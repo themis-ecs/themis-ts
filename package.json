@@ -1,6 +1,6 @@
 {
   "name": "themis-ts",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "entity component system in typescript",
   "main": "index.js",
   "typings": "dist/index.d.ts",
