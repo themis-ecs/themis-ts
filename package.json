@@ -2,7 +2,7 @@
   "name": "themis-ts",
   "version": "0.1.1",
   "description": "entity component system in typescript",
-  "main": "index.js",
+  "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "files": [
     "dist"
@@ -20,7 +20,7 @@
     "ecs"
   ],
   "author": "Christopher Bartel",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/themis-ecs/themis-ts/issues"
   },
