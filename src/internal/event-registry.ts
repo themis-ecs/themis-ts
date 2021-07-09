@@ -1,4 +1,4 @@
-import { Event, EventListener, EventType } from '@public/event';
+import { Event, EventListener, EventType } from '../public/event';
 
 /**
  * @internal

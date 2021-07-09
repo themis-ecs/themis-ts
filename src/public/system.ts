@@ -1,8 +1,8 @@
-import { World } from '@public/world';
-import { EntityCollection } from '@public/entity-collection';
-import { ComponentSet } from '@internal/component-set';
-import { ThemisWorld } from '@internal/world';
-import { Entity } from '@public/entity';
+import { World } from './world';
+import { EntityCollection } from './entity-collection';
+import { ComponentSet } from '../internal/component-set';
+import { ThemisWorld } from '../internal/world';
+import { Entity } from './entity';
 import { ComponentSetBuilder } from './component-set-builder';
 
 export abstract class System {

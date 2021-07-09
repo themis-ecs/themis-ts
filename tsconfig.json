@@ -4,10 +4,6 @@
   "compilerOptions": {
     "outDir": "./dist",
     "baseUrl": "src",
-    "paths": {
-      "@public/*": ["public/*"],
-      "@internal/*": ["internal/*"]
-    },
     "module": "esnext",
     "lib": ["dom", "esnext"],
     "target": "es2015",

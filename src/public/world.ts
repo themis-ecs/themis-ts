@@ -1,6 +1,6 @@
-import { Entity } from '@public/entity';
-import { Blueprint } from '@public/blueprint';
-import { EventListener, EventType } from '@public/event';
+import { Entity } from './entity';
+import { Blueprint } from './blueprint';
+import { EventListener, EventType } from './event';
 
 export interface World {
   update(dt: number): void;

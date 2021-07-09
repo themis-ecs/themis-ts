@@ -1,12 +1,12 @@
-import { System } from '@public/system';
-import { EntityRegistry } from '@internal/entity-registry';
-import { SystemRegistry } from '@internal/system-registry';
-import { ComponentRegistry } from '@internal/component-registry';
-import { BlueprintRegistry } from '@internal/blueprint-registry';
-import { EventRegistry } from '@internal/event-registry';
-import { EntityFactory } from '@internal/entity';
-import { ThemisWorld } from '@internal/world';
-import { World } from '@public/world';
+import { System } from './system';
+import { EntityRegistry } from '../internal/entity-registry';
+import { SystemRegistry } from '../internal/system-registry';
+import { ComponentRegistry } from '../internal/component-registry';
+import { BlueprintRegistry } from '../internal/blueprint-registry';
+import { EventRegistry } from '../internal/event-registry';
+import { EntityFactory } from '../internal/entity';
+import { ThemisWorld } from '../internal/world';
+import { World } from './world';
 
 export class WorldBuilder {
   private readonly systems: Array<System> = [];

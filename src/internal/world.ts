@@ -4,11 +4,11 @@ import { SystemRegistry } from './system-registry';
 import { ComponentRegistry } from './component-registry';
 import { EventRegistry } from './event-registry';
 import { Entity } from './entity';
-import { Component, ComponentType } from '@public/component';
+import { Component, ComponentType } from '../public/component';
 import { ComponentMapper } from './component-mapper';
-import { World } from '@public/world';
-import { Blueprint } from '@public/blueprint';
-import { EventType, EventListener } from '@public/event';
+import { World } from '../public/world';
+import { Blueprint } from '../public/blueprint';
+import { EventType, EventListener } from '../public/event';
 
 /**
  * @internal

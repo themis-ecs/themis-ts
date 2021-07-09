@@ -1,4 +1,4 @@
-import { BitVector } from '@internal/bit-vector';
+import { BitVector } from './bit-vector';
 
 /**
  * @internal

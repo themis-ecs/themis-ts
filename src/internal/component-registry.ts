@@ -1,10 +1,10 @@
-import { Component, ComponentType } from '@public/component';
-import { BitVector } from '@internal/bit-vector';
-import { ComponentMapper } from '@internal/component-mapper';
-import { ComponentSet } from '@internal/component-set';
-import { ComponentSetBuilder } from '@public/component-set-builder';
-import { Blueprint } from '@public/blueprint';
-import { BlueprintComponentConfiguration } from '@internal/blueprint-registry';
+import { Component, ComponentType } from '../public/component';
+import { BitVector } from './bit-vector';
+import { ComponentMapper } from './component-mapper';
+import { ComponentSet } from './component-set';
+import { ComponentSetBuilder } from '../public/component-set-builder';
+import { Blueprint } from '../public/blueprint';
+import { BlueprintComponentConfiguration } from './blueprint-registry';
 
 /**
  * @internal

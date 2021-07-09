@@ -1,4 +1,4 @@
-import { Component, ComponentType } from '@public/component';
+import { Component, ComponentType } from './component';
 
 export interface Entity {
   getEntityId(): number;

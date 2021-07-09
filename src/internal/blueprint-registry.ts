@@ -1,6 +1,6 @@
-import { ComponentSet } from '@internal/component-set';
-import { Component, ComponentType } from '@public/component';
-import { ComponentMapper } from '@internal/component-mapper';
+import { ComponentSet } from './component-set';
+import { Component, ComponentType } from '../public/component';
+import { ComponentMapper } from './component-mapper';
 
 /**
  * @internal
