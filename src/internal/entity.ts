@@ -22,7 +22,7 @@ export class Entity implements IEntity {
     return this.world;
   }
 
-  public addComponent(...components: Component[]): Entity {
+  public addComponent(...components: Component[]): this {
     components.forEach((component) => {
       const componentType = Object.getPrototypeOf(component).constructor;
       this.world.getComponentMapper(componentType).addComponent(this.entityId, component);
@@ -34,7 +34,7 @@ export class Entity implements IEntity {
     return this.world.getComponentMapper(componentType).getComponent(this.entityId) as T;
   }
 
-  public removeComponent(...componentTypes: ComponentType<any>[]): Entity {
+  public removeComponent(...componentTypes: ComponentType<any>[]): this {
     componentTypes.forEach((componentType) => {
       this.world.getComponentMapper(componentType).removeComponent(this.entityId);
     });
@@ -45,7 +45,7 @@ export class Entity implements IEntity {
     this.world.getEntityRegistry().deleteEntityById(this.entityId);
   }
 
-  public setAlias(alias: string): Entity {
+  public setAlias(alias: string): this {
     this.getWorld().registerAlias(this.entityId, alias);
     return this;
   }

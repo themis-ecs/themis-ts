@@ -7,20 +7,25 @@ import { EventRegistry } from '../internal/event-registry';
 import { EntityFactory } from '../internal/entity';
 import { ThemisWorld } from '../internal/world';
 import { World } from './world';
+import { ThemisInspector } from '../internal/inspector';
 
 export class WorldBuilder {
   private readonly systems: Array<System> = [];
+  private inspectorContainer: HTMLElement | null = null;
 
   public build(): World {
-    const entityRegistry = new EntityRegistry();
-    const systemRegistry = new SystemRegistry(this.systems);
-    const componentRegistry = new ComponentRegistry();
-    const blueprintRegistry = new BlueprintRegistry();
     const eventRegistry = new EventRegistry();
-
-    entityRegistry.onEntityDelete((entity) => componentRegistry.processEntityDelete(entity));
+    const entityRegistry = new EntityRegistry(eventRegistry);
+    const systemRegistry = new SystemRegistry(this.systems);
+    const componentRegistry = new ComponentRegistry(eventRegistry);
+    const blueprintRegistry = new BlueprintRegistry();
 
     const world = new ThemisWorld(entityRegistry, systemRegistry, componentRegistry, blueprintRegistry, eventRegistry);
+
+    if (this.inspectorContainer !== null) {
+      const inspector = new ThemisInspector(this.inspectorContainer);
+      this.systems.push(inspector);
+    }
 
     this.systems.forEach((system: any) => {
       world.injectComponentMappers(system);
@@ -34,8 +39,13 @@ export class WorldBuilder {
     return world;
   }
 
-  public with(...systems: System[]): WorldBuilder {
+  public with(...systems: System[]): this {
     this.systems.push(...systems);
+    return this;
+  }
+
+  public setInspectorContainer(container: HTMLElement): this {
+    this.inspectorContainer = container;
     return this;
   }
 }

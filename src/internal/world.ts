@@ -8,7 +8,7 @@ import { Component, ComponentType } from '../public/component';
 import { ComponentMapper } from './component-mapper';
 import { World } from '../public/world';
 import { Blueprint } from '../public/blueprint';
-import { EventType, EventListener } from '../public/event';
+import { EventType, EventListener, EntityCreateEvent } from '../public/event';
 
 /**
  * @internal
@@ -37,6 +37,14 @@ export class ThemisWorld implements World {
     return this.componentRegistry;
   }
 
+  public getSystemRegistry(): SystemRegistry {
+    return this.systemRegistry;
+  }
+
+  public getEventRegistry(): EventRegistry {
+    return this.eventRegistry;
+  }
+
   public createEntityId(): number {
     return this.entityRegistry.createEntityId();
   }
@@ -60,6 +68,7 @@ export class ThemisWorld implements World {
     if (blueprint) {
       this.blueprintRegistry.applyBlueprint(entity.getEntityId(), blueprint);
     }
+    this.eventRegistry.submit(EntityCreateEvent, new EntityCreateEvent(entity.getEntityId()));
     return entity;
   }
 
@@ -89,7 +98,7 @@ export class ThemisWorld implements World {
     this.eventRegistry.registerListener(eventType, listener);
   }
 
-  public submit<T extends Event>(eventType: EventType<T>, event: T) {
-    this.eventRegistry.submit(eventType, event);
+  public submit<T extends Event>(eventType: EventType<T>, event: T, instant = false) {
+    this.eventRegistry.submit(eventType, event, instant);
   }
 }

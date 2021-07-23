@@ -5,6 +5,7 @@ import { EventListener, EventType } from './event';
 export interface World {
   update(dt: number): void;
   getEntity(alias: string): Entity;
+  getEntity(entityId: number): Entity;
   createEntity(): Entity;
   createEntity(blueprint: string): Entity;
   registerBlueprint(blueprint: Blueprint): void;

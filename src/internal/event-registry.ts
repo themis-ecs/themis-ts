@@ -5,7 +5,7 @@ import { Event, EventListener, EventType } from '../public/event';
  */
 export class EventRegistry {
   private readonly eventListenerMap: Map<EventType<any>, EventListener<any>[]>;
-  private queuedEvents: Array<{ eventType: EventType<any>; event: Event }>;
+  private readonly queuedEvents: Array<{ eventType: EventType<any>; event: Event }>;
 
   constructor() {
     this.eventListenerMap = new Map<EventType<any>, EventListener<any>[]>();
@@ -15,7 +15,7 @@ export class EventRegistry {
   public update() {
     while (this.queuedEvents.length > 0) {
       const pop = this.queuedEvents.pop()!;
-      this.eventListenerMap.get(pop.eventType)?.forEach((listener) => listener(pop.event));
+      this.notifyListeners(pop.eventType, pop.event);
     }
   }
 
@@ -28,7 +28,15 @@ export class EventRegistry {
     eventListener.push(listener);
   }
 
-  public submit<T extends Event>(eventType: EventType<T>, event: T) {
-    this.queuedEvents.push({ eventType, event });
+  public submit<T extends Event>(eventType: EventType<T>, event: T, instant = false) {
+    if (instant) {
+      this.notifyListeners(eventType, event);
+    } else {
+      this.queuedEvents.push({ eventType, event });
+    }
+  }
+
+  private notifyListeners(eventType: EventType<any>, event: Event): void {
+    this.eventListenerMap.get(eventType)?.forEach((listener) => listener(event));
   }
 }

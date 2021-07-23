@@ -1,4 +1,6 @@
 import { Entity, EntityFactory } from './entity';
+import { EventRegistry } from './event-registry';
+import { EntityDeleteEvent } from '../public/event';
 
 /**
  * @internal
@@ -9,9 +11,13 @@ export class EntityRegistry {
   private recyclableEntities: number[] = [];
   private entities: { [entityId: number]: Entity } = {};
   private entityFactory!: EntityFactory;
-  private entityDeleteListeners: ((entityId: number) => void)[] = [];
   private aliasToEntityIdMap: { [alias: string]: number } = {};
   private entityIdToAliasMap: { [entityId: number]: string } = {};
+  private readonly eventRegistry: EventRegistry;
+
+  constructor(eventRegistry: EventRegistry) {
+    this.eventRegistry = eventRegistry;
+  }
 
   public setEntityFactory(entityFactory: EntityFactory) {
     this.entityFactory = entityFactory;
@@ -26,10 +32,6 @@ export class EntityRegistry {
 
   public deleteEntityById(entityId: number): void {
     this.deletedEntities.push(entityId);
-  }
-
-  public onEntityDelete(callback: (entityId: number) => void): void {
-    this.entityDeleteListeners.push(callback);
   }
 
   public getEntity(entityId: number): Entity {
@@ -53,14 +55,14 @@ export class EntityRegistry {
 
   public update(): void {
     while (this.deletedEntities.length !== 0) {
-      const entity = this.deletedEntities.pop()!;
+      const entityId = this.deletedEntities.pop()!;
       try {
-        this.entityDeleteListeners.forEach((listener) => listener(entity));
+        this.eventRegistry.submit(EntityDeleteEvent, new EntityDeleteEvent(entityId), true);
       } finally {
-        this.recyclableEntities.push(entity);
-        const alias = this.entityIdToAliasMap[entity];
+        this.recyclableEntities.push(entityId);
+        const alias = this.entityIdToAliasMap[entityId];
         if (alias) {
-          delete this.entityIdToAliasMap[entity];
+          delete this.entityIdToAliasMap[entityId];
           delete this.aliasToEntityIdMap[alias];
         }
       }
