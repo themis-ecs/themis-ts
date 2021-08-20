@@ -1,6 +1,6 @@
 import { WorldBuilder } from '../src';
-import { Entity } from '../src/internal/entity';
-import { ThemisWorld } from '../src/internal/world';
+import { Entity } from '../src/internal/core/entity';
+import { ThemisWorld } from '../src/internal/core/world';
 import { EntitySystem } from '../src';
 import { ComponentSetBuilder } from '../src';
 

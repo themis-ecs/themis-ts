@@ -1,4 +1,4 @@
-import { EventRegistry } from '../src/internal/event-registry';
+import { EventRegistry } from '../src/internal/core/event-registry';
 
 test('Event Test', () => {
   const eventRegistry = new EventRegistry();

@@ -15,14 +15,17 @@ test('Simple Blueprint Performance Test', () => {
       { type: TestComponentB, component: new TestComponentB() },
       { type: TestComponentC, component: new TestComponentC() },
       { type: TestComponentD, component: new TestComponentD() }
-    ]
+    ],
+    initialize: (entity) => {
+      entity.getEntityId() + 1;
+    }
   });
 
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 10000; i++) {
     world.createEntity('test');
   }
 
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 10000; i++) {
     world
       .createEntity()
       .addComponent(new TestComponentA(), new TestComponentB(), new TestComponentC(), new TestComponentD());
@@ -30,7 +33,7 @@ test('Simple Blueprint Performance Test', () => {
 
   // Performance check with blueprint:
   let t0 = performance.now();
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < 100000; i++) {
     world.createEntity('test');
   }
   let t1 = performance.now();
@@ -39,7 +42,7 @@ test('Simple Blueprint Performance Test', () => {
   // Performance check without blueprint:
 
   t0 = performance.now();
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < 100000; i++) {
     world
       .createEntity()
       .addComponent(new TestComponentA(), new TestComponentB(), new TestComponentC(), new TestComponentD());

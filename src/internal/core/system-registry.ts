@@ -1,4 +1,4 @@
-import { System } from '../public/system';
+import { System } from '../../public/system';
 
 /**
  * @internal

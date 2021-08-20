@@ -1,6 +1,8 @@
 import { ComponentSet } from './component-set';
-import { Component, ComponentType } from '../public/component';
+import { Component, ComponentType } from '../../public/component';
 import { ComponentMapper } from './component-mapper';
+import { BluePrintInitializer } from '../../public/blueprint';
+import { Entity } from './entity';
 
 /**
  * @internal
@@ -8,6 +10,7 @@ import { ComponentMapper } from './component-mapper';
 export type BlueprintComponentConfiguration = {
   componentSets: Array<ComponentSet>;
   componentMapperConfigurations: Array<BlueprintComponentMapperConfiguration>;
+  initialize?: BluePrintInitializer;
 };
 
 /**
@@ -33,13 +36,14 @@ export class BlueprintRegistry {
     this.blueprintMap[blueprintName] = configuration;
   }
 
-  public applyBlueprint(entityId: number, blueprintName: string) {
+  public applyBlueprint(entity: Entity, blueprintName: string) {
     const configuration = this.blueprintMap[blueprintName];
-    configuration.componentSets.forEach((componentSet) => componentSet.add(entityId));
+    configuration.componentSets.forEach((componentSet) => componentSet.add(entity.getEntityId()));
     configuration.componentMapperConfigurations.forEach((it) => {
       const component = new it.componentType();
       Object.assign(component, it.component);
-      it.mapper.addComponent(entityId, component, true);
+      it.mapper.addComponent(entity.getEntityId(), component, true);
     });
+    configuration.initialize!(entity);
   }
 }

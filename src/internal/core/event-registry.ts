@@ -1,4 +1,4 @@
-import { Event, EventListener, EventType } from '../public/event';
+import { Event, EventListener, EventType } from '../../public/event';
 
 /**
  * @internal
@@ -12,14 +12,14 @@ export class EventRegistry {
     this.queuedEvents = [];
   }
 
-  public update() {
+  public update(): void {
     while (this.queuedEvents.length > 0) {
       const pop = this.queuedEvents.pop()!;
       this.notifyListeners(pop.eventType, pop.event);
     }
   }
 
-  public registerListener<T extends Event>(eventType: EventType<T>, listener: EventListener<T>) {
+  public registerListener<T extends Event>(eventType: EventType<T>, listener: EventListener<T>): void {
     let eventListener = this.eventListenerMap.get(eventType);
     if (eventListener === undefined) {
       eventListener = [];
@@ -28,7 +28,7 @@ export class EventRegistry {
     eventListener.push(listener);
   }
 
-  public submit<T extends Event>(eventType: EventType<T>, event: T, instant = false) {
+  public submit<T extends Event>(eventType: EventType<T>, event: T, instant = false): void {
     if (instant) {
       this.notifyListeners(eventType, event);
     } else {
@@ -37,6 +37,12 @@ export class EventRegistry {
   }
 
   private notifyListeners(eventType: EventType<any>, event: Event): void {
-    this.eventListenerMap.get(eventType)?.forEach((listener) => listener(event));
+    this.eventListenerMap.get(eventType)?.forEach((listener) => {
+      try {
+        listener(event);
+      } catch (error) {
+        console.error(error); // TODO listeners should have an error callback
+      }
+    });
   }
 }

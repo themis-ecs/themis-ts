@@ -1,12 +1,12 @@
-import { Component, ComponentType } from '../public/component';
+import { Component, ComponentType } from '../../public/component';
 import { BitVector } from './bit-vector';
 import { ComponentMapper } from './component-mapper';
 import { ComponentSet } from './component-set';
-import { ComponentSetBuilder } from '../public/component-set-builder';
-import { Blueprint } from '../public/blueprint';
+import { ComponentSetBuilder } from '../../public/component-set-builder';
+import { BlueprintDefinition } from '../../public/blueprint';
 import { BlueprintComponentConfiguration } from './blueprint-registry';
 import { EventRegistry } from './event-registry';
-import { ComponentAddEvent, ComponentRemoveEvent, EntityDeleteEvent } from '../public/event';
+import { ComponentAddEvent, ComponentRemoveEvent, EntityDeleteEvent } from '../../public/event';
 
 /**
  * @internal
@@ -50,11 +50,11 @@ export class ComponentRegistry {
     }
   }
 
-  public getComponentId(component: ComponentType<any>): number {
-    let id = this.componentIdentityMap.get(component);
+  public getComponentId(componentType: ComponentType<any>): number {
+    let id = this.componentIdentityMap.get(componentType);
     if (id == null) {
       id = this.componentIdCounter++;
-      this.componentIdentityMap.set(component, id);
+      this.componentIdentityMap.set(componentType, id);
     }
     return id;
   }
@@ -83,7 +83,7 @@ export class ComponentRegistry {
     });
   }
 
-  public getBlueprintConfiguration(blueprint: Blueprint): BlueprintComponentConfiguration {
+  public getBlueprintConfiguration(blueprint: BlueprintDefinition): BlueprintComponentConfiguration {
     const blueprintConfiguration: BlueprintComponentConfiguration = {
       componentMapperConfigurations: [],
       componentSets: []

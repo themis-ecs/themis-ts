@@ -1,7 +1,7 @@
 import { World } from './world';
 import { EntityCollection } from './entity-collection';
-import { ComponentSet } from '../internal/component-set';
-import { ThemisWorld } from '../internal/world';
+import { ComponentSet } from '../internal/core/component-set';
+import { ThemisWorld } from '../internal/core/world';
 import { Entity } from './entity';
 import { ComponentSetBuilder } from './component-set-builder';
 
@@ -30,6 +30,7 @@ export abstract class System {
 
   abstract onUpdate(dt: number): void;
   abstract onInit(): void;
+  public registerListeners(): void {}
 }
 
 export abstract class EntitySystem extends System {

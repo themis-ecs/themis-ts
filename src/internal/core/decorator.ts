@@ -1,4 +1,4 @@
-import { ComponentType } from '../public/component';
+import { ComponentType } from '../../public/component';
 
 /**
  * @internal

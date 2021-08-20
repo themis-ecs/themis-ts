@@ -1,8 +1,8 @@
 import { WorldBuilder } from '../src';
 import { System } from '../src';
-import { Mapper } from '../src/internal/decorator';
-import { ComponentMapper } from '../src/internal/component-mapper';
-import { ThemisWorld } from '../src/internal/world';
+import { Mapper } from '../src/internal/core/decorator';
+import { ComponentMapper } from '../src/internal/core/component-mapper';
+import { ThemisWorld } from '../src/internal/core/world';
 
 test('Component Mapper Inject Test', () => {
   const world = new WorldBuilder().with(new TestSystem()).build() as ThemisWorld;

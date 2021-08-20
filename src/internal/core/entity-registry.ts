@@ -1,6 +1,6 @@
 import { Entity, EntityFactory } from './entity';
 import { EventRegistry } from './event-registry';
-import { EntityDeleteEvent } from '../public/event';
+import { EntityDeleteEvent } from '../../public/event';
 
 /**
  * @internal

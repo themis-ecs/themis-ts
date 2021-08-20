@@ -1,6 +1,6 @@
 import { ThemisWorld } from './world';
-import { Component, ComponentType } from '../public/component';
-import { Entity as IEntity } from '../public/entity';
+import { Component, ComponentType } from '../../public/component';
+import { Entity as IEntity } from '../../public/entity';
 
 /**
  * @internal

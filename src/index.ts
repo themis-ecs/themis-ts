@@ -4,6 +4,7 @@ export * from './public/component-set-builder';
 export * from './public/entity';
 export * from './public/entity-collection';
 export * from './public/event';
+export * from './public/inject';
 export * from './public/system';
 export * from './public/world';
 export * from './public/world-builder';

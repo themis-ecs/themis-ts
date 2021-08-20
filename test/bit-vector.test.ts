@@ -1,4 +1,4 @@
-import { BitVector } from '../src/internal/bit-vector';
+import { BitVector } from '../src/internal/core/bit-vector';
 
 test('set and get', () => {
   const vec = new BitVector();

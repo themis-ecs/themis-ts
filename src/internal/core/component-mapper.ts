@@ -1,7 +1,7 @@
-import { Component, ComponentType } from '../public/component';
+import { Component, ComponentType } from '../../public/component';
 import { BitVector } from './bit-vector';
 import { EventRegistry } from './event-registry';
-import { ComponentAddEvent, ComponentRemoveEvent } from '../public/event';
+import { ComponentAddEvent, ComponentRemoveEvent } from '../../public/event';
 
 /**
  * @internal

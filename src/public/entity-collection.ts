@@ -1,5 +1,5 @@
-import { Entity } from '../internal/entity';
-import { ThemisWorld } from '../internal/world';
+import { Entity } from '../internal/core/entity';
+import { ThemisWorld } from '../internal/core/world';
 
 export class EntityCollection {
   protected readonly entityIds: number[];
