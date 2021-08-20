@@ -1,14 +1,19 @@
-import { Event, EventListener, EventType } from '../../public/event';
+import { Event, EventErrorCallback, EventListener, EventType } from '../../public/event';
+
+type EventListenerEntry<T> = {
+  listener: EventListener<T>;
+  errorCallback?: EventErrorCallback<T>;
+};
 
 /**
  * @internal
  */
 export class EventRegistry {
-  private readonly eventListenerMap: Map<EventType<any>, EventListener<any>[]>;
+  private readonly eventListenerMap: Map<EventType<any>, EventListenerEntry<any>[]>;
   private readonly queuedEvents: Array<{ eventType: EventType<any>; event: Event }>;
 
   constructor() {
-    this.eventListenerMap = new Map<EventType<any>, EventListener<any>[]>();
+    this.eventListenerMap = new Map<EventType<any>, EventListenerEntry<any>[]>();
     this.queuedEvents = [];
   }
 
@@ -19,13 +24,21 @@ export class EventRegistry {
     }
   }
 
-  public registerListener<T extends Event>(eventType: EventType<T>, listener: EventListener<T>): void {
+  public registerListener<T extends Event>(
+    eventType: EventType<T>,
+    listener: EventListener<T>,
+    errorCallback?: EventErrorCallback<T>
+  ): void {
     let eventListener = this.eventListenerMap.get(eventType);
     if (eventListener === undefined) {
       eventListener = [];
       this.eventListenerMap.set(eventType, eventListener);
     }
-    eventListener.push(listener);
+    const entry: EventListenerEntry<T> = {
+      listener,
+      errorCallback
+    };
+    eventListener.push(entry);
   }
 
   public submit<T extends Event>(eventType: EventType<T>, event: T, instant = false): void {
@@ -37,11 +50,15 @@ export class EventRegistry {
   }
 
   private notifyListeners(eventType: EventType<any>, event: Event): void {
-    this.eventListenerMap.get(eventType)?.forEach((listener) => {
+    this.eventListenerMap.get(eventType)?.forEach((entry) => {
       try {
-        listener(event);
+        entry.listener(event);
       } catch (error) {
-        console.error(error); // TODO listeners should have an error callback
+        if (entry.errorCallback) {
+          entry.errorCallback(event, error);
+        } else {
+          console.error(error); // TODO should better start using some kind of logger....
+        }
       }
     });
   }

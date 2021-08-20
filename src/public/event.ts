@@ -6,6 +6,8 @@ export type EventType<T extends Event> = new (...params: any[]) => T;
 
 export type EventListener<T extends Event> = (event: T) => void;
 
+export type EventErrorCallback<T extends Event> = (event: T, error: Error) => void;
+
 export class EntityEvent {
   private readonly entityId;
   constructor(entityId: number) {

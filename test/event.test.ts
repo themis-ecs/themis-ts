@@ -22,6 +22,27 @@ test('Event Test', () => {
   expect(b).toEqual(true);
 });
 
+test('Listener Throws Error', () => {
+  const eventRegistry = new EventRegistry();
+
+  let errorHandled = false;
+
+  eventRegistry.registerListener(
+    EventTestA,
+    (event) => {
+      throw new Error('test');
+    },
+    (event, error) => {
+      errorHandled = true;
+      expect(error.message).toEqual('test');
+    }
+  );
+
+  eventRegistry.submit(EventTestA, { a: 'blub' }, true);
+
+  expect(errorHandled).toBe(true);
+});
+
 class EventTestA {
   a!: string;
 }
