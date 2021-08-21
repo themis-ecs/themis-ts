@@ -1,9 +1,9 @@
 export interface LoggerInterface {
-  error(msg: string): void;
-  warn(msg: string): void;
-  info(msg: string): void;
-  debug(msg: string): void;
-  trace(msg: string): void;
+  error(msg: any, ...optionalParams: any[]): void;
+  warn(msg: any, ...optionalParams: any[]): void;
+  info(msg: any, ...optionalParams: any[]): void;
+  debug(msg: any, ...optionalParams: any[]): void;
+  trace(msg: any, ...optionalParams: any[]): void;
 }
 
 export type LogConfig = {
@@ -78,11 +78,11 @@ export class LogManager {
     switch (this.config.handler) {
       case 'console': {
         return {
-          error: console.error.bind(console, `[${module}]`),
-          warn: console.warn.bind(console, `[${module}]`),
-          info: console.log.bind(console, `[${module}]`),
-          debug: console.debug.bind(console, `[${module}]`),
-          trace: console.trace.bind(console, `[${module}]`)
+          error: console.error.bind(console, `ERROR - %c[${module}]`, 'font-weight: bold'),
+          warn: console.warn.bind(console, `WARN - %c[${module}]`, 'font-weight: bold'),
+          info: console.log.bind(console, `INFO - %c[${module}]`, 'font-weight: bold'),
+          debug: console.debug.bind(console, `DEBUG - %c[${module}]`, 'font-weight: bold'),
+          trace: console.trace.bind(console, `TRACE - %c[${module}]`, 'font-weight: bold')
         };
       }
       default: {
@@ -98,4 +98,4 @@ export class LogManager {
   }
 }
 
-export const logging = new LogManager();
+export const Logging = new LogManager();

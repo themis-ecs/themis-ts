@@ -1,7 +1,7 @@
 import { Event, EventErrorCallback, EventListener, EventType } from '../../public/event';
-import { logging } from '../logger/logger';
+import { Logging } from '../../public/logger';
 
-const logger = logging.getLogger('event-registry');
+const logger = Logging.getLogger('event-registry');
 
 type EventListenerEntry<T> = {
   listener: EventListener<T>;
