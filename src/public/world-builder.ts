@@ -10,6 +10,9 @@ import { World } from './world';
 import { ThemisInspector } from '../internal/inspector/inspector';
 import { Container } from '../internal/di/container';
 import { Identifier } from './inject';
+import { logging } from '../internal/logger/logger';
+
+const logger = logging.getLogger('WORLD');
 
 export class WorldBuilder {
   private readonly systems: Array<System> = [];
@@ -17,6 +20,8 @@ export class WorldBuilder {
   private container = new Container();
 
   public build(): World {
+    logger.info('THEMIS ECS');
+
     const eventRegistry = new EventRegistry();
     const entityRegistry = new EntityRegistry(eventRegistry);
     const systemRegistry = new SystemRegistry(this.systems);

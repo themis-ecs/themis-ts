@@ -1,4 +1,7 @@
 import { Event, EventErrorCallback, EventListener, EventType } from '../../public/event';
+import { logging } from '../logger/logger';
+
+const logger = logging.getLogger('event-registry');
 
 type EventListenerEntry<T> = {
   listener: EventListener<T>;
@@ -57,7 +60,7 @@ export class EventRegistry {
         if (entry.errorCallback) {
           entry.errorCallback(event, error);
         } else {
-          console.error(error); // TODO should better start using some kind of logger....
+          logger.error(error);
         }
       }
     });
