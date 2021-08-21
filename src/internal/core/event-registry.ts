@@ -1,7 +1,7 @@
 import { Event, EventErrorCallback, EventListener, EventType } from '../../public/event';
 import { Logging } from '../../public/logger';
 
-const logger = Logging.getLogger('event-registry');
+const logger = Logging.getLogger('themis.event');
 
 type EventListenerEntry<T> = {
   listener: EventListener<T>;
