@@ -1,6 +1,6 @@
 export * from './public/blueprint';
 export * from './public/component';
-export * from './public/component-set-builder';
+export * from './internal/core/component-set-builder';
 export * from './public/entity';
 export * from './public/entity-collection';
 export * from './public/event';

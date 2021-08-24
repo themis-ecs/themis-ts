@@ -1,4 +1,4 @@
-import { WorldBuilder } from '../src';
+import { All, WorldBuilder } from '../src';
 import { Entity } from '../src/internal/core/entity';
 import { ThemisWorld } from '../src/internal/core/world';
 import { EntitySystem } from '../src';
@@ -21,6 +21,7 @@ class TestComponentA {
   name!: string;
 }
 
+@All(TestComponentA)
 class TestSystem extends EntitySystem {
   initComponentSet(componentSetBuilder: ComponentSetBuilder): ComponentSetBuilder {
     return componentSetBuilder.containingAll(TestComponentA);

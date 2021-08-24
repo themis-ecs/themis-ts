@@ -2,7 +2,7 @@ import { Component, ComponentType } from '../../public/component';
 import { BitVector } from './bit-vector';
 import { ComponentMapper } from './component-mapper';
 import { ComponentSet } from './component-set';
-import { ComponentSetBuilder } from '../../public/component-set-builder';
+import { ComponentSetBuilder } from './component-set-builder';
 import { BlueprintDefinition } from '../../public/blueprint';
 import { BlueprintComponentConfiguration } from './blueprint-registry';
 import { EventRegistry } from './event-registry';

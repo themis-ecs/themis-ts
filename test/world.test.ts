@@ -1,7 +1,6 @@
-import { WorldBuilder } from '../src';
+import { All, Any, None, WorldBuilder } from '../src';
 import { ThemisWorld } from '../src/internal/core/world';
 import { Component } from '../src';
-import { ComponentSetBuilder } from '../src';
 import { EntitySystem } from '../src';
 
 test('integration test', () => {
@@ -60,32 +59,23 @@ class TestComponentB extends Component {}
 class TestComponentC extends Component {}
 class TestComponentD extends Component {}
 
+@Any(TestComponentA, TestComponentD)
 class TestEntitySystemA extends EntitySystem {
   onInit(): void {}
 
   onUpdate(_dt: number): void {}
-
-  initComponentSet(componentSetBuilder: ComponentSetBuilder): ComponentSetBuilder {
-    return componentSetBuilder.containingAny(TestComponentA, TestComponentD);
-  }
 }
 
+@All(TestComponentA, TestComponentD)
 class TestEntitySystemB extends EntitySystem {
   onInit(): void {}
 
   onUpdate(_dt: number): void {}
-
-  initComponentSet(componentSetBuilder: ComponentSetBuilder): ComponentSetBuilder {
-    return componentSetBuilder.containingAll(TestComponentA, TestComponentD);
-  }
 }
 
+@None(TestComponentA)
 class TestEntitySystemC extends EntitySystem {
   onInit(): void {}
 
   onUpdate(_dt: number): void {}
-
-  initComponentSet(componentSetBuilder: ComponentSetBuilder): ComponentSetBuilder {
-    return componentSetBuilder.containingNone(TestComponentA);
-  }
 }

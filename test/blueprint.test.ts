@@ -1,7 +1,6 @@
-import { WorldBuilder } from '../src';
+import { All, WorldBuilder } from '../src';
 import { EntitySystem } from '../src';
 import { Component } from '../src';
-import { ComponentSetBuilder } from '../src';
 
 const performance = require('perf_hooks').performance;
 
@@ -56,11 +55,8 @@ class TestComponentB extends Component {}
 class TestComponentC extends Component {}
 class TestComponentD extends Component {}
 
+@All(TestComponentA, TestComponentB)
 class TestSystem extends EntitySystem {
-  protected initComponentSet(componentSetBuilder: ComponentSetBuilder): ComponentSetBuilder {
-    return componentSetBuilder.containingAll(TestComponentA, TestComponentB);
-  }
-
   onInit(): void {}
 
   onUpdate(dt: number): void {

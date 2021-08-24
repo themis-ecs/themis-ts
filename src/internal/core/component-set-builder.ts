@@ -1,6 +1,6 @@
-import { ComponentSet } from '../internal/core/component-set';
-import { ComponentType } from './component';
-import { BitVector } from '../internal/core/bit-vector';
+import { ComponentSet } from './component-set';
+import { ComponentType } from '../../public/component';
+import { BitVector } from './bit-vector';
 
 export class ComponentSetBuilder {
   private readonly all: Array<ComponentType<any>> = [];
