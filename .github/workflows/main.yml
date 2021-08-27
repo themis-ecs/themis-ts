@@ -3,8 +3,6 @@ name: Main
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
   build:
@@ -24,3 +22,7 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm test
+      - name: Release
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npx semantic-release
