@@ -10,7 +10,8 @@
   "scripts": {
     "test": "npx jest",
     "lint": "npx eslint . --ext .ts,.tsx",
-    "build": "tsc"
+    "build": "tsc",
+    "ci": "tsc"
   },
   "repository": {
     "type": "git",
