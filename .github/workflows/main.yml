@@ -19,6 +19,8 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm test
+      - run: npm run lint
+      - run: npm run build
       - name: Release
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}

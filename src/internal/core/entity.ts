@@ -61,7 +61,7 @@ export class EntityFactory {
     this.world = world;
   }
 
-  public build(entityId: number) {
+  public build(entityId: number): Entity {
     return new Entity(this.world, entityId);
   }
 }

@@ -6,7 +6,7 @@ import { EntityDeleteEvent } from '../../public/event';
  * @internal
  */
 export class EntityRegistry {
-  private entityIdCounter: number = 0;
+  private entityIdCounter = 0;
   private deletedEntities: number[] = [];
   private recyclableEntities: number[] = [];
   private entities: { [entityId: number]: Entity } = {};
@@ -19,13 +19,14 @@ export class EntityRegistry {
     this.eventRegistry = eventRegistry;
   }
 
-  public setEntityFactory(entityFactory: EntityFactory) {
+  public setEntityFactory(entityFactory: EntityFactory): void {
     this.entityFactory = entityFactory;
   }
 
   public createEntityId(): number {
-    if (this.recyclableEntities.length !== 0) {
-      return this.recyclableEntities.pop()!;
+    const entityId = this.recyclableEntities.pop();
+    if (entityId !== undefined) {
+      return entityId;
     }
     return this.entityIdCounter++;
   }
@@ -54,8 +55,8 @@ export class EntityRegistry {
   }
 
   public update(): void {
-    while (this.deletedEntities.length !== 0) {
-      const entityId = this.deletedEntities.pop()!;
+    let entityId = this.deletedEntities.pop();
+    while (entityId !== undefined) {
       try {
         this.eventRegistry.submit(EntityDeleteEvent, new EntityDeleteEvent(entityId), true);
       } finally {
@@ -66,6 +67,7 @@ export class EntityRegistry {
           delete this.aliasToEntityIdMap[alias];
         }
       }
+      entityId = this.deletedEntities.pop();
     }
   }
 }

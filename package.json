@@ -9,9 +9,8 @@
   ],
   "scripts": {
     "test": "npx jest",
-    "lint": "npx eslint . --ext .ts,.tsx",
+    "lint": "npx eslint src/** --ext .ts,.tsx",
     "build": "tsc",
-    "ci": "tsc",
     "semantic-release": "semantic-release"
   },
   "repository": {
@@ -40,6 +39,6 @@
     "semantic-release": "^17.4.7",
     "ts-jest": "^27.0.3",
     "tslib": "^2.3.0",
-    "typescript": "^4.3.5"
+    "typescript": "^4.4.2"
   }
 }

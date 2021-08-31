@@ -43,10 +43,6 @@ export class WorldBuilder {
       this.systems.push(inspector);
     }
 
-    this.systems.forEach((system: any) => {
-      world.injectComponentMappers(system);
-    });
-
     entityRegistry.setEntityFactory(new EntityFactory(world));
 
     this.systems.forEach((system) => system.init(world));

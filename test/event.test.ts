@@ -29,12 +29,12 @@ test('Listener Throws Error', () => {
 
   eventRegistry.registerListener(
     EventTestA,
-    (event) => {
+    () => {
       throw new Error('test');
     },
     (event, error) => {
       errorHandled = true;
-      expect(error.message).toEqual('test');
+      expect((error as Error).message).toEqual('test');
     }
   );
 
