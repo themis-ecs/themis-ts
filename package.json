@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "test": "npx jest",
-    "lint": "npx eslint . --ext .ts,.tsx",
+    "lint": "npx eslint src/** --ext .ts,.tsx",
     "build": "tsc",
     "semantic-release": "semantic-release"
   },

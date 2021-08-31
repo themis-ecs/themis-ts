@@ -44,7 +44,7 @@ export class ComponentMapper<T extends Component> {
     this.cachedDeletions.set(entityId);
   }
 
-  public processModifications() {
+  public processModifications(): void {
     this.cachedDeletions.getBits().forEach((entity) => {
       delete this.components[entity];
     });

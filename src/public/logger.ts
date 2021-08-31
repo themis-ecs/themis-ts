@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 export interface LoggerInterface {
   error(msg: any, ...optionalParams: any[]): void;
   warn(msg: any, ...optionalParams: any[]): void;

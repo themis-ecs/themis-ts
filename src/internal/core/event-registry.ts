@@ -21,9 +21,10 @@ export class EventRegistry {
   }
 
   public update(): void {
-    while (this.queuedEvents.length > 0) {
-      const pop = this.queuedEvents.pop()!;
+    let pop = this.queuedEvents.pop();
+    while (pop !== undefined) {
       this.notifyListeners(pop.eventType, pop.event);
+      pop = this.queuedEvents.pop();
     }
   }
 

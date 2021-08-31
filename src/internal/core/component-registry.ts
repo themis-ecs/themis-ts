@@ -45,7 +45,7 @@ export class ComponentRegistry {
     for (const componentSet of this.componentSets) {
       componentSet.processModifications();
     }
-    for (let componentId in this.componentMapperMap) {
+    for (const componentId in this.componentMapperMap) {
       this.componentMapperMap[componentId].processModifications();
     }
   }
@@ -60,7 +60,7 @@ export class ComponentRegistry {
   }
 
   public createComponentSet(componentSetBuilder: ComponentSetBuilder): ComponentSet {
-    let componentSet = componentSetBuilder.build(ComponentRegistry.INITIAL_COMPONENT_CAPACITY, (component) =>
+    const componentSet = componentSetBuilder.build(ComponentRegistry.INITIAL_COMPONENT_CAPACITY, (component) =>
       this.getComponentId(component)
     );
     this.componentSets.push(componentSet);

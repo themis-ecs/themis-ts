@@ -78,21 +78,13 @@ export class ThemisWorld implements World {
     return this.componentRegistry.getComponentMapper(component);
   }
 
-  public injectComponentMappers(object: any) {
-    const proto = Object.getPrototypeOf(object);
-    const componentMappers = proto.__componentMappers || {};
-    Object.keys(componentMappers).forEach((key: any) => {
-      const componentType = componentMappers[key];
-      object[key] = this.getComponentMapper(componentType);
-    });
-  }
-  public registerBlueprint(blueprint: BlueprintDefinition) {
+  public registerBlueprint(blueprint: BlueprintDefinition): void {
     const blueprintConfiguration = this.componentRegistry.getBlueprintConfiguration(blueprint);
     blueprintConfiguration.initialize = blueprint.initialize ? blueprint.initialize : () => {};
     this.blueprintRegistry.registerBlueprint(blueprint.name, blueprintConfiguration);
   }
 
-  public registerAlias(entityId: number, name: string) {
+  public registerAlias(entityId: number, name: string): void {
     this.entityRegistry.registerAlias(entityId, name);
   }
 
@@ -100,11 +92,11 @@ export class ThemisWorld implements World {
     eventType: EventType<T>,
     listener: EventListener<T>,
     errorCallback?: EventErrorCallback<T>
-  ) {
+  ): void {
     this.eventRegistry.registerListener(eventType, listener, errorCallback);
   }
 
-  public submit<T extends Event>(eventType: EventType<T>, event: T, instant = false) {
+  public submit<T extends Event>(eventType: EventType<T>, event: T, instant = false): void {
     this.eventRegistry.submit(eventType, event, instant);
   }
 

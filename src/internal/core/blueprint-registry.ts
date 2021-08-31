@@ -32,11 +32,11 @@ export class BlueprintRegistry {
     this.blueprintMap = {};
   }
 
-  public registerBlueprint(blueprintName: string, configuration: BlueprintComponentConfiguration) {
+  public registerBlueprint(blueprintName: string, configuration: BlueprintComponentConfiguration): void {
     this.blueprintMap[blueprintName] = configuration;
   }
 
-  public applyBlueprint(entity: Entity, blueprintName: string) {
+  public applyBlueprint(entity: Entity, blueprintName: string): void {
     const configuration = this.blueprintMap[blueprintName];
     configuration.componentSets.forEach((componentSet) => componentSet.add(entity.getEntityId()));
     configuration.componentMapperConfigurations.forEach((it) => {
@@ -44,6 +44,6 @@ export class BlueprintRegistry {
       Object.assign(component, it.component);
       it.mapper.addComponent(entity.getEntityId(), component, true);
     });
-    configuration.initialize!(entity);
+    configuration.initialize?.(entity);
   }
 }

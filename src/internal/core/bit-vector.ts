@@ -9,7 +9,7 @@ export class BitVector {
    * Create a new BitVector with initial capacity of 1024
    * @param {number} size the initial size of the BitVector
    */
-  constructor(size: number = 1024) {
+  constructor(size = 1024) {
     this.chunks = new Uint32Array((size / 32) >> 0);
   }
 
@@ -156,7 +156,7 @@ export class BitVector {
    * the capacity will be set to the next larger power of 2.
    * @param {number} capacity
    */
-  public setCapacity(capacity: number) {
+  public setCapacity(capacity: number): void {
     this.ensureCapacity(capacity);
   }
 

@@ -12,7 +12,7 @@ export class ComponentSet {
   private readonly entitiesAdded = new BitVector();
   private readonly entitiesRemoved = new BitVector();
 
-  private modified: boolean = false;
+  private modified = false;
 
   constructor(
     private readonly all: BitVector | null,
@@ -20,15 +20,15 @@ export class ComponentSet {
     private readonly none: BitVector | null
   ) {}
 
-  public onEntityAdd(callback: (entityId: number) => void) {
+  public onEntityAdd(callback: (entityId: number) => void): void {
     this.entityAddListeners.push(callback);
   }
 
-  public onEntityRemove(callback: (entityId: number) => void) {
+  public onEntityRemove(callback: (entityId: number) => void): void {
     this.entityRemoveListeners.push(callback);
   }
 
-  public onCompositionChange(entityId: number, entityComposition: BitVector, entityDelete = false) {
+  public onCompositionChange(entityId: number, entityComposition: BitVector, entityDelete = false): void {
     if (this.isInterested(entityComposition) && !entityDelete) {
       if (this.entities.get(entityId)) {
         return;
@@ -45,13 +45,13 @@ export class ComponentSet {
     }
   }
 
-  public add(entityId: number) {
+  public add(entityId: number): void {
     this.entities.set(entityId);
     this.entitiesAdded.set(entityId);
     this.modified = true;
   }
 
-  public isInterested(entityComposition: BitVector) {
+  public isInterested(entityComposition: BitVector): boolean {
     if (this.all && !entityComposition.containsAll(this.all)) {
       return false;
     }
@@ -61,7 +61,7 @@ export class ComponentSet {
     return !(this.any && !entityComposition.containsAny(this.any));
   }
 
-  public processModifications() {
+  public processModifications(): void {
     if (this.modified) {
       this.activeEntities = this.entities.getBits();
       this.entitiesAdded.getBits().forEach((entity) => this.entityAddListeners.forEach((listener) => listener(entity)));
