@@ -1,28 +1,28 @@
 import { ComponentSet } from './component-set';
-import { ComponentType } from '../../public/component';
+import { Component, ComponentType } from '../../public/component';
 import { BitVector } from './bit-vector';
 
 export class ComponentSetBuilder {
-  private readonly all: Array<ComponentType<any>> = [];
-  private readonly any: Array<ComponentType<any>> = [];
-  private readonly none: Array<ComponentType<any>> = [];
+  private readonly all: Array<ComponentType<Component>> = [];
+  private readonly any: Array<ComponentType<Component>> = [];
+  private readonly none: Array<ComponentType<Component>> = [];
 
-  public containingAll(...components: Array<ComponentType<any>>): ComponentSetBuilder {
+  public containingAll(...components: Array<ComponentType<Component>>): ComponentSetBuilder {
     this.all.push(...components);
     return this;
   }
 
-  public containingAny(...components: Array<ComponentType<any>>): ComponentSetBuilder {
+  public containingAny(...components: Array<ComponentType<Component>>): ComponentSetBuilder {
     this.any.push(...components);
     return this;
   }
 
-  public containingNone(...components: Array<ComponentType<any>>): ComponentSetBuilder {
+  public containingNone(...components: Array<ComponentType<Component>>): ComponentSetBuilder {
     this.none.push(...components);
     return this;
   }
 
-  public build(capacity: number, resolveComponentId: (component: ComponentType<any>) => number): ComponentSet {
+  public build(capacity: number, resolveComponentId: (component: ComponentType<Component>) => number): ComponentSet {
     let allVector: BitVector | null = null;
     let anyVector: BitVector | null = null;
     let noneVector: BitVector | null = null;

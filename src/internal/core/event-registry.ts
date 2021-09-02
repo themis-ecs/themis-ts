@@ -12,11 +12,11 @@ type EventListenerEntry<T> = {
  * @internal
  */
 export class EventRegistry {
-  private readonly eventListenerMap: Map<EventType<any>, EventListenerEntry<any>[]>;
-  private readonly queuedEvents: Array<{ eventType: EventType<any>; event: Event }>;
+  private readonly eventListenerMap: Map<EventType<Event>, EventListenerEntry<Event>[]>;
+  private readonly queuedEvents: Array<{ eventType: EventType<Event>; event: Event }>;
 
   constructor() {
-    this.eventListenerMap = new Map<EventType<any>, EventListenerEntry<any>[]>();
+    this.eventListenerMap = new Map<EventType<Event>, EventListenerEntry<Event>[]>();
     this.queuedEvents = [];
   }
 
@@ -42,7 +42,7 @@ export class EventRegistry {
       listener,
       errorCallback
     };
-    eventListener.push(entry);
+    eventListener.push(entry as EventListenerEntry<Event>);
   }
 
   public submit<T extends Event>(eventType: EventType<T>, event: T, instant = false): void {
@@ -53,7 +53,7 @@ export class EventRegistry {
     }
   }
 
-  private notifyListeners(eventType: EventType<any>, event: Event): void {
+  private notifyListeners(eventType: EventType<Event>, event: Event): void {
     this.eventListenerMap.get(eventType)?.forEach((entry) => {
       try {
         entry.listener(event);

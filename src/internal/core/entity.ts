@@ -34,7 +34,7 @@ export class Entity implements IEntity {
     return this.world.getComponentMapper(componentType).getComponent(this.entityId) as T;
   }
 
-  public removeComponent(...componentTypes: ComponentType<any>[]): this {
+  public removeComponent(...componentTypes: ComponentType<Component>[]): this {
     componentTypes.forEach((componentType) => {
       this.world.getComponentMapper(componentType).removeComponent(this.entityId);
     });

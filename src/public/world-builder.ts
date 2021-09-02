@@ -63,7 +63,7 @@ export class WorldBuilder {
     return this;
   }
 
-  public register(identifier: Identifier, instance: any): void {
+  public register(identifier: Identifier, instance: unknown): void {
     this.container.register(identifier, instance);
   }
 }

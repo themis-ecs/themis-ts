@@ -1,5 +1,5 @@
 import { Container } from '../src/internal/di/container';
-import { Inject } from '../src/public/inject';
+import { Inject } from '../src';
 
 test('Inject Test', () => {
   const container = new Container();

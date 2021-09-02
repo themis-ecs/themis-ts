@@ -49,7 +49,7 @@ export class EntityRegistry {
     return this.getEntity(this.aliasToEntityIdMap[alias]);
   }
 
-  public registerAlias(entityId: number, alias: string) {
+  public registerAlias(entityId: number, alias: string): void {
     this.entityIdToAliasMap[entityId] = alias;
     this.aliasToEntityIdMap[alias] = entityId;
   }

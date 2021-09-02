@@ -2,6 +2,7 @@ import { All, Any, None, WorldBuilder } from '../src';
 import { ThemisWorld } from '../src/internal/core/world';
 import { Component } from '../src';
 import { EntitySystem } from '../src';
+import { Entity } from '../src';
 
 test('integration test', () => {
   const entitySystemA = new TestEntitySystemA();
@@ -64,6 +65,10 @@ class TestEntitySystemA extends EntitySystem {
   onInit(): void {}
 
   onUpdate(_dt: number): void {}
+
+  onEntityAdd(entity: Entity): void {}
+
+  onEntityRemove(entity: Entity): void {}
 }
 
 @All(TestComponentA, TestComponentD)
@@ -71,6 +76,10 @@ class TestEntitySystemB extends EntitySystem {
   onInit(): void {}
 
   onUpdate(_dt: number): void {}
+
+  onEntityAdd(entity: Entity): void {}
+
+  onEntityRemove(entity: Entity): void {}
 }
 
 @None(TestComponentA)
@@ -78,4 +87,8 @@ class TestEntitySystemC extends EntitySystem {
   onInit(): void {}
 
   onUpdate(_dt: number): void {}
+
+  onEntityAdd(entity: Entity): void {}
+
+  onEntityRemove(entity: Entity): void {}
 }

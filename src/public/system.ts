@@ -3,7 +3,7 @@ import { EntityCollection } from './entity-collection';
 import { ComponentSet } from '../internal/core/component-set';
 import { ThemisWorld } from '../internal/core/world';
 import { Entity } from './entity';
-import { ComponentType } from './component';
+import { Component, ComponentType } from './component';
 import { ComponentSetBuilder } from '../internal/core/component-set-builder';
 
 export abstract class System {
@@ -31,45 +31,47 @@ export abstract class System {
 
   abstract onUpdate(dt: number): void;
   abstract onInit(): void;
-  public registerListeners(): void {}
+  public registerListeners(): void {
+    return;
+  }
 }
 
 const COMPONENT_SET_CONFIG = '__themis__component__set__config';
 
 type ComponentSetConfig = {
-  all?: ComponentType<any>[];
-  any?: ComponentType<any>[];
-  none?: ComponentType<any>[];
+  all?: ComponentType<Component>[];
+  any?: ComponentType<Component>[];
+  none?: ComponentType<Component>[];
 };
 
 type ComponentSetConfigKey = keyof ComponentSetConfig;
 
 const setComponentSetConfig = function (
-  prototype: any,
+  prototype: Record<string, ComponentSetConfig>,
   key: ComponentSetConfigKey,
-  ...components: ComponentType<any>[]
+  ...components: ComponentType<Component>[]
 ): void {
   const componentSetConfig: ComponentSetConfig = prototype[COMPONENT_SET_CONFIG] || {};
   componentSetConfig[key] = components;
   prototype[COMPONENT_SET_CONFIG] = componentSetConfig;
 };
 
-export type EntitySystemType<T extends EntitySystem> = new (...args: any[]) => T;
+export type EntitySystemType<T extends EntitySystem> = new (...args: never[]) => T;
 
-export const All = function (...components: ComponentType<any>[]) {
-  return function <T extends EntitySystem>(constructor: EntitySystemType<T>) {
+export const All = function (...components: ComponentType<Component>[]) {
+  return function <T extends EntitySystem>(constructor: EntitySystemType<T>): void {
     setComponentSetConfig(constructor.prototype, 'all', ...components);
   };
 };
 
-export const Any = function (...components: ComponentType<any>[]) {
-  return function <T extends EntitySystem>(constructor: EntitySystemType<T>) {
+export const Any = function (...components: ComponentType<Component>[]) {
+  return function <T extends EntitySystem>(constructor: EntitySystemType<T>): void {
     setComponentSetConfig(constructor.prototype, 'any', ...components);
   };
 };
 
-export const None = function (...components: ComponentType<any>[]) {
-  return function <T extends EntitySystem>(constructor: EntitySystemType<T>) {
+export const None = function (...components: ComponentType<Component>[]) {
+  return function <T extends EntitySystem>(constructor: EntitySystemType<T>): void {
     setComponentSetConfig(constructor.prototype, 'none', ...components);
   };
 };
@@ -81,7 +83,7 @@ export abstract class EntitySystem extends System {
    * @internal
    * @param world
    */
-  public init(world: ThemisWorld) {
+  public init(world: ThemisWorld): void {
     super.init(world);
     const prototype = Object.getPrototypeOf(this);
     const componentSetConfig: ComponentSetConfig = prototype[COMPONENT_SET_CONFIG] || {};
@@ -91,13 +93,14 @@ export abstract class EntitySystem extends System {
       .containingNone(...(componentSetConfig.none || []));
 
     this.componentSet = world.getComponentRegistry().createComponentSet(componentSetBuilder);
+    this.componentSet.onEntityAdd((entityId) => this.onEntityAdd(world.getEntityRegistry().getEntity(entityId)));
+    this.componentSet.onEntityRemove((entityId) => this.onEntityRemove(world.getEntityRegistry().getEntity(entityId)));
   }
 
   public getEntities(): EntityCollection {
     return new EntityCollection(this.componentSet.getActiveEntities(), this.getWorld() as ThemisWorld);
   }
 
-  public onEntityAdd(entity: Entity): void {}
-
-  public onEntityRemove(entity: Entity): void {}
+  public abstract onEntityAdd(entity: Entity): void;
+  public abstract onEntityRemove(entity: Entity): void;
 }

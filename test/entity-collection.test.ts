@@ -1,6 +1,7 @@
 import { All, WorldBuilder } from '../src';
 import { EntitySystem } from '../src';
 import { ThemisWorld } from '../src/internal/core/world';
+import { Entity } from '../src';
 
 test('entity collection test', () => {
   const world = new WorldBuilder().with(new TestSystem()).build() as ThemisWorld;
@@ -26,4 +27,8 @@ class TestSystem extends EntitySystem {
       entity.getComponent(TestComponentA).name = 'test';
     });
   }
+
+  onEntityAdd(entity: Entity): void {}
+
+  onEntityRemove(entity: Entity): void {}
 }

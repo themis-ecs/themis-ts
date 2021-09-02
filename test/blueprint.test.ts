@@ -1,6 +1,7 @@
 import { All, WorldBuilder } from '../src';
 import { EntitySystem } from '../src';
 import { Component } from '../src';
+import { Entity } from '../src';
 
 const performance = require('perf_hooks').performance;
 
@@ -66,4 +67,8 @@ class TestSystem extends EntitySystem {
       entity.getComponent(TestComponentB);
     });
   }
+
+  onEntityAdd(entity: Entity): void {}
+
+  onEntityRemove(entity: Entity): void {}
 }

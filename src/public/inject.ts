@@ -1,13 +1,14 @@
-import { Config, DI_CONFIG } from '../internal/di/container';
+import { Config, ConfigHolder } from '../internal/di/container';
 
-export type Class<T> = new (...params: any[]) => T;
+export type Class<T> = new (...params: never[]) => T;
 
-export type Identifier = string | Class<any>;
+export type Identifier = string | Class<unknown>;
 
 export const Inject = function (identifier: Identifier) {
-  return function (prototype: any, key: string) {
-    const config: Config = prototype[DI_CONFIG] || {};
+  return function (prototype: unknown, key: string): void {
+    const configHolder = prototype as ConfigHolder;
+    const config: Config = configHolder.__themis__di__config || {};
     config[key] = identifier;
-    prototype[DI_CONFIG] = config;
+    configHolder.__themis__di__config = config;
   };
 };
