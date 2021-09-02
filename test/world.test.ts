@@ -2,7 +2,7 @@ import { All, Any, None, WorldBuilder } from '../src';
 import { ThemisWorld } from '../src/internal/core/world';
 import { Component } from '../src';
 import { EntitySystem } from '../src';
-import { Entity } from '../dist';
+import { Entity } from '../src';
 
 test('integration test', () => {
   const entitySystemA = new TestEntitySystemA();

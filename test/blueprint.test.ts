@@ -1,7 +1,7 @@
 import { All, WorldBuilder } from '../src';
 import { EntitySystem } from '../src';
 import { Component } from '../src';
-import { Entity } from '../dist';
+import { Entity } from '../src';
 
 const performance = require('perf_hooks').performance;
 

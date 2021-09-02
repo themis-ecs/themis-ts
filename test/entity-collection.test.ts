@@ -1,7 +1,7 @@
 import { All, WorldBuilder } from '../src';
 import { EntitySystem } from '../src';
 import { ThemisWorld } from '../src/internal/core/world';
-import { Entity } from '../dist';
+import { Entity } from '../src';
 
 test('entity collection test', () => {
   const world = new WorldBuilder().with(new TestSystem()).build() as ThemisWorld;
