@@ -10,7 +10,7 @@ export class EntityCollection {
     this.world = world;
   }
 
-  public forEach(callback: (entity: Entity) => void) {
+  public forEach(callback: (entity: Entity) => void): void {
     this.entityIds.forEach((entityId) => {
       callback(this.world.getEntity(entityId));
     });

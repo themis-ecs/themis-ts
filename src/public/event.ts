@@ -2,7 +2,7 @@ import { Component, ComponentType } from './component';
 
 export class Event {}
 
-export type EventType<T extends Event> = new (...params: any[]) => T;
+export type EventType<T extends Event> = new (...params: never[]) => T;
 
 export type EventListener<T extends Event> = (event: T) => void;
 

@@ -10,6 +10,7 @@ import { World } from '../../public/world';
 import { BlueprintDefinition } from '../../public/blueprint';
 import { Event, EventType, EventListener, EntityCreateEvent, EventErrorCallback } from '../../public/event';
 import { Container } from '../di/container';
+import { NOOP } from './noop';
 
 /**
  * @internal
@@ -80,7 +81,7 @@ export class ThemisWorld implements World {
 
   public registerBlueprint(blueprint: BlueprintDefinition): void {
     const blueprintConfiguration = this.componentRegistry.getBlueprintConfiguration(blueprint);
-    blueprintConfiguration.initialize = blueprint.initialize ? blueprint.initialize : () => {};
+    blueprintConfiguration.initialize = blueprint.initialize ? blueprint.initialize : () => NOOP;
     this.blueprintRegistry.registerBlueprint(blueprint.name, blueprintConfiguration);
   }
 
@@ -100,7 +101,7 @@ export class ThemisWorld implements World {
     this.eventRegistry.submit(eventType, event, instant);
   }
 
-  public inject(object: any): void {
+  public inject(object: unknown): void {
     this.container.inject(object);
   }
 }

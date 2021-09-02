@@ -8,7 +8,7 @@ export type BlueprintDefinition = {
 };
 
 export type BlueprintComponentDefinition = {
-  type: ComponentType<any>;
+  type: ComponentType<Component>;
   component?: Component;
 };
 

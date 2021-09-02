@@ -38,4 +38,8 @@ class TestSystem extends EntitySystem {
       fail();
     }
   }
+
+  onEntityAdd(entity: Entity): void {}
+
+  onEntityRemove(entity: Entity): void {}
 }

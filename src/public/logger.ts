@@ -1,11 +1,13 @@
 /* eslint-disable no-console */
 
+import { NOOP } from '../internal/core/noop';
+
 export interface LoggerInterface {
-  error(msg: any, ...optionalParams: any[]): void;
-  warn(msg: any, ...optionalParams: any[]): void;
-  info(msg: any, ...optionalParams: any[]): void;
-  debug(msg: any, ...optionalParams: any[]): void;
-  trace(msg: any, ...optionalParams: any[]): void;
+  error(msg: unknown, ...optionalParams: unknown[]): void;
+  warn(msg: unknown, ...optionalParams: unknown[]): void;
+  info(msg: unknown, ...optionalParams: unknown[]): void;
+  debug(msg: unknown, ...optionalParams: unknown[]): void;
+  trace(msg: unknown, ...optionalParams: unknown[]): void;
 }
 
 export type LogConfig = {
@@ -21,14 +23,12 @@ export enum LogLevel {
   ERROR
 }
 
-const noop = () => {};
-
 export class Logger implements LoggerInterface {
-  error = noop;
-  warn = noop;
-  info = noop;
-  debug = noop;
-  trace = noop;
+  error = NOOP;
+  warn = NOOP;
+  info = NOOP;
+  debug = NOOP;
+  trace = NOOP;
 }
 
 export class LogManager {
@@ -69,11 +69,11 @@ export class LogManager {
         match = key;
       }
     }
-    logger.trace = level <= LogLevel.TRACE ? loggerInterface.trace : noop;
-    logger.debug = level <= LogLevel.DEBUG ? loggerInterface.debug : noop;
-    logger.info = level <= LogLevel.INFO ? loggerInterface.info : noop;
-    logger.warn = level <= LogLevel.WARN ? loggerInterface.warn : noop;
-    logger.error = level <= LogLevel.ERROR ? loggerInterface.error : noop;
+    logger.trace = level <= LogLevel.TRACE ? loggerInterface.trace : NOOP;
+    logger.debug = level <= LogLevel.DEBUG ? loggerInterface.debug : NOOP;
+    logger.info = level <= LogLevel.INFO ? loggerInterface.info : NOOP;
+    logger.warn = level <= LogLevel.WARN ? loggerInterface.warn : NOOP;
+    logger.error = level <= LogLevel.ERROR ? loggerInterface.error : NOOP;
   }
 
   private getLoggerInterface(module: string) {

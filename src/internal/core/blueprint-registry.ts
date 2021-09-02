@@ -17,9 +17,9 @@ export type BlueprintComponentConfiguration = {
  * @internal
  */
 export type BlueprintComponentMapperConfiguration = {
-  componentType: ComponentType<any>;
+  componentType: ComponentType<Component>;
   component: Component | undefined;
-  mapper: ComponentMapper<any>;
+  mapper: ComponentMapper<Component>;
 };
 
 /**

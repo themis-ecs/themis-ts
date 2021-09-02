@@ -14,17 +14,17 @@ import { ComponentAddEvent, ComponentRemoveEvent, EntityDeleteEvent } from '../.
 export class ComponentRegistry {
   private static readonly INITIAL_COMPONENT_CAPACITY = 32;
 
-  private readonly componentIdentityMap: Map<ComponentType<any>, number>;
+  private readonly componentIdentityMap: Map<ComponentType<Component>, number>;
   private readonly entityCompositionMap: { [entityId: number]: BitVector };
   private readonly componentMapperMap: {
-    [componentId: number]: ComponentMapper<any>;
+    [componentId: number]: ComponentMapper<Component>;
   };
   private readonly componentSets: Array<ComponentSet>;
   private componentIdCounter: number;
   private readonly eventRegistry: EventRegistry;
 
   constructor(eventRegistry: EventRegistry) {
-    this.componentIdentityMap = new Map<ComponentType<any>, number>();
+    this.componentIdentityMap = new Map<ComponentType<Component>, number>();
     this.entityCompositionMap = {};
     this.componentMapperMap = {};
     this.componentSets = [];
@@ -50,7 +50,7 @@ export class ComponentRegistry {
     }
   }
 
-  public getComponentId(componentType: ComponentType<any>): number {
+  public getComponentId(componentType: ComponentType<Component>): number {
     let id = this.componentIdentityMap.get(componentType);
     if (id == null) {
       id = this.componentIdCounter++;
@@ -72,7 +72,7 @@ export class ComponentRegistry {
     if (!this.componentMapperMap[componentId]) {
       this.componentMapperMap[componentId] = this.createComponentMapper(componentId, componentType);
     }
-    return this.componentMapperMap[componentId];
+    return this.componentMapperMap[componentId] as ComponentMapper<T>;
   }
 
   public processEntityDelete(entity: number): void {
@@ -103,7 +103,7 @@ export class ComponentRegistry {
 
     blueprint.components.forEach((it) => {
       blueprintConfiguration.componentMapperConfigurations.push({
-        mapper: this.getComponentMapper(it.type) as ComponentMapper<any>,
+        mapper: this.getComponentMapper(it.type) as ComponentMapper<Component>,
         componentType: it.type,
         component: it.component
       });
@@ -119,7 +119,10 @@ export class ComponentRegistry {
     return this.entityCompositionMap[entityId];
   }
 
-  private createComponentMapper(componentId: number, componentType: ComponentType<any>): ComponentMapper<any> {
+  private createComponentMapper<T extends Component>(
+    componentId: number,
+    componentType: ComponentType<T>
+  ): ComponentMapper<T> {
     return new ComponentMapper(this.eventRegistry, componentId, componentType);
   }
 
@@ -140,13 +143,5 @@ export class ComponentRegistry {
     for (const componentSet of this.componentSets) {
       componentSet.onCompositionChange(entityId, composition, entityDelete);
     }
-  }
-
-  public getComponentIdentityMap(): ReadonlyMap<ComponentType<any>, number> {
-    return this.componentIdentityMap;
-  }
-
-  public getEntityCompositionMap(): { [entityId: number]: BitVector } {
-    return this.entityCompositionMap;
   }
 }

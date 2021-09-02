@@ -78,5 +78,5 @@ export interface World {
    * @see WorldBuilder
    * @param object
    */
-  inject(object: any): void;
+  inject(object: unknown): void;
 }
