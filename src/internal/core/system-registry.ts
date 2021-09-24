@@ -1,14 +1,13 @@
-import { System } from '../../public/system';
-
 /**
  * @internal
  */
-export class SystemRegistry {
-  constructor(private readonly systems: System[]) {}
+import { ThemisPipeline } from './pipeline';
 
-  public update(dt: number): void {
-    for (const system of this.systems) {
-      system.update(dt);
-    }
+export class SystemRegistry {
+  private readonly pipelines: Map<string, ThemisPipeline>;
+
+  constructor(pipelines: Array<ThemisPipeline>) {
+    this.pipelines = new Map<string, ThemisPipeline>();
+    pipelines.forEach((pipeline) => this.pipelines.set(pipeline.getId(), pipeline));
   }
 }

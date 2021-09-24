@@ -1,19 +1,28 @@
-import { All, WorldBuilder } from '../src';
+import { All, Pipeline, WorldBuilder } from '../src';
 import { Entity } from '../src/internal/core/entity';
 import { ThemisWorld } from '../src/internal/core/world';
 import { EntitySystem } from '../src';
-import { ComponentSetBuilder } from '../src';
+import { ComponentSetBuilder } from 'internal/core/component-set-builder';
 
 test('entity test', () => {
-  const world = new WorldBuilder().with(new TestSystem()).build() as ThemisWorld;
+  let update = (dt: number) => {};
+
+  const mainPipeline = Pipeline('main')
+    .systems(new TestSystem())
+    .update((pipeline) => {
+      update = (dt) => pipeline.update(dt);
+    });
+
+  const world = new WorldBuilder().pipeline(mainPipeline).build() as ThemisWorld;
+
   const entity = new Entity(world, world.createEntityId());
   const testComponentA = new TestComponentA();
   testComponentA.name = 'test';
   entity.addComponent(testComponentA);
-  world.update(1);
+  update(1);
   expect(entity.getComponent(TestComponentA).name).toEqual('test');
   entity.removeComponent(TestComponentA);
-  world.update(2);
+  update(2);
   expect(entity.getComponent(TestComponentA)).toBeUndefined();
 });
 

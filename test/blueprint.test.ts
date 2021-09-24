@@ -1,4 +1,4 @@
-import { All, WorldBuilder } from '../src';
+import { All, Pipeline, WorldBuilder } from '../src';
 import { EntitySystem } from '../src';
 import { Component } from '../src';
 import { Entity } from '../src';
@@ -6,7 +6,11 @@ import { Entity } from '../src';
 const performance = require('perf_hooks').performance;
 
 test('Simple Blueprint Performance Test', () => {
-  const world = new WorldBuilder().with(new TestSystem()).build();
+  const mainPipeline = Pipeline('main')
+    .systems(new TestSystem())
+    .update(() => {});
+
+  const world = new WorldBuilder().pipeline(mainPipeline).build();
 
   world.registerBlueprint({
     name: 'test',

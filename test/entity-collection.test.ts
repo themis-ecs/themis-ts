@@ -1,12 +1,20 @@
-import { All, WorldBuilder } from '../src';
+import { All, Pipeline, WorldBuilder } from '../src';
 import { EntitySystem } from '../src';
 import { ThemisWorld } from '../src/internal/core/world';
 import { Entity } from '../src';
 
 test('entity collection test', () => {
-  const world = new WorldBuilder().with(new TestSystem()).build() as ThemisWorld;
+  let update = (dt: number) => {};
 
-  world.update(1);
+  const mainPipeline = Pipeline('main')
+    .systems(new TestSystem())
+    .update((pipeline) => {
+      update = (dt) => pipeline.update(dt);
+    });
+
+  const world = new WorldBuilder().pipeline(mainPipeline).build() as ThemisWorld;
+
+  update(1);
 
   const entity = world.getEntity(0);
   expect(entity.getComponent(TestComponentA).name).toEqual('test');
