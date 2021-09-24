@@ -13,7 +13,7 @@ test('integration test', () => {
 
   const mainPipeline = Pipeline('main')
     .systems(entitySystemA, entitySystemB, entitySystemC)
-    .update((pipeline) => {
+    .setup((pipeline) => {
       update = (dt) => pipeline.update(dt);
     });
 

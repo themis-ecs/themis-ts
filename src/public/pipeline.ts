@@ -5,25 +5,25 @@ export interface Pipeline {
   update(dt: number): void;
 }
 
-export type UpdateCallback = (pipeline: Pipeline) => void;
+export type SetupCallback = (pipeline: Pipeline) => void;
 
 export type PipelineDefinition = {
   id: string;
-  updateCallback: UpdateCallback;
+  setupCallback: SetupCallback;
   systems: Array<System>;
 };
 
 export class PipelineDefinitionBuilder {
   private readonly _id: string;
-  private _updateCallback: UpdateCallback = NOOP;
+  private _setupCallback: SetupCallback = NOOP;
   private _systems: Array<System> = [];
 
   constructor(id: string) {
     this._id = id;
   }
 
-  public update(updateCallback: UpdateCallback): this {
-    this._updateCallback = updateCallback;
+  public setup(setupCallback: SetupCallback): this {
+    this._setupCallback = setupCallback;
     return this;
   }
 
@@ -36,7 +36,7 @@ export class PipelineDefinitionBuilder {
    * @internal
    */
   public build(): PipelineDefinition {
-    return { id: this._id, systems: this._systems, updateCallback: this._updateCallback };
+    return { id: this._id, systems: this._systems, setupCallback: this._setupCallback };
   }
 }
 

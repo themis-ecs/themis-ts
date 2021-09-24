@@ -28,7 +28,7 @@ export class WorldBuilder {
 
     const pipelines = this.pipelineDefinitions.map((definition) => ({
       pipeline: new ThemisPipeline(definition.id, definition.systems, entityRegistry, componentRegistry, eventRegistry),
-      updateCallback: definition.updateCallback
+      updateCallback: definition.setupCallback
     }));
 
     const systemRegistry = new SystemRegistry(pipelines.map((it) => it.pipeline));

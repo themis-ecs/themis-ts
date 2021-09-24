@@ -9,7 +9,7 @@ test('entity test', () => {
 
   const mainPipeline = Pipeline('main')
     .systems(new TestSystem())
-    .update((pipeline) => {
+    .setup((pipeline) => {
       update = (dt) => pipeline.update(dt);
     });
 

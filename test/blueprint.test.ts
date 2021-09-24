@@ -8,7 +8,7 @@ const performance = require('perf_hooks').performance;
 test('Simple Blueprint Performance Test', () => {
   const mainPipeline = Pipeline('main')
     .systems(new TestSystem())
-    .update(() => {});
+    .setup(() => {});
 
   const world = new WorldBuilder().pipeline(mainPipeline).build();
 
