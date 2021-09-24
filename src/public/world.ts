@@ -9,12 +9,6 @@ import { Event, EventErrorCallback, EventListener, EventType } from './event';
  */
 export interface World {
   /**
-   * Iterate your world, this will cause all systems to update
-   * @param dt the time that has passed since the last update
-   */
-  update(dt: number): void;
-
-  /**
    * Get an entity by alias. You can set an alias for an entity via the Entity object.
    * @see Entity
    * @param alias the alias of your entity

@@ -1,4 +1,4 @@
-import { All, Any, None, WorldBuilder } from '../src';
+import { All, Any, None, Pipeline, WorldBuilder } from '../src';
 import { ThemisWorld } from '../src/internal/core/world';
 import { Component } from '../src';
 import { EntitySystem } from '../src';
@@ -9,7 +9,15 @@ test('integration test', () => {
   const entitySystemB = new TestEntitySystemB();
   const entitySystemC = new TestEntitySystemC();
 
-  const world = new WorldBuilder().with(entitySystemA, entitySystemB, entitySystemC).build() as ThemisWorld;
+  let update = (dt: number) => {};
+
+  const mainPipeline = Pipeline('main')
+    .systems(entitySystemA, entitySystemB, entitySystemC)
+    .update((pipeline) => {
+      update = (dt) => pipeline.update(dt);
+    });
+
+  const world = new WorldBuilder().pipeline(mainPipeline).build() as ThemisWorld;
 
   const componentAMapper = world.getComponentMapper<TestComponentA>(TestComponentA);
   const componentBMapper = world.getComponentMapper<TestComponentB>(TestComponentB);
@@ -34,7 +42,7 @@ test('integration test', () => {
   componentAMapper.addComponent(entity4, new TestComponentA());
   componentDMapper.addComponent(entity4, new TestComponentD());
 
-  world.update(0);
+  update(0);
   expect(entitySystemA.getEntities().getIds()).toStrictEqual([entity1, entity2, entity4]);
   expect(entitySystemB.getEntities().getIds()).toStrictEqual([entity1, entity4]);
   expect(entitySystemC.getEntities().getIds()).toStrictEqual([entity3]);
@@ -42,13 +50,13 @@ test('integration test', () => {
   componentAMapper.removeComponent(entity1);
   componentAMapper.removeComponent(entity2);
 
-  world.update(0);
+  update(0);
   expect(entitySystemA.getEntities().getIds()).toStrictEqual([entity1, entity4]);
   expect(entitySystemB.getEntities().getIds()).toStrictEqual([entity4]);
   expect(entitySystemC.getEntities().getIds()).toStrictEqual([entity1, entity2, entity3]);
 
   world.deleteEntityById(entity1);
-  world.update(0);
+  update(0);
   expect(entitySystemA.getEntities().getIds()).toStrictEqual([entity4]);
   expect(entitySystemB.getEntities().getIds()).toStrictEqual([entity4]);
   expect(entitySystemC.getEntities().getIds()).toStrictEqual([entity2, entity3]);
