@@ -1,5 +1,4 @@
 import { System } from 'public/system';
-import { ThemisWorld } from './world';
 import { EventRegistry } from './event-registry';
 import { ComponentRegistry } from './component-registry';
 import { EntityRegistry } from './entity-registry';
@@ -8,16 +7,16 @@ import { Pipeline } from '../../public/pipeline';
 /**
  * @internal
  */
-export class ThemisPipeline implements Pipeline {
+export class ThemisPipeline<T> implements Pipeline<T> {
   private readonly id: string;
-  private readonly systems: Array<System>;
+  private readonly systems: Array<System<T>>;
   private readonly entityRegistry: EntityRegistry;
   private readonly componentRegistry: ComponentRegistry;
   private readonly eventRegistry: EventRegistry;
 
   constructor(
     id: string,
-    systems: Array<System>,
+    systems: Array<System<T>>,
     entityRegistry: EntityRegistry,
     componentRegistry: ComponentRegistry,
     eventRegistry: EventRegistry
@@ -33,19 +32,11 @@ export class ThemisPipeline implements Pipeline {
     return this.id;
   }
 
-  public init(world: ThemisWorld): void {
-    this.systems.forEach((system) => system.init(world));
+  public getSystems(): Array<System<T>> {
+    return this.systems;
   }
 
-  public registerListeners(): void {
-    this.systems.forEach((system) => system.registerListeners());
-  }
-
-  public onInit(): void {
-    this.systems.forEach((system) => system.onInit()); // double init method will be removed in refactoring of Systems API (https://github.com/themis-ecs/themis-ts/issues/10)
-  }
-
-  public update(dt: number): void {
+  public update(dt: T): void {
     this.entityRegistry.update();
     this.componentRegistry.update();
     this.systems.forEach((system) => system.update(dt));

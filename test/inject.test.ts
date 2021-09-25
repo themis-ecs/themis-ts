@@ -1,5 +1,5 @@
+import { Inject } from 'public/decorator';
 import { Container } from '../src/internal/di/container';
-import { Inject } from '../src';
 
 test('Inject Test', () => {
   const container = new Container();
@@ -23,10 +23,10 @@ class TestClassB {
 
 class InjectTestClass {
   @Inject(TestClassA)
-  private a!: TestClassA;
+  a!: TestClassA;
 
   @Inject('test')
-  private b!: TestClassB;
+  b!: TestClassB;
 
   public getA(): TestClassA {
     return this.a;

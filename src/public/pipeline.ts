@@ -1,33 +1,33 @@
 import { System } from './system';
 import { NOOP } from '../internal/core/noop';
 
-export interface Pipeline {
-  update(dt: number): void;
+export interface Pipeline<T> {
+  update(o: T): void;
 }
 
-export type SetupCallback = (pipeline: Pipeline) => void;
+export type SetupCallback<T> = (pipeline: Pipeline<T>) => void;
 
-export type PipelineDefinition = {
+export type PipelineDefinition<T> = {
   id: string;
-  setupCallback: SetupCallback;
-  systems: Array<System>;
+  setupCallback: SetupCallback<T>;
+  systems: Array<System<T>>;
 };
 
-export class PipelineDefinitionBuilder {
+export class PipelineDefinitionBuilder<T> {
   private readonly _id: string;
-  private _setupCallback: SetupCallback = NOOP;
-  private _systems: Array<System> = [];
+  private _setupCallback: SetupCallback<T> = NOOP;
+  private _systems: Array<System<T>> = [];
 
   constructor(id: string) {
     this._id = id;
   }
 
-  public setup(setupCallback: SetupCallback): this {
+  public setup(setupCallback: SetupCallback<T>): this {
     this._setupCallback = setupCallback;
     return this;
   }
 
-  public systems(...systems: System[]): this {
+  public systems(...systems: System<T>[]): this {
     this._systems = systems;
     return this;
   }
@@ -35,11 +35,11 @@ export class PipelineDefinitionBuilder {
   /**
    * @internal
    */
-  public build(): PipelineDefinition {
+  public build(): PipelineDefinition<T> {
     return { id: this._id, systems: this._systems, setupCallback: this._setupCallback };
   }
 }
 
-export function Pipeline(id: string): PipelineDefinitionBuilder {
+export function Pipeline<T = number>(id: string): PipelineDefinitionBuilder<T> {
   return new PipelineDefinitionBuilder(id);
 }

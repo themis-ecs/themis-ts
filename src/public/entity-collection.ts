@@ -1,26 +1,27 @@
 import { Entity } from '../internal/core/entity';
 import { ThemisWorld } from '../internal/core/world';
+import { ComponentSet } from '../internal/core/component-set';
 
 export class EntityCollection {
-  protected readonly entityIds: number[];
+  protected readonly componentSet: ComponentSet;
   protected readonly world: ThemisWorld;
 
-  constructor(entityIds: number[], world: ThemisWorld) {
-    this.entityIds = entityIds;
+  constructor(componentSet: ComponentSet, world: ThemisWorld) {
+    this.componentSet = componentSet;
     this.world = world;
   }
 
   public forEach(callback: (entity: Entity) => void): void {
-    this.entityIds.forEach((entityId) => {
+    this.componentSet.getActiveEntities().forEach((entityId) => {
       callback(this.world.getEntity(entityId));
     });
   }
 
   public size(): number {
-    return this.entityIds.length;
+    return this.componentSet.getActiveEntities().length;
   }
 
-  public getIds(): readonly number[] {
-    return this.entityIds;
+  public getIds(): number[] {
+    return this.componentSet.getActiveEntities();
   }
 }

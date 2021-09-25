@@ -1,16 +1,5 @@
-import { Identifier } from '../../public/inject';
-
-/**
- * @internal
- */
-export type ConfigHolder = {
-  __themis__di__config?: Config;
-};
-
-/**
- * @internal
- */
-export type Config = { [identifier: string]: Identifier };
+import { Identifier } from '../../public/decorator';
+import { Prototype } from '../core/prototype';
 
 /**
  * @internal
@@ -23,10 +12,13 @@ export class Container {
   }
 
   public inject(object: unknown): void {
-    const configHolder = Object.getPrototypeOf(object) as ConfigHolder;
-    const config: Config = configHolder.__themis__di__config || {};
-    Object.keys(config).forEach((key: string) => {
-      const identifier = config[key];
+    const metadata = Prototype.getMetadata(Object.getPrototypeOf(object));
+    const injectMetadata = metadata.injectMetadata;
+    if (!injectMetadata) {
+      return;
+    }
+    Object.keys(injectMetadata).forEach((key: string) => {
+      const identifier = injectMetadata[key];
       (object as Record<string, unknown>)[key] = this.instances.get(identifier);
     });
   }

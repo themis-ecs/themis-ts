@@ -1,8 +1,6 @@
-import { All, Pipeline, WorldBuilder } from '../src';
+import { all, ComponentQuery, EntityCollection, Pipeline, System, WorldBuilder } from '../src';
 import { Entity } from '../src/internal/core/entity';
 import { ThemisWorld } from '../src/internal/core/world';
-import { EntitySystem } from '../src';
-import { ComponentSetBuilder } from 'internal/core/component-set-builder';
 
 test('entity test', () => {
   let update = (dt: number) => {};
@@ -30,25 +28,19 @@ class TestComponentA {
   name!: string;
 }
 
-@All(TestComponentA)
-class TestSystem extends EntitySystem {
-  initComponentSet(componentSetBuilder: ComponentSetBuilder): ComponentSetBuilder {
-    return componentSetBuilder.containingAll(TestComponentA);
-  }
+class TestSystem implements System {
+  @ComponentQuery(all(TestComponentA))
+  entities!: EntityCollection;
 
-  onInit(): void {}
+  init(): void {}
 
-  onUpdate(dt: number): void {
+  update(dt: number): void {
     if (dt === 1) {
-      expect(this.getEntities().size()).toEqual(1);
+      expect(this.entities.size()).toEqual(1);
     } else if (dt === 2) {
-      expect(this.getEntities().size()).toEqual(0);
+      expect(this.entities.size()).toEqual(0);
     } else {
       fail();
     }
   }
-
-  onEntityAdd(entity: Entity): void {}
-
-  onEntityRemove(entity: Entity): void {}
 }
