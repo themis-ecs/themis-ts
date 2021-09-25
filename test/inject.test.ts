@@ -1,4 +1,4 @@
-import { Inject } from 'public/decorator';
+import { Inject } from '../src';
 import { Container } from '../src/internal/di/container';
 
 test('Inject Test', () => {
