@@ -3,7 +3,7 @@ import { BitVector } from './bit-vector';
 /**
  * @internal
  */
-export class ComponentSet {
+export class ComponentQuery {
   private activeEntities: number[] = [];
 
   private readonly entities = new BitVector();

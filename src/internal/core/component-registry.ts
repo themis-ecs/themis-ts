@@ -1,8 +1,8 @@
 import { Component, ComponentType } from '../../public/component';
 import { BitVector } from './bit-vector';
 import { ComponentMapper } from './component-mapper';
-import { ComponentSet } from './component-set';
-import { ComponentSetBuilder } from './component-set-builder';
+import { ComponentQuery } from './component-query';
+import { ComponentQueryBuilder } from './component-query-builder';
 import { BlueprintDefinition } from '../../public/blueprint';
 import { BlueprintComponentConfiguration } from './blueprint-registry';
 import { EventRegistry } from './event-registry';
@@ -19,7 +19,7 @@ export class ComponentRegistry {
   private readonly componentMapperMap: {
     [componentId: number]: ComponentMapper<Component>;
   };
-  private readonly componentSets: Array<ComponentSet>;
+  private readonly componentQueries: Array<ComponentQuery>;
   private componentIdCounter: number;
   private readonly eventRegistry: EventRegistry;
 
@@ -27,7 +27,7 @@ export class ComponentRegistry {
     this.componentIdentityMap = new Map<ComponentType<Component>, number>();
     this.entityCompositionMap = {};
     this.componentMapperMap = {};
-    this.componentSets = [];
+    this.componentQueries = [];
     this.componentIdCounter = 0;
     this.eventRegistry = eventRegistry;
     this.eventRegistry.registerListener(EntityDeleteEvent, (event) => {
@@ -42,8 +42,8 @@ export class ComponentRegistry {
   }
 
   public update(): void {
-    for (const componentSet of this.componentSets) {
-      componentSet.processModifications();
+    for (const componentQuery of this.componentQueries) {
+      componentQuery.processModifications();
     }
     for (const componentId in this.componentMapperMap) {
       this.componentMapperMap[componentId].processModifications();
@@ -59,12 +59,12 @@ export class ComponentRegistry {
     return id;
   }
 
-  public createComponentSet(componentSetBuilder: ComponentSetBuilder): ComponentSet {
-    const componentSet = componentSetBuilder.build(ComponentRegistry.INITIAL_COMPONENT_CAPACITY, (component) =>
+  public createComponentSet(componentQueryBuilder: ComponentQueryBuilder): ComponentQuery {
+    const componentQuery = componentQueryBuilder.build(ComponentRegistry.INITIAL_COMPONENT_CAPACITY, (component) =>
       this.getComponentId(component)
     );
-    this.componentSets.push(componentSet);
-    return componentSet;
+    this.componentQueries.push(componentQuery);
+    return componentQuery;
   }
 
   public getComponentMapper<T extends Component>(componentType: ComponentType<T>): ComponentMapper<T> {
@@ -86,7 +86,7 @@ export class ComponentRegistry {
   public getBlueprintConfiguration(blueprint: BlueprintDefinition): BlueprintComponentConfiguration {
     const blueprintConfiguration: BlueprintComponentConfiguration = {
       componentMapperConfigurations: [],
-      componentSets: []
+      componentQueries: []
     };
 
     const composition = new BitVector();
@@ -95,9 +95,9 @@ export class ComponentRegistry {
       .forEach((componentId) => {
         composition.set(componentId);
       });
-    this.componentSets.forEach((componentSet) => {
-      if (componentSet.isInterested(composition)) {
-        blueprintConfiguration.componentSets.push(componentSet);
+    this.componentQueries.forEach((componentQuery) => {
+      if (componentQuery.isInterested(composition)) {
+        blueprintConfiguration.componentQueries.push(componentQuery);
       }
     });
 
@@ -132,7 +132,7 @@ export class ComponentRegistry {
     if (blueprintAdd) {
       return;
     }
-    for (const componentSet of this.componentSets) {
+    for (const componentSet of this.componentQueries) {
       componentSet.onCompositionChange(entityId, composition);
     }
   }
@@ -140,7 +140,7 @@ export class ComponentRegistry {
   private onComponentRemove(entityId: number, componentId: number, entityDelete: boolean): void {
     const composition = this.getEntityComposition(entityId);
     composition.clear(componentId);
-    for (const componentSet of this.componentSets) {
+    for (const componentSet of this.componentQueries) {
       componentSet.onCompositionChange(entityId, composition, entityDelete);
     }
   }

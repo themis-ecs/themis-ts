@@ -1,14 +1,23 @@
-import { System } from '../../public/system';
+import { ThemisPipeline } from './pipeline';
+import { ThemisWorld } from './world';
 
 /**
  * @internal
  */
 export class SystemRegistry {
-  constructor(private readonly systems: System[]) {}
+  private readonly pipelines: Map<string, ThemisPipeline<unknown>>;
 
-  public update(dt: number): void {
-    for (const system of this.systems) {
-      system.update(dt);
-    }
+  constructor(pipelines: Array<ThemisPipeline<unknown>>) {
+    this.pipelines = new Map<string, ThemisPipeline<unknown>>();
+    pipelines.forEach((pipeline) => this.pipelines.set(pipeline.getId(), pipeline));
+  }
+
+  public initSystems(world: ThemisWorld): void {
+    this.pipelines.forEach((pipeline) => {
+      pipeline.getSystems().forEach((system) => {
+        world.inject(system);
+        system.init(world);
+      });
+    });
   }
 }

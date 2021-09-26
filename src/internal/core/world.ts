@@ -25,13 +25,6 @@ export class ThemisWorld implements World {
     private readonly container: Container
   ) {}
 
-  public update(dt: number): void {
-    this.entityRegistry.update();
-    this.componentRegistry.update();
-    this.systemRegistry.update(dt);
-    this.eventRegistry.update();
-  }
-
   public getEntityRegistry(): EntityRegistry {
     return this.entityRegistry;
   }
@@ -102,6 +95,6 @@ export class ThemisWorld implements World {
   }
 
   public inject(object: unknown): void {
-    this.container.inject(object);
+    this.container.inject(object, this);
   }
 }
