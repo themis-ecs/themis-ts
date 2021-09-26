@@ -1,12 +1,12 @@
 import { Entity } from '../internal/core/entity';
 import { ThemisWorld } from '../internal/core/world';
-import { ComponentSet } from '../internal/core/component-set';
+import { ComponentQuery } from '../internal/core/component-query';
 
 export class EntityCollection {
-  protected readonly componentSet: ComponentSet;
+  protected readonly componentSet: ComponentQuery;
   protected readonly world: ThemisWorld;
 
-  constructor(componentSet: ComponentSet, world: ThemisWorld) {
+  constructor(componentSet: ComponentQuery, world: ThemisWorld) {
     this.componentSet = componentSet;
     this.world = world;
   }

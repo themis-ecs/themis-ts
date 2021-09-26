@@ -1,8 +1,7 @@
-import { all, any, EntityCollection, none, Pipeline, World, WorldBuilder } from '../src';
+import { all, any, ComponentQuery, EntityCollection, none, Pipeline, World, WorldBuilder } from '../src';
 import { ThemisWorld } from '../src/internal/core/world';
 import { Component } from '../src';
 import { System } from '../src';
-import { ComponentQuery } from '../src';
 
 test('integration test', () => {
   const entitySystemA = new TestEntitySystemA();

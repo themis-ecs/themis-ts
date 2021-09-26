@@ -23,8 +23,8 @@ export function Inject(identifier: Identifier): PropertyDecorator {
 export function ComponentQuery(...queries: ComponentQueryFunction[]): PropertyDecorator<EntityCollection> {
   return (prototype, key) => {
     const metadata = Prototype.getMetadata(prototype);
-    const componentSetMetadata = metadata.componentSetMetadata || {};
+    const componentSetMetadata = metadata.componentQueryMetadata || {};
     componentSetMetadata[key as string] = queries;
-    metadata.componentSetMetadata = componentSetMetadata;
+    metadata.componentQueryMetadata = componentSetMetadata;
   };
 }

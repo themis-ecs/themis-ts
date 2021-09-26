@@ -1,7 +1,6 @@
-import { all, EntityCollection, Pipeline, System, WorldBuilder } from '../src';
+import { all, ComponentQuery, EntityCollection, Pipeline, System, WorldBuilder } from '../src';
 import { Component } from '../src';
 import { Entity } from '../src';
-import { ComponentQuery } from '../src';
 
 const performance = require('perf_hooks').performance;
 

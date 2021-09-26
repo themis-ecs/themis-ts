@@ -1,13 +1,12 @@
-import { Inject } from '../src';
-import { Container } from '../src/internal/di/container';
+import { Inject, WorldBuilder } from '../src';
 
 test('Inject Test', () => {
-  const container = new Container();
-  container.register(TestClassA, new TestClassA());
-  container.register('test', new TestClassB());
-
+  const builder = new WorldBuilder();
+  builder.register(TestClassA, new TestClassA());
+  builder.register('test', new TestClassB());
+  const world = builder.build();
   const testClass = new InjectTestClass();
-  container.inject(testClass);
+  world.inject(testClass);
 
   expect(testClass.getA().name).toEqual('test');
   expect(testClass.getB().number).toEqual(5);

@@ -11,14 +11,14 @@ export type InjectMetadata = { [key: string]: Identifier };
 /**
  * @internal
  */
-export type ComponentSetMetadata = { [key: string]: ComponentQueryFunction[] };
+export type ComponentQueryMetadata = { [key: string]: ComponentQueryFunction[] };
 
 /**
  * @internal
  */
 export interface PrototypeMetadata {
   injectMetadata?: InjectMetadata;
-  componentSetMetadata?: ComponentSetMetadata;
+  componentQueryMetadata?: ComponentQueryMetadata;
 }
 
 /**
