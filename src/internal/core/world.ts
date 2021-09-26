@@ -95,6 +95,6 @@ export class ThemisWorld implements World {
   }
 
   public inject(object: unknown): void {
-    this.container.inject(object);
+    this.container.inject(object, this);
   }
 }

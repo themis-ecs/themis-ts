@@ -1,5 +1,4 @@
-import { All, Pipeline, WorldBuilder } from '../src';
-import { EntitySystem } from '../src';
+import { all, ComponentQuery, EntityCollection, Pipeline, System, WorldBuilder } from '../src';
 import { Component } from '../src';
 import { Entity } from '../src';
 
@@ -60,12 +59,14 @@ class TestComponentB extends Component {}
 class TestComponentC extends Component {}
 class TestComponentD extends Component {}
 
-@All(TestComponentA, TestComponentB)
-class TestSystem extends EntitySystem {
-  onInit(): void {}
+class TestSystem implements System {
+  @ComponentQuery(all(TestComponentA, TestComponentB))
+  entities!: EntityCollection;
 
-  onUpdate(dt: number): void {
-    this.getEntities().forEach((entity) => {
+  init(): void {}
+
+  update(dt: number): void {
+    this.entities.forEach((entity) => {
       // entity.removeComponent(TestComponentA, TestComponentB).addComponent(new TestComponentC(), new TestComponentD());
       entity.getComponent(TestComponentA);
       entity.getComponent(TestComponentB);

@@ -7,15 +7,15 @@ import { EntityFactory } from '../internal/core/entity';
 import { ThemisWorld } from '../internal/core/world';
 import { World } from './world';
 import { Container } from '../internal/di/container';
-import { Identifier } from './inject';
 import { Logging } from './logger';
 import { PipelineDefinition, PipelineDefinitionBuilder } from './pipeline';
 import { ThemisPipeline } from '../internal/core/pipeline';
+import { Identifier } from './decorator';
 
 const logger = Logging.getLogger('themis.world.builder');
 
 export class WorldBuilder {
-  private readonly pipelineDefinitions: Array<PipelineDefinition> = [];
+  private readonly pipelineDefinitions: Array<PipelineDefinition<unknown>> = [];
   private container = new Container();
 
   public build(): World {
@@ -46,20 +46,17 @@ export class WorldBuilder {
 
     entityRegistry.setEntityFactory(new EntityFactory(world));
 
+    systemRegistry.initSystems(world);
+
     pipelines.forEach((it) => {
-      const pipeline = it.pipeline;
-      logger.info(`initializing pipeline ${pipeline.getId()}`);
-      pipeline.init(world);
-      pipeline.registerListeners();
-      pipeline.onInit();
-      it.updateCallback(pipeline);
+      it.updateCallback(it.pipeline);
     });
 
     logger.info('world building done!');
     return world;
   }
 
-  public pipeline(pipelineBuilder: PipelineDefinitionBuilder): this {
+  public pipeline(pipelineBuilder: PipelineDefinitionBuilder<unknown>): this {
     this.pipelineDefinitions.push(pipelineBuilder.build());
     return this;
   }

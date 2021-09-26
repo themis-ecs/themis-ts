@@ -1,8 +1,7 @@
-import { All, Any, None, Pipeline, WorldBuilder } from '../src';
+import { all, any, ComponentQuery, EntityCollection, none, Pipeline, World, WorldBuilder } from '../src';
 import { ThemisWorld } from '../src/internal/core/world';
 import { Component } from '../src';
-import { EntitySystem } from '../src';
-import { Entity } from '../src';
+import { System } from '../src';
 
 test('integration test', () => {
   const entitySystemA = new TestEntitySystemA();
@@ -43,23 +42,23 @@ test('integration test', () => {
   componentDMapper.addComponent(entity4, new TestComponentD());
 
   update(0);
-  expect(entitySystemA.getEntities().getIds()).toStrictEqual([entity1, entity2, entity4]);
-  expect(entitySystemB.getEntities().getIds()).toStrictEqual([entity1, entity4]);
-  expect(entitySystemC.getEntities().getIds()).toStrictEqual([entity3]);
+  expect(entitySystemA.entities.getIds()).toStrictEqual([entity1, entity2, entity4]);
+  expect(entitySystemB.entities.getIds()).toStrictEqual([entity1, entity4]);
+  expect(entitySystemC.entities.getIds()).toStrictEqual([entity3]);
 
   componentAMapper.removeComponent(entity1);
   componentAMapper.removeComponent(entity2);
 
   update(0);
-  expect(entitySystemA.getEntities().getIds()).toStrictEqual([entity1, entity4]);
-  expect(entitySystemB.getEntities().getIds()).toStrictEqual([entity4]);
-  expect(entitySystemC.getEntities().getIds()).toStrictEqual([entity1, entity2, entity3]);
+  expect(entitySystemA.entities.getIds()).toStrictEqual([entity1, entity4]);
+  expect(entitySystemB.entities.getIds()).toStrictEqual([entity4]);
+  expect(entitySystemC.entities.getIds()).toStrictEqual([entity1, entity2, entity3]);
 
   world.deleteEntityById(entity1);
   update(0);
-  expect(entitySystemA.getEntities().getIds()).toStrictEqual([entity4]);
-  expect(entitySystemB.getEntities().getIds()).toStrictEqual([entity4]);
-  expect(entitySystemC.getEntities().getIds()).toStrictEqual([entity2, entity3]);
+  expect(entitySystemA.entities.getIds()).toStrictEqual([entity4]);
+  expect(entitySystemB.entities.getIds()).toStrictEqual([entity4]);
+  expect(entitySystemC.entities.getIds()).toStrictEqual([entity2, entity3]);
   expect(world.createEntityId()).toEqual(entity1);
 });
 
@@ -68,35 +67,29 @@ class TestComponentB extends Component {}
 class TestComponentC extends Component {}
 class TestComponentD extends Component {}
 
-@Any(TestComponentA, TestComponentD)
-class TestEntitySystemA extends EntitySystem {
-  onInit(): void {}
+class TestEntitySystemA implements System {
+  @ComponentQuery(any(TestComponentA, TestComponentD))
+  entities!: EntityCollection;
 
-  onUpdate(_dt: number): void {}
+  init(world: World): void {}
 
-  onEntityAdd(entity: Entity): void {}
-
-  onEntityRemove(entity: Entity): void {}
+  update(o: number): void {}
 }
 
-@All(TestComponentA, TestComponentD)
-class TestEntitySystemB extends EntitySystem {
-  onInit(): void {}
+class TestEntitySystemB implements System {
+  @ComponentQuery(all(TestComponentA, TestComponentD))
+  entities!: EntityCollection;
 
-  onUpdate(_dt: number): void {}
+  init(world: World): void {}
 
-  onEntityAdd(entity: Entity): void {}
-
-  onEntityRemove(entity: Entity): void {}
+  update(o: number): void {}
 }
 
-@None(TestComponentA)
-class TestEntitySystemC extends EntitySystem {
-  onInit(): void {}
+class TestEntitySystemC implements System {
+  @ComponentQuery(none(TestComponentA))
+  entities!: EntityCollection;
 
-  onUpdate(_dt: number): void {}
+  init(world: World): void {}
 
-  onEntityAdd(entity: Entity): void {}
-
-  onEntityRemove(entity: Entity): void {}
+  update(o: number): void {}
 }

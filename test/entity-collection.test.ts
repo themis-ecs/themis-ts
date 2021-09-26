@@ -1,5 +1,4 @@
-import { All, Pipeline, WorldBuilder } from '../src';
-import { EntitySystem } from '../src';
+import { all, ComponentQuery, EntityCollection, Pipeline, System, World, WorldBuilder } from '../src';
 import { ThemisWorld } from '../src/internal/core/world';
 import { Entity } from '../src';
 
@@ -24,14 +23,16 @@ class TestComponentA {
   name!: string;
 }
 
-@All(TestComponentA)
-class TestSystem extends EntitySystem {
-  onInit(): void {
-    this.getWorld().createEntity().addComponent(new TestComponentA());
+class TestSystem implements System {
+  @ComponentQuery(all(TestComponentA))
+  entities!: EntityCollection;
+
+  init(world: World): void {
+    world.createEntity().addComponent(new TestComponentA());
   }
 
-  onUpdate(dt: number): void {
-    this.getEntities().forEach((entity) => {
+  update(): void {
+    this.entities.forEach((entity) => {
       entity.getComponent(TestComponentA).name = 'test';
     });
   }
