@@ -1,7 +1,7 @@
 import { Component, ComponentType } from '../../public/component';
 import { BitVector } from './bit-vector';
 import { ComponentMapper } from './component-mapper';
-import { ComponentQuery } from './component-query';
+import { ComponentQuery, ComponentQueryIdentity } from './component-query';
 import { ComponentQueryBuilder } from './component-query-builder';
 import { BlueprintDefinition } from '../../public/blueprint';
 import { BlueprintComponentConfiguration } from './blueprint-registry';
@@ -19,7 +19,7 @@ export class ComponentRegistry {
   private readonly componentMapperMap: {
     [componentId: number]: ComponentMapper<Component>;
   };
-  private readonly componentQueries: Array<ComponentQuery>;
+  private readonly componentQueries: Map<ComponentQueryIdentity, ComponentQuery>;
   private componentIdCounter: number;
   private readonly eventRegistry: EventRegistry;
 
@@ -27,7 +27,7 @@ export class ComponentRegistry {
     this.componentIdentityMap = new Map<ComponentType<Component>, number>();
     this.entityCompositionMap = {};
     this.componentMapperMap = {};
-    this.componentQueries = [];
+    this.componentQueries = new Map<ComponentQueryIdentity, ComponentQuery>();
     this.componentIdCounter = 0;
     this.eventRegistry = eventRegistry;
     this.eventRegistry.registerListener(EntityDeleteEvent, (event) => {
@@ -42,9 +42,7 @@ export class ComponentRegistry {
   }
 
   public update(): void {
-    for (const componentQuery of this.componentQueries) {
-      componentQuery.processModifications();
-    }
+    this.componentQueries.forEach((componentQuery) => componentQuery.processModifications());
     for (const componentId in this.componentMapperMap) {
       this.componentMapperMap[componentId].processModifications();
     }
@@ -60,10 +58,15 @@ export class ComponentRegistry {
   }
 
   public createComponentSet(componentQueryBuilder: ComponentQueryBuilder): ComponentQuery {
-    const componentQuery = componentQueryBuilder.build(ComponentRegistry.INITIAL_COMPONENT_CAPACITY, (component) =>
+    const identity = componentQueryBuilder.getIdentity();
+    let componentQuery = this.componentQueries.get(identity);
+    if (componentQuery) {
+      return componentQuery;
+    }
+    componentQuery = componentQueryBuilder.build(ComponentRegistry.INITIAL_COMPONENT_CAPACITY, (component) =>
       this.getComponentId(component)
     );
-    this.componentQueries.push(componentQuery);
+    this.componentQueries.set(identity, componentQuery);
     return componentQuery;
   }
 
@@ -132,16 +135,14 @@ export class ComponentRegistry {
     if (blueprintAdd) {
       return;
     }
-    for (const componentSet of this.componentQueries) {
-      componentSet.onCompositionChange(entityId, composition);
-    }
+    this.componentQueries.forEach((componentQuery) => componentQuery.onCompositionChange(entityId, composition));
   }
 
   private onComponentRemove(entityId: number, componentId: number, entityDelete: boolean): void {
     const composition = this.getEntityComposition(entityId);
     composition.clear(componentId);
-    for (const componentSet of this.componentQueries) {
-      componentSet.onCompositionChange(entityId, composition, entityDelete);
-    }
+    this.componentQueries.forEach((componentQuery) =>
+      componentQuery.onCompositionChange(entityId, composition, entityDelete)
+    );
   }
 }
