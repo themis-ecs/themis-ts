@@ -1,7 +1,10 @@
 import { Component, ComponentQueryDefinition, ComponentType } from '../../public/component';
 import { BitVector } from './bit-vector';
-import { ComponentQuery } from './component-query';
+import { ComponentQuery, ComponentQueryIdentity } from './component-query';
 
+/**
+ * @internal
+ */
 export class ComponentQueryBuilder implements ComponentQueryDefinition {
   private readonly all: Array<ComponentType<Component>> = [];
   private readonly any: Array<ComponentType<Component>> = [];
@@ -20,6 +23,14 @@ export class ComponentQueryBuilder implements ComponentQueryDefinition {
   public containingNone(...components: Array<ComponentType<Component>>): ComponentQueryBuilder {
     this.none.push(...components);
     return this;
+  }
+
+  public getIdentity(): ComponentQueryIdentity {
+    return {
+      all: this.all,
+      any: this.any,
+      none: this.none
+    };
   }
 
   public build(capacity: number, resolveComponentId: (component: ComponentType<Component>) => number): ComponentQuery {

@@ -1,4 +1,14 @@
 import { BitVector } from './bit-vector';
+import { Component, ComponentType } from '../../public/component';
+
+/**
+ * @internal
+ */
+export type ComponentQueryIdentity = {
+  all: ReadonlyArray<ComponentType<Component>>;
+  any: ReadonlyArray<ComponentType<Component>>;
+  none: ReadonlyArray<ComponentType<Component>>;
+};
 
 /**
  * @internal
