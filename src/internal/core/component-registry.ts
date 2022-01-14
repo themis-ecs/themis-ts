@@ -57,7 +57,7 @@ export class ComponentRegistry {
     return id;
   }
 
-  public createComponentSet(componentQueryBuilder: ComponentQueryBuilder): ComponentQuery {
+  public getComponentQuery(componentQueryBuilder: ComponentQueryBuilder): ComponentQuery {
     const identity = componentQueryBuilder.getIdentity();
     let componentQuery = this.componentQueries.get(identity);
     if (componentQuery) {

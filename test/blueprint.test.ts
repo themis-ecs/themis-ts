@@ -1,6 +1,4 @@
-import { all, ComponentQuery, EntityCollection, Pipeline, System, WorldBuilder } from '../src';
-import { Component } from '../src';
-import { Entity } from '../src';
+import { all, Component, ComponentQuery, Entity, Pipeline, QueryResult, System, WorldBuilder } from '../src';
 
 const performance = require('perf_hooks').performance;
 
@@ -61,12 +59,12 @@ class TestComponentD extends Component {}
 
 class TestSystem implements System {
   @ComponentQuery(all(TestComponentA, TestComponentB))
-  entities!: EntityCollection;
+  result!: QueryResult;
 
   init(): void {}
 
   update(dt: number): void {
-    this.entities.forEach((entity) => {
+    this.result.forEach((entity) => {
       // entity.removeComponent(TestComponentA, TestComponentB).addComponent(new TestComponentC(), new TestComponentD());
       entity.getComponent(TestComponentA);
       entity.getComponent(TestComponentB);

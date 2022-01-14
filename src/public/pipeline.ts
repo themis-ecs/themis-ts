@@ -1,11 +1,14 @@
 import { System } from './system';
 import { NOOP } from '../internal/core/noop';
+import { NoArgsClass } from './decorator';
 
 export interface Pipeline<T> {
   update(o: T): void;
 }
 
 export type SetupCallback<T> = (pipeline: Pipeline<T>) => void;
+
+export type SystemDefinition = System<unknown> | NoArgsClass<System>;
 
 export type PipelineDefinition<T> = {
   id: string;
@@ -27,8 +30,13 @@ export class PipelineDefinitionBuilder<T> {
     return this;
   }
 
-  public systems(...systems: System<T>[]): this {
-    this._systems = systems;
+  public systems(...systems: SystemDefinition[]): this {
+    this._systems = systems.map((system) => {
+      if (typeof system === 'function') {
+        return new system();
+      }
+      return system;
+    });
     return this;
   }
 

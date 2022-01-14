@@ -16,6 +16,10 @@ export class SystemRegistry {
     this.pipelines.forEach((pipeline) => {
       pipeline.getSystems().forEach((system) => {
         world.inject(system);
+      });
+    });
+    this.pipelines.forEach((pipeline) => {
+      pipeline.getSystems().forEach((system) => {
         system.init(world);
       });
     });

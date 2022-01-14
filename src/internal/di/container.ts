@@ -2,7 +2,8 @@ import { Identifier } from '../../public/decorator';
 import { Prototype, PrototypeMetadata } from '../core/prototype';
 import { ThemisWorld } from '../core/world';
 import { ComponentQueryBuilder } from '../core/component-query-builder';
-import { EntityCollection } from '../../public/entity-collection';
+import { ComponentQueryResult } from '../core/component-query-result';
+import { World } from '../../public/world';
 
 /**
  * @internal
@@ -14,10 +15,10 @@ export class Container {
     this.instances.set(identifier, instance);
   }
 
-  public inject(object: unknown, world: ThemisWorld): void {
+  public inject(object: unknown): void {
     const metadata = Prototype.getMetadata(Object.getPrototypeOf(object));
     this.injectObjects(metadata, object);
-    this.injectComponentQueries(metadata, object, world);
+    this.injectComponentQueries(metadata, object);
   }
 
   private injectObjects(metadata: PrototypeMetadata, object: unknown): void {
@@ -28,27 +29,33 @@ export class Container {
     Object.keys(injectMetadata).forEach((key: string) => {
       const identifier = injectMetadata[key];
       Object.defineProperty(object, key, {
-        value: this.instances.get(identifier)
+        value: this.resolve(identifier)
       });
     });
   }
 
-  private injectComponentQueries(metadata: PrototypeMetadata, object: unknown, world: ThemisWorld) {
+  private resolve(identifier: Identifier): unknown {
+    return this.instances.get(identifier);
+  }
+
+  private injectComponentQueries(metadata: PrototypeMetadata, object: unknown) {
     const componentQueryMetadata = metadata.componentQueryMetadata;
     if (!componentQueryMetadata) {
       return;
     }
+    const world = this.resolve(World) as ThemisWorld;
+
     Object.keys(componentQueryMetadata).forEach((key: string) => {
       const queryFunctions = componentQueryMetadata[key];
 
-      const componentSetBuilder = new ComponentQueryBuilder();
-      queryFunctions.forEach((fn) => fn(componentSetBuilder));
+      const componentQueryBuilder = new ComponentQueryBuilder();
+      queryFunctions.forEach((fn) => fn(componentQueryBuilder));
 
-      const componentSet = world.getComponentRegistry().createComponentSet(componentSetBuilder);
-      const entityCollection = new EntityCollection(componentSet, world);
+      const componentQuery = world.getComponentRegistry().getComponentQuery(componentQueryBuilder);
+      const componentQueryResult = new ComponentQueryResult(componentQuery, world);
 
       Object.defineProperty(object, key, {
-        value: entityCollection
+        value: componentQueryResult
       });
     });
   }

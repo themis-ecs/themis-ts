@@ -38,7 +38,7 @@ export class BlueprintRegistry {
 
   public applyBlueprint(entity: Entity, blueprintName: string): void {
     const configuration = this.blueprintMap[blueprintName];
-    configuration.componentQueries.forEach((componentSet) => componentSet.add(entity.getEntityId()));
+    configuration.componentQueries.forEach((componentQuery) => componentQuery.add(entity.getEntityId()));
     configuration.componentMapperConfigurations.forEach((it) => {
       const component = new it.componentType();
       Object.assign(component, it.component);

@@ -44,6 +44,8 @@ export class WorldBuilder {
       this.container
     );
 
+    this.register(World, world);
+
     entityRegistry.setEntityFactory(new EntityFactory(world));
 
     systemRegistry.initSystems(world);
@@ -61,7 +63,8 @@ export class WorldBuilder {
     return this;
   }
 
-  public register(identifier: Identifier, instance: unknown): void {
+  public register(identifier: Identifier, instance: unknown): this {
     this.container.register(identifier, instance);
+    return this;
   }
 }

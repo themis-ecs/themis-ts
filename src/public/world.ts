@@ -7,40 +7,40 @@ import { Event, EventErrorCallback, EventListener, EventType } from './event';
  * your entities live in. You can use this object to create new entities, register and use blueprints, register
  * and submit events and most importantly: you use the update method to let time pass in your world.
  */
-export interface World {
+export abstract class World {
   /**
    * Get an entity by alias. You can set an alias for an entity via the Entity object.
    * @see Entity
    * @param alias the alias of your entity
    */
-  getEntity(alias: string): Entity;
+  abstract getEntity(alias: string): Entity;
 
   /**
    * Get an entity by it's id. The id is managed by themis internally, you can get the id via the Entity object
    * @see Entity
    * @param entityId the id of the entity
    */
-  getEntity(entityId: number): Entity;
+  abstract getEntity(entityId: number): Entity;
 
   /**
    * Create a new and totally blank entity
    * @see Entity
    */
-  createEntity(): Entity;
+  abstract createEntity(): Entity;
 
   /**
    * Create a new entity which is based on a blueprint. You can learn more about blueprints in the documentation.
    * @see registerBlueprint
    * @param blueprint
    */
-  createEntity(blueprint: string): Entity;
+  abstract createEntity(blueprint: string): Entity;
 
   /**
    * Register a new blueprint. This can then be used to create new entities based on the given BlueprintDefinition
    * @see createEntity
    * @param blueprint
    */
-  registerBlueprint(blueprint: BlueprintDefinition): void;
+  abstract registerBlueprint(blueprint: BlueprintDefinition): void;
 
   /**
    * Register an EventListener. If the given event occurs, all registered listeners be called after all Systems
@@ -50,7 +50,7 @@ export interface World {
    * @param listener
    * @param errorCallback
    */
-  registerListener<T extends Event>(
+  abstract registerListener<T extends Event>(
     eventType: EventType<T>,
     listener: EventListener<T>,
     errorCallback?: EventErrorCallback<T>
@@ -64,7 +64,7 @@ export interface World {
    * @param event
    * @param instant
    */
-  submit<T extends Event>(eventType: EventType<T>, event: T, instant?: boolean): void;
+  abstract submit<T extends Event>(eventType: EventType<T>, event: T, instant?: boolean): void;
 
   /**
    * You can use this method to inject the dependencies which were configured during world building into any
@@ -72,5 +72,5 @@ export interface World {
    * @see WorldBuilder
    * @param object
    */
-  inject(object: unknown): void;
+  abstract inject(object: unknown): void;
 }
