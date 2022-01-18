@@ -1,13 +1,13 @@
 import { BitVector } from './bit-vector';
-import { Component, ComponentType } from '../../public/component';
+import { ComponentBase, ComponentType } from '../../public/component';
 
 /**
  * @internal
  */
 export type ComponentQueryIdentity = {
-  all: ReadonlyArray<ComponentType<Component>>;
-  any: ReadonlyArray<ComponentType<Component>>;
-  none: ReadonlyArray<ComponentType<Component>>;
+  all: ReadonlyArray<ComponentType<ComponentBase>>;
+  any: ReadonlyArray<ComponentType<ComponentBase>>;
+  none: ReadonlyArray<ComponentType<ComponentBase>>;
 };
 
 /**
@@ -16,11 +16,11 @@ export type ComponentQueryIdentity = {
 export class ComponentQuery {
   private activeEntities: number[] = [];
 
-  private readonly entities = new BitVector();
+  private entities = new BitVector();
   private readonly entityAddListeners: ((entityId: number) => void)[] = [];
   private readonly entityRemoveListeners: ((entityId: number) => void)[] = [];
-  private readonly entitiesAdded = new BitVector();
-  private readonly entitiesRemoved = new BitVector();
+  private entitiesAdded = new BitVector();
+  private entitiesRemoved = new BitVector();
 
   private modified = false;
 
@@ -38,26 +38,28 @@ export class ComponentQuery {
     this.entityRemoveListeners.push(callback);
   }
 
-  public onCompositionChange(entityId: number, entityComposition: BitVector, entityDelete = false): void {
-    if (this.isInterested(entityComposition) && !entityDelete) {
+  public onCompositionChange(entityId: number, entityComposition: BitVector): void {
+    if (this.isInterested(entityComposition)) {
       if (this.entities.get(entityId)) {
         return;
       }
-      this.entities.set(entityId);
-      this.entitiesAdded.set(entityId);
-      this.entitiesRemoved.clear(entityId);
-      this.modified = true;
+      this.add(entityId);
     } else if (this.entities.get(entityId)) {
-      this.entities.clear(entityId);
-      this.entitiesRemoved.set(entityId);
-      this.entitiesAdded.clear(entityId);
-      this.modified = true;
+      this.remove(entityId);
     }
   }
 
   public add(entityId: number): void {
     this.entities.set(entityId);
     this.entitiesAdded.set(entityId);
+    this.entitiesRemoved.clear(entityId);
+    this.modified = true;
+  }
+
+  public remove(entityId: number): void {
+    this.entities.clear(entityId);
+    this.entitiesRemoved.set(entityId);
+    this.entitiesAdded.clear(entityId);
     this.modified = true;
   }
 
@@ -86,5 +88,13 @@ export class ComponentQuery {
 
   public getActiveEntities(): number[] {
     return this.activeEntities;
+  }
+
+  public reset(): void {
+    this.modified = false;
+    this.entities.reset();
+    this.entitiesAdded.reset();
+    this.entitiesRemoved.reset();
+    this.activeEntities = [];
   }
 }

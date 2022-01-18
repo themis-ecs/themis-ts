@@ -31,6 +31,7 @@
     "forceConsistentCasingInFileNames": true,
     // use decorators
     "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     //hide properties marked with JSDoc @internal
     "stripInternal": true
   }

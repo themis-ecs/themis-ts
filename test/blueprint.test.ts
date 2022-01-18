@@ -1,4 +1,4 @@
-import { all, Component, ComponentQuery, Entity, Pipeline, QueryResult, System, WorldBuilder } from '../src';
+import { all, ComponentBase, ComponentQuery, Entity, Pipeline, QueryResult, System, WorldBuilder } from '../src';
 
 const performance = require('perf_hooks').performance;
 
@@ -52,10 +52,10 @@ test('Simple Blueprint Performance Test', () => {
   console.log('Without blueprint: ' + (t1 - t0));
 });
 
-class TestComponentA extends Component {}
-class TestComponentB extends Component {}
-class TestComponentC extends Component {}
-class TestComponentD extends Component {}
+class TestComponentA extends ComponentBase {}
+class TestComponentB extends ComponentBase {}
+class TestComponentC extends ComponentBase {}
+class TestComponentD extends ComponentBase {}
 
 class TestSystem implements System {
   @ComponentQuery(all(TestComponentA, TestComponentB))

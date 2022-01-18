@@ -115,3 +115,9 @@ test('getBits', () => {
   const vec = BitVector.from(1, 2, 3, 4, 5, 20, 2048, 10000);
   expect(vec.getBits()).toStrictEqual([1, 2, 3, 4, 5, 20, 2048, 10000]);
 });
+
+test('reset', () => {
+  const vec = BitVector.from(1);
+  vec.reset();
+  expect(vec.getBits().length).toEqual(0);
+});

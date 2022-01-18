@@ -1,8 +1,7 @@
 import { ComponentQuery } from './component-query';
-import { Component, ComponentType } from '../../public/component';
+import { ComponentBase, ComponentType } from '../../public/component';
 import { ComponentMapper } from './component-mapper';
-import { BluePrintInitializer } from '../../public/blueprint';
-import { Entity } from './entity';
+import { BlueprintDefinition, BluePrintInitializer } from '../../public/blueprint';
 
 /**
  * @internal
@@ -17,16 +16,17 @@ export type BlueprintComponentConfiguration = {
  * @internal
  */
 export type BlueprintComponentMapperConfiguration = {
-  componentType: ComponentType<Component>;
-  component: Component | undefined;
-  mapper: ComponentMapper<Component>;
+  componentType: ComponentType<ComponentBase>;
+  component: ComponentBase | undefined;
+  mapper: ComponentMapper<ComponentBase>;
 };
 
 /**
  * @internal
  */
 export class BlueprintRegistry {
-  private readonly blueprintMap: { [blueprintName: string]: BlueprintComponentConfiguration };
+  private blueprintMap: { [blueprintName: string]: BlueprintComponentConfiguration };
+  private readonly blueprintDefinitions: BlueprintDefinition[] = [];
 
   constructor() {
     this.blueprintMap = {};
@@ -36,14 +36,19 @@ export class BlueprintRegistry {
     this.blueprintMap[blueprintName] = configuration;
   }
 
-  public applyBlueprint(entity: Entity, blueprintName: string): void {
-    const configuration = this.blueprintMap[blueprintName];
-    configuration.componentQueries.forEach((componentQuery) => componentQuery.add(entity.getEntityId()));
-    configuration.componentMapperConfigurations.forEach((it) => {
-      const component = new it.componentType();
-      Object.assign(component, it.component);
-      it.mapper.addComponent(entity.getEntityId(), component, true);
-    });
-    configuration.initialize?.(entity);
+  public getBlueprint(blueprintName: string): BlueprintComponentConfiguration {
+    return this.blueprintMap[blueprintName];
+  }
+
+  public registerBlueprintDefinition(definition: BlueprintDefinition): void {
+    this.blueprintDefinitions.push(definition);
+  }
+
+  public getBlueprintDefinitions(): BlueprintDefinition[] {
+    return this.blueprintDefinitions;
+  }
+
+  public resetBlueprints(): void {
+    this.blueprintMap = {};
   }
 }

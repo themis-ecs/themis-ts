@@ -1,4 +1,15 @@
-import { all, any, Component, ComponentQuery, none, Pipeline, QueryResult, System, World, WorldBuilder } from '../src';
+import {
+  all,
+  any,
+  ComponentBase,
+  ComponentQuery,
+  none,
+  Pipeline,
+  QueryResult,
+  System,
+  World,
+  WorldBuilder
+} from '../src';
 import { ThemisWorld } from '../src/internal/core/world';
 
 test('integration test', () => {
@@ -16,36 +27,31 @@ test('integration test', () => {
 
   const world = new WorldBuilder().pipeline(mainPipeline).build() as ThemisWorld;
 
-  const componentAMapper = world.getComponentMapper<TestComponentA>(TestComponentA);
-  const componentBMapper = world.getComponentMapper<TestComponentB>(TestComponentB);
-  const componentCMapper = world.getComponentMapper<TestComponentC>(TestComponentC);
-  const componentDMapper = world.getComponentMapper<TestComponentD>(TestComponentD);
-
   let entity1 = world.createEntityId();
-  componentAMapper.addComponent(entity1, new TestComponentA());
-  componentBMapper.addComponent(entity1, new TestComponentB());
-  componentCMapper.addComponent(entity1, new TestComponentC());
-  componentDMapper.addComponent(entity1, new TestComponentD());
+  world.addComponent(entity1, new TestComponentA());
+  world.addComponent(entity1, new TestComponentB());
+  world.addComponent(entity1, new TestComponentC());
+  world.addComponent(entity1, new TestComponentD());
 
   let entity2 = world.createEntityId();
-  componentAMapper.addComponent(entity2, new TestComponentA());
-  componentBMapper.addComponent(entity2, new TestComponentB());
+  world.addComponent(entity2, new TestComponentA());
+  world.addComponent(entity2, new TestComponentB());
 
   let entity3 = world.createEntityId();
-  componentBMapper.addComponent(entity3, new TestComponentB());
-  componentCMapper.addComponent(entity3, new TestComponentC());
+  world.addComponent(entity3, new TestComponentB());
+  world.addComponent(entity3, new TestComponentC());
 
   let entity4 = world.createEntityId();
-  componentAMapper.addComponent(entity4, new TestComponentA());
-  componentDMapper.addComponent(entity4, new TestComponentD());
+  world.addComponent(entity4, new TestComponentA());
+  world.addComponent(entity4, new TestComponentD());
 
   update(0);
   expect(entitySystemA.result.getIds()).toStrictEqual([entity1, entity2, entity4]);
   expect(entitySystemB.result.getIds()).toStrictEqual([entity1, entity4]);
   expect(entitySystemC.result.getIds()).toStrictEqual([entity3]);
 
-  componentAMapper.removeComponent(entity1);
-  componentAMapper.removeComponent(entity2);
+  world.removeComponent(entity1, TestComponentA);
+  world.removeComponent(entity2, TestComponentA);
 
   update(0);
   expect(entitySystemA.result.getIds()).toStrictEqual([entity1, entity4]);
@@ -60,10 +66,10 @@ test('integration test', () => {
   expect(world.createEntityId()).toEqual(entity1);
 });
 
-class TestComponentA extends Component {}
-class TestComponentB extends Component {}
-class TestComponentC extends Component {}
-class TestComponentD extends Component {}
+class TestComponentA extends ComponentBase {}
+class TestComponentB extends ComponentBase {}
+class TestComponentC extends ComponentBase {}
+class TestComponentD extends ComponentBase {}
 
 class TestEntitySystemA implements System {
   @ComponentQuery(any(TestComponentA, TestComponentD))

@@ -1,6 +1,8 @@
-import { ComponentQueryFunction } from './component';
+import { ComponentBase, ComponentBase as ComponentClass, ComponentQueryFunction, ComponentType } from './component';
 import { Prototype } from '../internal/core/prototype';
 import { QueryResult } from './query-result';
+import { ComponentSerializer } from '../internal/core/serialization';
+import { ComponentRegistry } from '../internal/core/component-registry';
 
 export type Class<T> = new (...params: never[]) => T;
 
@@ -30,5 +32,21 @@ export function ComponentQuery(...queries: ComponentQueryFunction[]): PropertyDe
     const componentSetMetadata = metadata.componentQueryMetadata || {};
     componentSetMetadata[key as string] = queries;
     metadata.componentQueryMetadata = componentSetMetadata;
+  };
+}
+
+export type ComponentDefinition = {
+  id?: string;
+  serializer?: ComponentSerializer<ComponentBase, unknown>;
+};
+
+export function Component(definition?: ComponentDefinition) {
+  return function <T extends ComponentClass>(constructor: ComponentType<T>): ComponentType<T> {
+    const metadata = Prototype.getMetadata(constructor.prototype);
+    const id = definition?.id;
+    const serializer = definition?.serializer;
+    metadata.componentMetadata = { id, serializer };
+    ComponentRegistry.registerComponent(constructor, id);
+    return constructor;
   };
 }

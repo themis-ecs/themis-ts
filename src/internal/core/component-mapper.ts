@@ -1,46 +1,29 @@
-import { Component, ComponentType } from '../../public/component';
+import { ComponentBase } from '../../public/component';
 import { BitVector } from './bit-vector';
-import { EventRegistry } from './event-registry';
-import { ComponentAddEvent, ComponentRemoveEvent } from '../../public/event';
+import { ComponentMapperSerialization, ComponentSerializer } from './serialization';
 
 /**
  * @internal
  */
-export class ComponentMapper<T extends Component> {
-  private readonly components: { [entityId: number]: T } = {};
-  private readonly cachedDeletions = new BitVector();
-  private readonly eventRegistry: EventRegistry;
+export class ComponentMapper<T extends ComponentBase> {
+  private components: { [entityId: number]: T } = {};
+  private cachedDeletions = new BitVector();
   private readonly componentId: number;
-  private readonly componentType: ComponentType<T>;
+  private readonly componentName: string;
+  private readonly serializer: ComponentSerializer<T, unknown>;
 
-  constructor(eventRegistry: EventRegistry, componentId: number, componentType: ComponentType<T>) {
-    this.eventRegistry = eventRegistry;
+  constructor(componentId: number, componentName: string, serializer: ComponentSerializer<T, unknown>) {
     this.componentId = componentId;
-    this.componentType = componentType;
+    this.componentName = componentName;
+    this.serializer = serializer;
   }
 
-  public addComponent(entityId: number, component: T, blueprintAdd = false): void {
+  public addComponent(entityId: number, component: T): void {
     this.components[entityId] = component;
-    this.eventRegistry.submit(
-      ComponentAddEvent,
-      new ComponentAddEvent<T>(entityId, this.componentType, this.componentId, component, blueprintAdd),
-      true
-    );
     this.cachedDeletions.clear(entityId);
   }
 
-  public removeComponent(entityId: number, entityDelete = false): void {
-    this.eventRegistry.submit(
-      ComponentRemoveEvent,
-      new ComponentRemoveEvent<T>(
-        entityId,
-        this.componentType,
-        this.componentId,
-        this.components[entityId],
-        entityDelete
-      ),
-      true
-    );
+  public removeComponent(entityId: number): void {
     this.cachedDeletions.set(entityId);
   }
 
@@ -53,5 +36,42 @@ export class ComponentMapper<T extends Component> {
 
   public getComponent(entityId: number): T {
     return this.components[entityId];
+  }
+
+  public getComponentName(): string {
+    return this.componentName;
+  }
+
+  public getComponentId(): number {
+    return this.componentId;
+  }
+
+  public static fromSerialization(
+    serialization: ComponentMapperSerialization,
+    serializer: ComponentSerializer<ComponentBase, unknown>
+  ): ComponentMapper<ComponentBase> {
+    const mapper = new ComponentMapper(serialization.componentId, serialization.componentName, serializer);
+
+    Object.keys(serialization.components).forEach((entityId: string) => {
+      const serializedComponent = serialization.components[Number(entityId)];
+      mapper.components[Number(entityId)] = serializer.deserialize(serializedComponent);
+    });
+
+    mapper.cachedDeletions = BitVector.from(...serialization.cachedDeletions);
+    return mapper;
+  }
+
+  public getSerialization(): ComponentMapperSerialization {
+    const serializedComponents: { [entityId: number]: unknown } = {};
+    Object.keys(this.components).forEach((entityId) => {
+      serializedComponents[Number(entityId)] = this.serializer.serialize(this.components[Number(entityId)]);
+    });
+
+    return {
+      components: serializedComponents,
+      cachedDeletions: this.cachedDeletions.getBits(),
+      componentId: this.componentId,
+      componentName: this.componentName
+    };
   }
 }

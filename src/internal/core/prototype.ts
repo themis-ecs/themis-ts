@@ -1,5 +1,6 @@
 import { Identifier } from '../../public/decorator';
-import { ComponentQueryFunction } from '../../public/component';
+import { ComponentBase, ComponentQueryFunction } from '../../public/component';
+import { ComponentSerializer } from './serialization';
 
 const THEMIS_METADATA_KEY = '__themis';
 
@@ -16,9 +17,18 @@ export type ComponentQueryMetadata = { [key: string]: ComponentQueryFunction[] }
 /**
  * @internal
  */
+export type ComponentMetadata = {
+  id?: string;
+  serializer?: ComponentSerializer<ComponentBase, unknown>;
+};
+
+/**
+ * @internal
+ */
 export interface PrototypeMetadata {
   injectMetadata?: InjectMetadata;
   componentQueryMetadata?: ComponentQueryMetadata;
+  componentMetadata?: ComponentMetadata;
 }
 
 /**

@@ -29,7 +29,8 @@ export class Container {
     Object.keys(injectMetadata).forEach((key: string) => {
       const identifier = injectMetadata[key];
       Object.defineProperty(object, key, {
-        value: this.resolve(identifier)
+        value: this.resolve(identifier),
+        configurable: true
       });
     });
   }
@@ -55,7 +56,8 @@ export class Container {
       const componentQueryResult = new ComponentQueryResult(componentQuery, world);
 
       Object.defineProperty(object, key, {
-        value: componentQueryResult
+        value: componentQueryResult,
+        configurable: true
       });
     });
   }

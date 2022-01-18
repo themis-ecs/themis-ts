@@ -17,6 +17,7 @@ test('entity test', () => {
   const testComponentA = new TestComponentA();
   testComponentA.name = 'test';
   entity.addComponent(testComponentA);
+  entity.addComponent({ name: 'test' });
   update(1);
   expect(entity.getComponent(TestComponentA).name).toEqual('test');
   entity.removeComponent(TestComponentA);

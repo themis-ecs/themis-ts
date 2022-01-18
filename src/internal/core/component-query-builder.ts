@@ -1,4 +1,4 @@
-import { Component, ComponentQueryDefinition, ComponentType } from '../../public/component';
+import { ComponentBase, ComponentQueryDefinition, ComponentType } from '../../public/component';
 import { BitVector } from './bit-vector';
 import { ComponentQuery, ComponentQueryIdentity } from './component-query';
 
@@ -6,21 +6,21 @@ import { ComponentQuery, ComponentQueryIdentity } from './component-query';
  * @internal
  */
 export class ComponentQueryBuilder implements ComponentQueryDefinition {
-  private readonly all: Array<ComponentType<Component>> = [];
-  private readonly any: Array<ComponentType<Component>> = [];
-  private readonly none: Array<ComponentType<Component>> = [];
+  private readonly all: Array<ComponentType<ComponentBase>> = [];
+  private readonly any: Array<ComponentType<ComponentBase>> = [];
+  private readonly none: Array<ComponentType<ComponentBase>> = [];
 
-  public containingAll(...components: Array<ComponentType<Component>>): ComponentQueryBuilder {
+  public containingAll(...components: Array<ComponentType<ComponentBase>>): ComponentQueryBuilder {
     this.all.push(...components);
     return this;
   }
 
-  public containingAny(...components: Array<ComponentType<Component>>): ComponentQueryBuilder {
+  public containingAny(...components: Array<ComponentType<ComponentBase>>): ComponentQueryBuilder {
     this.any.push(...components);
     return this;
   }
 
-  public containingNone(...components: Array<ComponentType<Component>>): ComponentQueryBuilder {
+  public containingNone(...components: Array<ComponentType<ComponentBase>>): ComponentQueryBuilder {
     this.none.push(...components);
     return this;
   }
@@ -33,7 +33,10 @@ export class ComponentQueryBuilder implements ComponentQueryDefinition {
     };
   }
 
-  public build(capacity: number, resolveComponentId: (component: ComponentType<Component>) => number): ComponentQuery {
+  public build(
+    capacity: number,
+    resolveComponentId: (component: ComponentType<ComponentBase>) => number
+  ): ComponentQuery {
     let allVector: BitVector | null = null;
     let anyVector: BitVector | null = null;
     let noneVector: BitVector | null = null;

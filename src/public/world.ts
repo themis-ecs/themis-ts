@@ -73,4 +73,8 @@ export abstract class World {
    * @param object
    */
   abstract inject(object: unknown): void;
+
+  abstract save(): string;
+
+  abstract load(serialization: string): void;
 }
