@@ -1,9 +1,10 @@
-import { Identifier } from '../../public/decorator';
-import { Prototype, PrototypeMetadata } from '../core/prototype';
+import { Class, Identifier, SINGLETON } from '../../public/decorator';
 import { ThemisWorld } from '../core/world';
 import { ComponentQueryBuilder } from '../core/component-query-builder';
 import { ComponentQueryResult } from '../core/component-query-result';
 import { World } from '../../public/world';
+import 'reflect-metadata';
+import { COMPONENT_QUERY_METADATA, ComponentQueryMetadata, INJECT_METADATA, InjectMetadata } from './metadata';
 
 /**
  * @internal
@@ -16,18 +17,40 @@ export class Container {
   }
 
   public inject(object: unknown): void {
-    const metadata = Prototype.getMetadata(Object.getPrototypeOf(object));
-    this.injectObjects(metadata, object);
-    this.injectComponentQueries(metadata, object);
+    const injectMetadata: InjectMetadata = Reflect.getMetadata(INJECT_METADATA, Object.getPrototypeOf(object));
+    const componentQueryMetadata: ComponentQueryMetadata = Reflect.getMetadata(
+      COMPONENT_QUERY_METADATA,
+      Object.getPrototypeOf(object)
+    );
+    this.injectObjects(injectMetadata, object);
+    this.injectComponentQueries(componentQueryMetadata, object);
   }
 
-  private injectObjects(metadata: PrototypeMetadata, object: unknown): void {
-    const injectMetadata = metadata.injectMetadata;
-    if (!injectMetadata) {
+  public resolve<T>(identifier: Identifier<T>): T {
+    const instance = this.instances.get(identifier);
+    if (instance) {
+      return instance as T;
+    }
+    if (typeof identifier === 'function') {
+      const dependencies: Class[] | undefined = Reflect.getMetadata('design:paramtypes', identifier);
+      const metadata: InjectMetadata | undefined = Reflect.getMetadata(INJECT_METADATA, identifier);
+      const resolvedDependencies = (dependencies?.map((dependency) => this.resolve(dependency)) as never[]) || [];
+      const newInstance = new identifier(...resolvedDependencies) as T;
+      if (metadata?.scope === SINGLETON) {
+        this.instances.set(identifier, newInstance);
+      }
+      return newInstance;
+    } else {
+      throw new Error(`${identifier} can not be resolved`);
+    }
+  }
+
+  private injectObjects(metadata: InjectMetadata, object: unknown): void {
+    if (!metadata || !metadata.injectionPoints) {
       return;
     }
-    Object.keys(injectMetadata).forEach((key: string) => {
-      const identifier = injectMetadata[key];
+    Object.keys(metadata.injectionPoints).forEach((key: string) => {
+      const identifier = metadata.injectionPoints[key];
       Object.defineProperty(object, key, {
         value: this.resolve(identifier),
         configurable: true
@@ -35,19 +58,14 @@ export class Container {
     });
   }
 
-  private resolve(identifier: Identifier): unknown {
-    return this.instances.get(identifier);
-  }
-
-  private injectComponentQueries(metadata: PrototypeMetadata, object: unknown) {
-    const componentQueryMetadata = metadata.componentQueryMetadata;
-    if (!componentQueryMetadata) {
+  private injectComponentQueries(metadata: ComponentQueryMetadata, object: unknown) {
+    if (!metadata) {
       return;
     }
     const world = this.resolve(World) as ThemisWorld;
 
-    Object.keys(componentQueryMetadata).forEach((key: string) => {
-      const queryFunctions = componentQueryMetadata[key];
+    Object.keys(metadata).forEach((key: string) => {
+      const queryFunctions = metadata[key];
 
       const componentQueryBuilder = new ComponentQueryBuilder();
       queryFunctions.forEach((fn) => fn(componentQueryBuilder));

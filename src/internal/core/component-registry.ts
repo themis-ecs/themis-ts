@@ -7,13 +7,13 @@ import { BlueprintDefinition } from '../../public/blueprint';
 import { BlueprintComponentConfiguration } from './blueprint-registry';
 import { EventRegistry } from './event-registry';
 import { EntityDeleteEvent } from '../../public/event';
-import { Prototype } from './prototype';
 import {
   ComponentRegistrySerialization,
   ComponentSerializer,
   DefaultComponentSerializer,
   Serialization
 } from './serialization';
+import { COMPONENT_METADATA, ComponentMetadata } from '../di/metadata';
 
 /**
  * @internal
@@ -69,14 +69,14 @@ export class ComponentRegistry {
   }
 
   public getComponentName(componentType: ComponentType<ComponentBase>): string {
-    const componentMetadata = Prototype.getMetadata(componentType.prototype).componentMetadata;
+    const componentMetadata: ComponentMetadata = Reflect.getMetadata(COMPONENT_METADATA, componentType);
     return componentMetadata?.id || componentType.name;
   }
 
   public getComponentSerializer(
     componentType: ComponentType<ComponentBase>
   ): ComponentSerializer<ComponentBase, unknown> {
-    const componentMetadata = Prototype.getMetadata(componentType.prototype).componentMetadata;
+    const componentMetadata: ComponentMetadata = Reflect.getMetadata(COMPONENT_METADATA, componentType);
     return componentMetadata?.serializer || new DefaultComponentSerializer();
   }
 
