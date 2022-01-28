@@ -1,7 +1,7 @@
 import { Class, Identifier, SINGLETON } from '../../public/decorator';
 import { ThemisWorld } from '../core/world';
 import { ComponentQueryBuilder } from '../core/component-query-builder';
-import { ComponentQueryResult } from '../core/component-query-result';
+import { ComponentQueryAdapter } from '../core/component-query-adapter';
 import { World } from '../../public/world';
 import 'reflect-metadata';
 import { COMPONENT_QUERY_METADATA, ComponentQueryMetadata, INJECT_METADATA, InjectMetadata } from './metadata';
@@ -23,7 +23,7 @@ export class Container {
       Object.getPrototypeOf(object)
     );
     this.injectObjects(injectMetadata, object);
-    this.injectComponentQueries(componentQueryMetadata, object);
+    this.injectQueries(componentQueryMetadata, object);
   }
 
   public resolve<T>(identifier: Identifier<T>): T {
@@ -58,7 +58,7 @@ export class Container {
     });
   }
 
-  private injectComponentQueries(metadata: ComponentQueryMetadata, object: unknown) {
+  private injectQueries(metadata: ComponentQueryMetadata, object: unknown) {
     if (!metadata) {
       return;
     }
@@ -71,10 +71,10 @@ export class Container {
       queryFunctions.forEach((fn) => fn(componentQueryBuilder));
 
       const componentQuery = world.getComponentRegistry().getComponentQuery(componentQueryBuilder);
-      const componentQueryResult = new ComponentQueryResult(componentQuery, world);
+      const componentQueryAdapter = new ComponentQueryAdapter(componentQuery, world);
 
       Object.defineProperty(object, key, {
-        value: componentQueryResult,
+        value: componentQueryAdapter,
         configurable: true
       });
     });

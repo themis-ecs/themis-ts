@@ -1,15 +1,23 @@
 import { Entity } from './entity';
 import { ThemisWorld } from './world';
 import { ComponentQuery } from './component-query';
-import { QueryResult } from '../../public/query-result';
+import { EntityCollection, Events, Query } from '../../public/query';
 
-export class ComponentQueryResult implements QueryResult {
+export class ComponentQueryAdapter implements Query {
   protected readonly componentQuery: ComponentQuery;
   protected readonly world: ThemisWorld;
 
   constructor(componentSet: ComponentQuery, world: ThemisWorld) {
     this.componentQuery = componentSet;
     this.world = world;
+  }
+
+  public get entities(): EntityCollection {
+    return this;
+  }
+
+  public get events(): Events {
+    return this;
   }
 
   public forEach(callback: (entity: Entity) => void): void {
@@ -27,7 +35,6 @@ export class ComponentQueryResult implements QueryResult {
   }
 
   public onEntityAdd(callback: (entity: Entity) => void): void {
-    // TODO Naming....
     this.componentQuery.onEntityAdd((entityId) => {
       callback(this.world.getEntity(entityId));
     });

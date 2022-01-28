@@ -5,7 +5,7 @@ export * from './public/entity';
 export * from './public/event';
 export * from './public/logger';
 export * from './public/pipeline';
-export * from './public/query-result';
+export * from './public/query';
 export * from './public/system';
 export * from './public/world';
 export * from './public/world-builder';

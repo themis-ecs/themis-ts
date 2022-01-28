@@ -1,4 +1,4 @@
-import { any, Component, ComponentQuery, Pipeline, QueryResult, System, World, WorldBuilder } from '../src';
+import { any, Component, ComponentQuery, Pipeline, Query, System, World, WorldBuilder } from '../src';
 import { ThemisWorld } from '../src/internal/core/world';
 
 test('Serialization Test', () => {
@@ -38,7 +38,7 @@ export class TestComponentA {
 
 class TestEntitySystemA implements System {
   @ComponentQuery(any(TestComponentA))
-  result!: QueryResult;
+  query!: Query;
 
   init(world: World): void {}
 

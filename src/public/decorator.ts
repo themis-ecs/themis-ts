@@ -1,5 +1,5 @@
 import { ComponentBase, ComponentQueryFunction, ComponentType } from './component';
-import { QueryResult } from './query-result';
+import { Query } from './query';
 import { ComponentSerializer } from '../internal/core/serialization';
 import { ComponentRegistry } from '../internal/core/component-registry';
 import 'reflect-metadata';
@@ -34,7 +34,7 @@ export function Inject(identifier: Identifier): PropertyDecorator {
   };
 }
 
-export function ComponentQuery(...queries: ComponentQueryFunction[]): PropertyDecorator<QueryResult> {
+export function ComponentQuery(...queries: ComponentQueryFunction[]): PropertyDecorator<Query> {
   return (prototype, key) => {
     const componentQueryMetadata: ComponentQueryMetadata =
       Reflect.getMetadata(COMPONENT_QUERY_METADATA, prototype) || {};

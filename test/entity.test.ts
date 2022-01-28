@@ -1,4 +1,4 @@
-import { all, ComponentQuery, Pipeline, QueryResult, System, WorldBuilder } from '../src';
+import { all, ComponentQuery, Pipeline, Query, System, WorldBuilder } from '../src';
 import { Entity } from '../src/internal/core/entity';
 import { ThemisWorld } from '../src/internal/core/world';
 
@@ -31,15 +31,15 @@ class TestComponentA {
 
 class TestSystem implements System {
   @ComponentQuery(all(TestComponentA))
-  result!: QueryResult;
+  query!: Query;
 
   init(): void {}
 
   update(dt: number): void {
     if (dt === 1) {
-      expect(this.result.size()).toEqual(1);
+      expect(this.query.entities.size()).toEqual(1);
     } else if (dt === 2) {
-      expect(this.result.size()).toEqual(0);
+      expect(this.query.entities.size()).toEqual(0);
     } else {
       fail();
     }
