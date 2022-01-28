@@ -1,8 +1,8 @@
 import { Entity } from './entity';
 
 export interface Query {
-  get entities(): EntityCollection;
-  get events(): Events;
+  readonly entities: EntityCollection;
+  readonly events: Events;
 }
 
 export interface EntityCollection {
