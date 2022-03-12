@@ -1,5 +1,5 @@
 import { ThemisWorld } from './world';
-import { Component, ComponentType } from '../../public/component';
+import { ComponentBase, ComponentType } from '../../public/component';
 import { Entity as IEntity } from '../../public/entity';
 
 /**
@@ -22,21 +22,20 @@ export class Entity implements IEntity {
     return this.world;
   }
 
-  public addComponent(...components: Component[]): this {
+  public addComponent(...components: ComponentBase[]): this {
     components.forEach((component) => {
-      const componentType = Object.getPrototypeOf(component).constructor;
-      this.world.getComponentMapper(componentType).addComponent(this.entityId, component);
+      this.world.addComponent(this.entityId, component);
     });
     return this;
   }
 
-  public getComponent<T extends Component>(componentType: ComponentType<T>): T {
-    return this.world.getComponentMapper(componentType).getComponent(this.entityId) as T;
+  public getComponent<T extends ComponentBase>(componentType: ComponentType<T>): T {
+    return this.world.getComponent(this.entityId, componentType);
   }
 
-  public removeComponent(...componentTypes: ComponentType<Component>[]): this {
+  public removeComponent(...componentTypes: ComponentType<ComponentBase>[]): this {
     componentTypes.forEach((componentType) => {
-      this.world.getComponentMapper(componentType).removeComponent(this.entityId);
+      this.world.removeComponent(this.entityId, componentType);
     });
     return this;
   }

@@ -1,6 +1,5 @@
-import { all, ComponentQuery, EntityCollection, Pipeline, System, World, WorldBuilder } from '../src';
+import { all, ComponentQuery, Entity, Pipeline, Query, System, World, WorldBuilder } from '../src';
 import { ThemisWorld } from '../src/internal/core/world';
-import { Entity } from '../src';
 
 test('entity collection test', () => {
   let update = (dt: number) => {};
@@ -25,14 +24,14 @@ class TestComponentA {
 
 class TestSystem implements System {
   @ComponentQuery(all(TestComponentA))
-  entities!: EntityCollection;
+  query!: Query;
 
   init(world: World): void {
     world.createEntity().addComponent(new TestComponentA());
   }
 
   update(): void {
-    this.entities.forEach((entity) => {
+    this.query.entities.forEach((entity) => {
       entity.getComponent(TestComponentA).name = 'test';
     });
   }

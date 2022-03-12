@@ -15,7 +15,7 @@ import { Identifier } from './decorator';
 const logger = Logging.getLogger('themis.world.builder');
 
 export class WorldBuilder {
-  private readonly pipelineDefinitions: Array<PipelineDefinition<unknown>> = [];
+  private readonly pipelines: Array<PipelineDefinition<unknown>> = [];
   private container = new Container();
 
   public build(): World {
@@ -25,14 +25,7 @@ export class WorldBuilder {
     const eventRegistry = new EventRegistry();
     const entityRegistry = new EntityRegistry(eventRegistry);
     const componentRegistry = new ComponentRegistry(eventRegistry);
-
-    const pipelines = this.pipelineDefinitions.map((definition) => ({
-      pipeline: new ThemisPipeline(definition.id, definition.systems, entityRegistry, componentRegistry, eventRegistry),
-      updateCallback: definition.setupCallback
-    }));
-
-    const systemRegistry = new SystemRegistry(pipelines.map((it) => it.pipeline));
-
+    const systemRegistry = new SystemRegistry();
     const blueprintRegistry = new BlueprintRegistry();
 
     const world = new ThemisWorld(
@@ -44,8 +37,24 @@ export class WorldBuilder {
       this.container
     );
 
+    this.register(World, world);
+
+    const pipelines = this.pipelines.map((definition) => {
+      return {
+        pipeline: new ThemisPipeline(
+          definition.id,
+          definition.systems.map((system) => (typeof system === 'function' ? this.container.resolve(system) : system)),
+          entityRegistry,
+          componentRegistry,
+          eventRegistry
+        ),
+        updateCallback: definition.setupCallback
+      };
+    });
+
     entityRegistry.setEntityFactory(new EntityFactory(world));
 
+    pipelines.forEach((it) => systemRegistry.registerSystem(...it.pipeline.getSystems()));
     systemRegistry.initSystems(world);
 
     pipelines.forEach((it) => {
@@ -57,11 +66,12 @@ export class WorldBuilder {
   }
 
   public pipeline(pipelineBuilder: PipelineDefinitionBuilder<unknown>): this {
-    this.pipelineDefinitions.push(pipelineBuilder.build());
+    this.pipelines.push(pipelineBuilder.build());
     return this;
   }
 
-  public register(identifier: Identifier, instance: unknown): void {
+  public register(identifier: Identifier, instance: unknown): this {
     this.container.register(identifier, instance);
+    return this;
   }
 }

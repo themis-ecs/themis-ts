@@ -1,4 +1,4 @@
-import { Component, ComponentType } from './component';
+import { ComponentBase, ComponentType } from './component';
 import { Entity } from './entity';
 
 export type BlueprintDefinition = {
@@ -8,8 +8,8 @@ export type BlueprintDefinition = {
 };
 
 export type BlueprintComponentDefinition = {
-  type: ComponentType<Component>;
-  component?: Component;
+  type: ComponentType<ComponentBase>;
+  component?: ComponentBase;
 };
 
 export type BluePrintInitializer = (entity: Entity) => void;

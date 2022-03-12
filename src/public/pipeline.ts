@@ -1,5 +1,6 @@
 import { System } from './system';
 import { NOOP } from '../internal/core/noop';
+import { Class } from './decorator';
 
 export interface Pipeline<T> {
   update(o: T): void;
@@ -7,16 +8,18 @@ export interface Pipeline<T> {
 
 export type SetupCallback<T> = (pipeline: Pipeline<T>) => void;
 
+export type SystemDefinition = System<unknown> | Class<System>;
+
 export type PipelineDefinition<T> = {
   id: string;
   setupCallback: SetupCallback<T>;
-  systems: Array<System<T>>;
+  systems: Array<SystemDefinition>;
 };
 
 export class PipelineDefinitionBuilder<T> {
   private readonly _id: string;
   private _setupCallback: SetupCallback<T> = NOOP;
-  private _systems: Array<System<T>> = [];
+  private _systems: Array<SystemDefinition> = [];
 
   constructor(id: string) {
     this._id = id;
@@ -27,8 +30,8 @@ export class PipelineDefinitionBuilder<T> {
     return this;
   }
 
-  public systems(...systems: System<T>[]): this {
-    this._systems = systems;
+  public systems(...systems: SystemDefinition[]): this {
+    this._systems.push(...systems);
     return this;
   }
 

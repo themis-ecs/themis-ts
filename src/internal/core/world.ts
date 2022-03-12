@@ -4,11 +4,10 @@ import { SystemRegistry } from './system-registry';
 import { ComponentRegistry } from './component-registry';
 import { EventRegistry } from './event-registry';
 import { Entity } from './entity';
-import { Component, ComponentType } from '../../public/component';
-import { ComponentMapper } from './component-mapper';
+import { ComponentBase, ComponentType } from '../../public/component';
 import { World } from '../../public/world';
 import { BlueprintDefinition } from '../../public/blueprint';
-import { Event, EventType, EventListener, EntityCreateEvent, EventErrorCallback } from '../../public/event';
+import { EntityCreateEvent, Event, EventErrorCallback, EventListener, EventType } from '../../public/event';
 import { Container } from '../di/container';
 import { NOOP } from './noop';
 
@@ -62,17 +61,27 @@ export class ThemisWorld implements World {
   public createEntity(blueprint?: string): Entity {
     const entity = this.getEntity(this.createEntityId());
     if (blueprint) {
-      this.blueprintRegistry.applyBlueprint(entity, blueprint);
+      const configuration = this.blueprintRegistry.getBlueprint(blueprint);
+      this.componentRegistry.applyBlueprint(entity.getEntityId(), configuration);
     }
     this.eventRegistry.submit(EntityCreateEvent, new EntityCreateEvent(entity.getEntityId()));
     return entity;
   }
 
-  public getComponentMapper<T extends Component>(component: ComponentType<T>): ComponentMapper<T> {
-    return this.componentRegistry.getComponentMapper(component);
+  public addComponent<T extends ComponentBase>(entityId: number, component: T): void {
+    this.componentRegistry.addComponent(entityId, component);
+  }
+
+  public removeComponent<T extends ComponentBase>(entityId: number, component: ComponentType<T>): void {
+    this.componentRegistry.removeComponent(entityId, component);
+  }
+
+  public getComponent<T extends ComponentBase>(entityId: number, component: ComponentType<T>): T {
+    return this.componentRegistry.getComponent(entityId, component);
   }
 
   public registerBlueprint(blueprint: BlueprintDefinition): void {
+    this.blueprintRegistry.registerBlueprintDefinition(blueprint);
     const blueprintConfiguration = this.componentRegistry.getBlueprintConfiguration(blueprint);
     blueprintConfiguration.initialize = blueprint.initialize ? blueprint.initialize : () => NOOP;
     this.blueprintRegistry.registerBlueprint(blueprint.name, blueprintConfiguration);
@@ -95,6 +104,6 @@ export class ThemisWorld implements World {
   }
 
   public inject(object: unknown): void {
-    this.container.inject(object, this);
+    this.container.inject(object);
   }
 }

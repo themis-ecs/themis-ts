@@ -51,7 +51,9 @@ export class BitVector {
    * Unset all bits
    */
   public reset(): void {
-    this.chunks = new Uint32Array(this.chunks.length);
+    for (let i = 0; i < this.chunks.length; i++) {
+      this.chunks[i] = 0;
+    }
   }
 
   /**

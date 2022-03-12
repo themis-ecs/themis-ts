@@ -1,46 +1,26 @@
-import { Component, ComponentType } from '../../public/component';
+import { ComponentBase } from '../../public/component';
 import { BitVector } from './bit-vector';
-import { EventRegistry } from './event-registry';
-import { ComponentAddEvent, ComponentRemoveEvent } from '../../public/event';
 
 /**
  * @internal
  */
-export class ComponentMapper<T extends Component> {
-  private readonly components: { [entityId: number]: T } = {};
-  private readonly cachedDeletions = new BitVector();
-  private readonly eventRegistry: EventRegistry;
+export class ComponentMapper<T extends ComponentBase> {
+  private components: { [entityId: number]: T } = {};
+  private cachedDeletions = new BitVector();
   private readonly componentId: number;
-  private readonly componentType: ComponentType<T>;
+  private readonly componentName: string;
 
-  constructor(eventRegistry: EventRegistry, componentId: number, componentType: ComponentType<T>) {
-    this.eventRegistry = eventRegistry;
+  constructor(componentId: number, componentName: string) {
     this.componentId = componentId;
-    this.componentType = componentType;
+    this.componentName = componentName;
   }
 
-  public addComponent(entityId: number, component: T, blueprintAdd = false): void {
+  public addComponent(entityId: number, component: T): void {
     this.components[entityId] = component;
-    this.eventRegistry.submit(
-      ComponentAddEvent,
-      new ComponentAddEvent<T>(entityId, this.componentType, this.componentId, component, blueprintAdd),
-      true
-    );
     this.cachedDeletions.clear(entityId);
   }
 
-  public removeComponent(entityId: number, entityDelete = false): void {
-    this.eventRegistry.submit(
-      ComponentRemoveEvent,
-      new ComponentRemoveEvent<T>(
-        entityId,
-        this.componentType,
-        this.componentId,
-        this.components[entityId],
-        entityDelete
-      ),
-      true
-    );
+  public removeComponent(entityId: number): void {
     this.cachedDeletions.set(entityId);
   }
 
@@ -53,5 +33,13 @@ export class ComponentMapper<T extends Component> {
 
   public getComponent(entityId: number): T {
     return this.components[entityId];
+  }
+
+  public getComponentName(): string {
+    return this.componentName;
+  }
+
+  public getComponentId(): number {
+    return this.componentId;
   }
 }

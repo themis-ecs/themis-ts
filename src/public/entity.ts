@@ -1,10 +1,10 @@
-import { Component, ComponentType } from './component';
+import { ComponentBase, ComponentType } from './component';
 
 export interface Entity {
   getEntityId(): number;
-  addComponent(...components: Component[]): this;
-  getComponent<T extends Component>(componentType: ComponentType<T>): T;
-  removeComponent(...componentTypes: ComponentType<Component>[]): this;
+  addComponent(...components: ComponentBase[]): this;
+  getComponent<T extends ComponentBase>(componentType: ComponentType<T>): T;
+  removeComponent(...componentTypes: ComponentType<ComponentBase>[]): this;
   delete(): void;
   setAlias(alias: string): this;
 }

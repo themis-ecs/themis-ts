@@ -1,6 +1,6 @@
 import { WorldBuilder } from '../src';
 import { ThemisWorld } from '../src/internal/core/world';
-import { Component } from '../src';
+import { ComponentBase } from '../src';
 
 test('Simple Alias Test', () => {
   const world = new WorldBuilder().build() as ThemisWorld;
@@ -23,11 +23,11 @@ test('Simple Alias Test', () => {
   expect(world.getEntity('anotheralias').getComponent(TestComponentB).value).toEqual(42);
 });
 
-class TestComponentA extends Component {
+class TestComponentA extends ComponentBase {
   value!: string;
 }
-class TestComponentB extends Component {
+class TestComponentB extends ComponentBase {
   value!: number;
 }
-class TestComponentC extends Component {}
-class TestComponentD extends Component {}
+class TestComponentC extends ComponentBase {}
+class TestComponentD extends ComponentBase {}

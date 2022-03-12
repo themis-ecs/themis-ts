@@ -1,86 +1,123 @@
-import { Component, ComponentType } from '../../public/component';
+import { ComponentBase, ComponentType } from '../../public/component';
 import { BitVector } from './bit-vector';
 import { ComponentMapper } from './component-mapper';
-import { ComponentQuery } from './component-query';
+import { ComponentQuery, ComponentQueryIdentity } from './component-query';
 import { ComponentQueryBuilder } from './component-query-builder';
 import { BlueprintDefinition } from '../../public/blueprint';
 import { BlueprintComponentConfiguration } from './blueprint-registry';
 import { EventRegistry } from './event-registry';
-import { ComponentAddEvent, ComponentRemoveEvent, EntityDeleteEvent } from '../../public/event';
+import { EntityDeleteEvent } from '../../public/event';
+import { COMPONENT_METADATA, ComponentMetadata } from '../di/metadata';
 
 /**
  * @internal
  */
 export class ComponentRegistry {
   private static readonly INITIAL_COMPONENT_CAPACITY = 32;
+  private static readonly componentTypeMap: { [componentName: string]: ComponentType<ComponentBase> } = {};
 
-  private readonly componentIdentityMap: Map<ComponentType<Component>, number>;
-  private readonly entityCompositionMap: { [entityId: number]: BitVector };
+  private componentIdentityMap: { [componentName: string]: number };
+  private entityCompositionMap: { [entityId: number]: BitVector };
   private readonly componentMapperMap: {
-    [componentId: number]: ComponentMapper<Component>;
+    [componentId: number]: ComponentMapper<ComponentBase>;
   };
-  private readonly componentQueries: Array<ComponentQuery>;
+  private readonly componentQueries: Map<ComponentQueryIdentity, ComponentQuery>;
   private componentIdCounter: number;
   private readonly eventRegistry: EventRegistry;
 
   constructor(eventRegistry: EventRegistry) {
-    this.componentIdentityMap = new Map<ComponentType<Component>, number>();
+    this.componentIdentityMap = {};
     this.entityCompositionMap = {};
     this.componentMapperMap = {};
-    this.componentQueries = [];
+    this.componentQueries = new Map<ComponentQueryIdentity, ComponentQuery>();
     this.componentIdCounter = 0;
     this.eventRegistry = eventRegistry;
     this.eventRegistry.registerListener(EntityDeleteEvent, (event) => {
       this.processEntityDelete(event.getEntityId());
     });
-    this.eventRegistry.registerListener(ComponentAddEvent, (event) => {
-      this.onComponentAdd(event.getEntityId(), event.getComponentId(), event.isBlueprintAdd());
-    });
-    this.eventRegistry.registerListener(ComponentRemoveEvent, (event) => {
-      this.onComponentRemove(event.getEntityId(), event.getComponentId(), event.isEntityDelete());
-    });
+  }
+
+  public static registerComponent(component: ComponentType<ComponentBase>, componentName?: string): void {
+    this.componentTypeMap[componentName || component.name] = component;
+  }
+
+  public static getComponentType(componentName: string): ComponentType<ComponentBase> {
+    return this.componentTypeMap[componentName];
   }
 
   public update(): void {
-    for (const componentQuery of this.componentQueries) {
-      componentQuery.processModifications();
-    }
+    this.componentQueries.forEach((componentQuery) => componentQuery.processModifications());
     for (const componentId in this.componentMapperMap) {
       this.componentMapperMap[componentId].processModifications();
     }
   }
 
-  public getComponentId(componentType: ComponentType<Component>): number {
-    let id = this.componentIdentityMap.get(componentType);
+  public getComponentId(componentType: ComponentType<ComponentBase>): number {
+    const componentName = this.getComponentName(componentType);
+    let id = this.componentIdentityMap[componentName];
     if (id == null) {
       id = this.componentIdCounter++;
-      this.componentIdentityMap.set(componentType, id);
+      this.componentIdentityMap[componentName] = id;
     }
     return id;
   }
 
-  public createComponentSet(componentQueryBuilder: ComponentQueryBuilder): ComponentQuery {
-    const componentQuery = componentQueryBuilder.build(ComponentRegistry.INITIAL_COMPONENT_CAPACITY, (component) =>
+  public getComponentName(componentType: ComponentType<ComponentBase>): string {
+    const componentMetadata: ComponentMetadata = Reflect.getMetadata(COMPONENT_METADATA, componentType);
+    return componentMetadata?.id || componentType.name;
+  }
+
+  public getComponentQuery(componentQueryBuilder: ComponentQueryBuilder): ComponentQuery {
+    const identity = componentQueryBuilder.getIdentity();
+    let componentQuery = this.componentQueries.get(identity);
+    if (componentQuery) {
+      return componentQuery;
+    }
+    componentQuery = componentQueryBuilder.build(ComponentRegistry.INITIAL_COMPONENT_CAPACITY, (component) =>
       this.getComponentId(component)
     );
-    this.componentQueries.push(componentQuery);
+    this.componentQueries.set(identity, componentQuery);
     return componentQuery;
   }
 
-  public getComponentMapper<T extends Component>(componentType: ComponentType<T>): ComponentMapper<T> {
+  private getComponentMapper<T extends ComponentBase>(componentType: ComponentType<T>): ComponentMapper<T> {
     const componentId = this.getComponentId(componentType);
+    const componentName = this.getComponentName(componentType);
     if (!this.componentMapperMap[componentId]) {
-      this.componentMapperMap[componentId] = this.createComponentMapper(componentId, componentType);
+      this.componentMapperMap[componentId] = ComponentRegistry.createComponentMapper(componentId, componentName);
     }
     return this.componentMapperMap[componentId] as ComponentMapper<T>;
+  }
+
+  public addComponent<T extends ComponentBase>(entityId: number, component: T): void {
+    const componentType = Object.getPrototypeOf(component).constructor;
+    const mapper = this.getComponentMapper(componentType);
+    mapper.addComponent(entityId, component);
+    const composition = this.getEntityComposition(entityId);
+    composition.set(mapper.getComponentId());
+    this.componentQueries.forEach((componentQuery) => componentQuery.onCompositionChange(entityId, composition));
+  }
+
+  public removeComponent<T extends ComponentBase>(entityId: number, component: ComponentType<T>): void {
+    const mapper = this.getComponentMapper(component);
+    mapper.removeComponent(entityId);
+    const composition = this.getEntityComposition(entityId);
+    composition.clear(mapper.getComponentId());
+    this.componentQueries.forEach((componentQuery) => componentQuery.onCompositionChange(entityId, composition));
+  }
+
+  public getComponent<T extends ComponentBase>(entityId: number, component: ComponentType<T>): T {
+    return this.getComponentMapper(component).getComponent(entityId);
   }
 
   public processEntityDelete(entity: number): void {
     const composition = this.getEntityComposition(entity);
     const componentIds = composition.getBits();
     componentIds.forEach((componentId) => {
-      this.componentMapperMap[componentId].removeComponent(entity, true);
+      this.componentMapperMap[componentId].removeComponent(entity);
     });
+    this.componentQueries.forEach((query) => query.remove(entity));
+    composition.reset();
   }
 
   public getBlueprintConfiguration(blueprint: BlueprintDefinition): BlueprintComponentConfiguration {
@@ -103,13 +140,23 @@ export class ComponentRegistry {
 
     blueprint.components.forEach((it) => {
       blueprintConfiguration.componentMapperConfigurations.push({
-        mapper: this.getComponentMapper(it.type) as ComponentMapper<Component>,
+        mapper: this.getComponentMapper(it.type) as ComponentMapper<ComponentBase>,
         componentType: it.type,
         component: it.component
       });
     });
 
     return blueprintConfiguration;
+  }
+
+  public applyBlueprint(entityId: number, configuration: BlueprintComponentConfiguration): void {
+    configuration.componentQueries.forEach((query) => query.add(entityId));
+    configuration.componentMapperConfigurations.forEach((it) => {
+      const component = new it.componentType();
+      Object.assign(component, it.component);
+      it.mapper.addComponent(entityId, component);
+      this.getEntityComposition(entityId).set(it.mapper.getComponentId());
+    });
   }
 
   private getEntityComposition(entityId: number): BitVector {
@@ -119,29 +166,10 @@ export class ComponentRegistry {
     return this.entityCompositionMap[entityId];
   }
 
-  private createComponentMapper<T extends Component>(
+  private static createComponentMapper<T extends ComponentBase>(
     componentId: number,
-    componentType: ComponentType<T>
+    componentName: string
   ): ComponentMapper<T> {
-    return new ComponentMapper(this.eventRegistry, componentId, componentType);
-  }
-
-  private onComponentAdd(entityId: number, componentId: number, blueprintAdd: boolean): void {
-    const composition = this.getEntityComposition(entityId);
-    composition.set(componentId);
-    if (blueprintAdd) {
-      return;
-    }
-    for (const componentSet of this.componentQueries) {
-      componentSet.onCompositionChange(entityId, composition);
-    }
-  }
-
-  private onComponentRemove(entityId: number, componentId: number, entityDelete: boolean): void {
-    const composition = this.getEntityComposition(entityId);
-    composition.clear(componentId);
-    for (const componentSet of this.componentQueries) {
-      componentSet.onCompositionChange(entityId, composition, entityDelete);
-    }
+    return new ComponentMapper(componentId, componentName);
   }
 }
