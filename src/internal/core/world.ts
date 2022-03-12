@@ -10,7 +10,6 @@ import { BlueprintDefinition } from '../../public/blueprint';
 import { EntityCreateEvent, Event, EventErrorCallback, EventListener, EventType } from '../../public/event';
 import { Container } from '../di/container';
 import { NOOP } from './noop';
-import { deserialize, Serialization, serialize } from './serialization';
 
 /**
  * @internal
@@ -106,21 +105,5 @@ export class ThemisWorld implements World {
 
   public inject(object: unknown): void {
     this.container.inject(object);
-  }
-
-  load(data: string): void {
-    this.blueprintRegistry.resetBlueprints();
-    const serialization = deserialize(data);
-    this.entityRegistry.loadFromSerialization(serialization);
-    this.componentRegistry.loadFromSerialization(serialization);
-    this.blueprintRegistry.getBlueprintDefinitions().forEach((definition) => this.registerBlueprint(definition));
-  }
-
-  save(): string {
-    const serialization: Serialization = {
-      componentRegistry: this.componentRegistry.getSerialization(),
-      entityRegistry: this.entityRegistry.getSerialization()
-    };
-    return serialize(serialization);
   }
 }

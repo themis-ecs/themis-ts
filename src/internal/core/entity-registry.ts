@@ -1,7 +1,6 @@
 import { Entity, EntityFactory } from './entity';
 import { EventRegistry } from './event-registry';
 import { EntityDeleteEvent } from '../../public/event';
-import { EntityRegistrySerialization, Serialization } from './serialization';
 
 /**
  * @internal
@@ -70,23 +69,5 @@ export class EntityRegistry {
       }
       entityId = this.deletedEntities.pop();
     }
-  }
-
-  public loadFromSerialization(serialization: Serialization): void {
-    this.entityIdCounter = serialization.entityRegistry.entityIdCounter;
-    this.deletedEntities = serialization.entityRegistry.deletedEntities;
-    this.recyclableEntities = serialization.entityRegistry.recyclableEntities;
-    this.aliasToEntityIdMap = serialization.entityRegistry.aliasToEntityIdMap;
-    this.entityIdToAliasMap = serialization.entityRegistry.entityIdToAliasMap;
-  }
-
-  public getSerialization(): EntityRegistrySerialization {
-    return {
-      entityIdCounter: this.entityIdCounter,
-      deletedEntities: this.deletedEntities,
-      recyclableEntities: this.recyclableEntities,
-      aliasToEntityIdMap: this.aliasToEntityIdMap,
-      entityIdToAliasMap: this.entityIdToAliasMap
-    };
   }
 }

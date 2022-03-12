@@ -1,6 +1,5 @@
 import { Identifier, Scope } from '../../public/decorator';
-import { ComponentBase, ComponentQueryFunction } from '../../public/component';
-import { ComponentSerializer } from '../core/serialization';
+import { ComponentQueryFunction } from '../../public/component';
 
 /**
  * @internal
@@ -31,5 +30,4 @@ export type ComponentQueryMetadata = Record<string | symbol, ComponentQueryFunct
  */
 export type ComponentMetadata = {
   id?: string;
-  serializer?: ComponentSerializer<ComponentBase, unknown>;
 };

@@ -1,6 +1,5 @@
 import { ComponentBase, ComponentQueryFunction, ComponentType } from './component';
 import { Query } from './query';
-import { ComponentSerializer } from '../internal/core/serialization';
 import { ComponentRegistry } from '../internal/core/component-registry';
 import 'reflect-metadata';
 import {
@@ -45,14 +44,12 @@ export function ComponentQuery(...queries: ComponentQueryFunction[]): PropertyDe
 
 export type ComponentDefinition = {
   id?: string;
-  serializer?: ComponentSerializer<ComponentBase, unknown>;
 };
 
 export function Component(definition?: ComponentDefinition) {
   return function <T extends ComponentBase>(constructor: ComponentType<T>) {
     const metadata: ComponentMetadata = {
-      id: definition?.id,
-      serializer: definition?.serializer
+      id: definition?.id
     };
     Reflect.defineMetadata(COMPONENT_METADATA, metadata, constructor);
     ComponentRegistry.registerComponent(constructor, definition?.id);
