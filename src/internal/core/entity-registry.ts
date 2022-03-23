@@ -1,6 +1,8 @@
-import { Entity, EntityFactory } from './entity';
 import { EventRegistry } from './event-registry';
 import { EntityDeleteEvent } from '../../public/event';
+import { EntityFactory } from '../../public/entity-factory';
+import { Inject } from '../../public/decorator';
+import { Entity } from '../../public/entity';
 
 /**
  * @internal
@@ -10,17 +12,14 @@ export class EntityRegistry {
   private deletedEntities: number[] = [];
   private recyclableEntities: number[] = [];
   private entities: { [entityId: number]: Entity } = {};
-  private entityFactory!: EntityFactory;
   private aliasToEntityIdMap: { [alias: string]: number } = {};
   private entityIdToAliasMap: { [entityId: number]: string } = {};
   private readonly eventRegistry: EventRegistry;
+  @Inject()
+  private entityFactory!: EntityFactory;
 
   constructor(eventRegistry: EventRegistry) {
     this.eventRegistry = eventRegistry;
-  }
-
-  public setEntityFactory(entityFactory: EntityFactory): void {
-    this.entityFactory = entityFactory;
   }
 
   public createEntityId(): number {
@@ -40,7 +39,7 @@ export class EntityRegistry {
     if (entity) {
       return entity;
     }
-    entity = this.entityFactory.build(entityId);
+    entity = this.entityFactory.get(entityId);
     this.entities[entityId] = entity;
     return entity;
   }

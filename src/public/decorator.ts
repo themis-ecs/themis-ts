@@ -1,5 +1,4 @@
 import { ComponentBase, ComponentQueryFunction, ComponentType } from './component';
-import { Query } from './query';
 import { ComponentRegistry } from '../internal/core/component-registry';
 import 'reflect-metadata';
 import {
@@ -15,25 +14,28 @@ export type Class<T = unknown> = new (...params: never[]) => T;
 
 export type AbstractClass<T = unknown> = abstract new (...params: never[]) => T;
 
-type PropertyDecorator<T = unknown> = <Key extends string | symbol, Prototype extends Record<Key, T>>(
-  protoOrClass: Prototype,
-  key: Key
-) => void;
+// eslint-disable-next-line @typescript-eslint/ban-types
+type PropertyDecorator = <Key extends string | symbol>(target: Object, key: Key) => void;
 
 export type Identifier<T = unknown> = string | Class<T> | AbstractClass<T>;
 
-export function Inject(identifier: Identifier): PropertyDecorator {
-  return (prototype, key) => {
-    const injectMetadata: InjectMetadata = Reflect.getMetadata(INJECT_METADATA, prototype) || {};
+export function Inject(identifier?: Identifier): PropertyDecorator {
+  return (target, key) => {
+    const injectMetadata: InjectMetadata = Reflect.getMetadata(INJECT_METADATA, target) || {};
     if (!injectMetadata.injectionPoints) {
       injectMetadata.injectionPoints = {};
     }
-    injectMetadata.injectionPoints[key] = identifier;
-    Reflect.defineMetadata(INJECT_METADATA, injectMetadata, prototype);
+    if (identifier) {
+      injectMetadata.injectionPoints[key] = identifier;
+    } else {
+      injectMetadata.injectionPoints[key] = Reflect.getMetadata('design:type', target, key);
+    }
+
+    Reflect.defineMetadata(INJECT_METADATA, injectMetadata, target);
   };
 }
 
-export function ComponentQuery(...queries: ComponentQueryFunction[]): PropertyDecorator<Query> {
+export function ComponentQuery(...queries: ComponentQueryFunction[]): PropertyDecorator {
   return (prototype, key) => {
     const componentQueryMetadata: ComponentQueryMetadata =
       Reflect.getMetadata(COMPONENT_QUERY_METADATA, prototype) || {};

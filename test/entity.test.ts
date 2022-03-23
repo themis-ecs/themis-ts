@@ -1,5 +1,5 @@
 import { all, ComponentQuery, Pipeline, Query, System, WorldBuilder } from '../src';
-import { Entity } from '../src/internal/core/entity';
+import { ThemisEntity } from '../src/internal/core/entity';
 import { ThemisWorld } from '../src/internal/core/world';
 
 test('entity test', () => {
@@ -13,7 +13,7 @@ test('entity test', () => {
 
   const world = new WorldBuilder().pipeline(mainPipeline).build() as ThemisWorld;
 
-  const entity = new Entity(world, world.createEntityId());
+  const entity = new ThemisEntity(world, world.createEntityId());
   const testComponentA = new TestComponentA();
   testComponentA.name = 'test';
   entity.addComponent(testComponentA);

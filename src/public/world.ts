@@ -5,7 +5,7 @@ import { Event, EventErrorCallback, EventListener, EventType } from './event';
 /**
  * The world is part of the main API of themis-ecs. It is the place, where your systems, your components and
  * your entities live in. You can use this object to create new entities, register and use blueprints, register
- * and submit events and most importantly: you use the update method to let time pass in your world.
+ * and submit events.
  */
 export abstract class World {
   /**

@@ -5,14 +5,8 @@ import { Entity as IEntity } from '../../public/entity';
 /**
  * @internal
  */
-export class Entity implements IEntity {
-  private readonly entityId: number;
-  private readonly world: ThemisWorld;
-
-  constructor(world: ThemisWorld, entityId: number) {
-    this.world = world;
-    this.entityId = entityId;
-  }
+export class ThemisEntity implements IEntity {
+  constructor(private readonly world: ThemisWorld, private readonly entityId: number) {}
 
   public getEntityId(): number {
     return this.entityId;
@@ -41,26 +35,11 @@ export class Entity implements IEntity {
   }
 
   public delete(): void {
-    this.world.getEntityRegistry().deleteEntityById(this.entityId);
+    this.world.deleteEntityById(this.entityId);
   }
 
   public setAlias(alias: string): this {
     this.getWorld().registerAlias(this.entityId, alias);
     return this;
-  }
-}
-
-/**
- * @internal
- */
-export class EntityFactory {
-  private readonly world: ThemisWorld;
-
-  constructor(world: ThemisWorld) {
-    this.world = world;
-  }
-
-  public build(entityId: number): Entity {
-    return new Entity(this.world, entityId);
   }
 }

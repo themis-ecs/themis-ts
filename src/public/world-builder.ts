@@ -1,12 +1,11 @@
+import { Container } from '../internal/di/container';
 import { EntityRegistry } from '../internal/core/entity-registry';
 import { SystemRegistry } from '../internal/core/system-registry';
 import { ComponentRegistry } from '../internal/core/component-registry';
 import { BlueprintRegistry } from '../internal/core/blueprint-registry';
 import { EventRegistry } from '../internal/core/event-registry';
-import { EntityFactory } from '../internal/core/entity';
 import { ThemisWorld } from '../internal/core/world';
 import { World } from './world';
-import { Container } from '../internal/di/container';
 import { Logging } from './logger';
 import { PipelineDefinition, PipelineDefinitionBuilder } from './pipeline';
 import { ThemisPipeline } from '../internal/core/pipeline';
@@ -23,21 +22,22 @@ export class WorldBuilder {
     logger.info('building your world...');
 
     const eventRegistry = new EventRegistry();
-    const entityRegistry = new EntityRegistry(eventRegistry);
-    const componentRegistry = new ComponentRegistry(eventRegistry);
     const systemRegistry = new SystemRegistry();
     const blueprintRegistry = new BlueprintRegistry();
+    const entityRegistry = new EntityRegistry(eventRegistry);
+    const componentRegistry = new ComponentRegistry(eventRegistry);
 
-    const world = new ThemisWorld(
-      entityRegistry,
-      systemRegistry,
-      componentRegistry,
-      blueprintRegistry,
-      eventRegistry,
-      this.container
-    );
+    const world = new ThemisWorld(entityRegistry, componentRegistry, blueprintRegistry, eventRegistry, this.container);
 
     this.register(World, world);
+    this.register(ThemisWorld, world);
+    this.register(EntityRegistry, eventRegistry);
+    this.register(SystemRegistry, systemRegistry);
+    this.register(BlueprintRegistry, blueprintRegistry);
+    this.register(EntityRegistry, entityRegistry);
+    this.register(ComponentRegistry, componentRegistry);
+
+    this.container.inject(entityRegistry);
 
     const pipelines = this.pipelines.map((definition) => {
       return {
@@ -51,8 +51,6 @@ export class WorldBuilder {
         updateCallback: definition.setupCallback
       };
     });
-
-    entityRegistry.setEntityFactory(new EntityFactory(world));
 
     pipelines.forEach((it) => systemRegistry.registerSystem(...it.pipeline.getSystems()));
     systemRegistry.initSystems(world);

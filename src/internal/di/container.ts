@@ -2,9 +2,9 @@ import { Class, Identifier, SINGLETON } from '../../public/decorator';
 import { ThemisWorld } from '../core/world';
 import { ComponentQueryBuilder } from '../core/component-query-builder';
 import { ComponentQueryAdapter } from '../core/component-query-adapter';
-import { World } from '../../public/world';
 import 'reflect-metadata';
 import { COMPONENT_QUERY_METADATA, ComponentQueryMetadata, INJECT_METADATA, InjectMetadata } from './metadata';
+import { ComponentRegistry } from '../core/component-registry';
 
 /**
  * @internal
@@ -62,7 +62,8 @@ export class Container {
     if (!metadata) {
       return;
     }
-    const world = this.resolve(World) as ThemisWorld;
+    const world = this.resolve(ThemisWorld);
+    const componentRegistry = this.resolve(ComponentRegistry);
 
     Object.keys(metadata).forEach((key: string) => {
       const queryFunctions = metadata[key];
@@ -70,7 +71,7 @@ export class Container {
       const componentQueryBuilder = new ComponentQueryBuilder();
       queryFunctions.forEach((fn) => fn(componentQueryBuilder));
 
-      const componentQuery = world.getComponentRegistry().getComponentQuery(componentQueryBuilder);
+      const componentQuery = componentRegistry.getComponentQuery(componentQueryBuilder);
       const componentQueryAdapter = new ComponentQueryAdapter(componentQuery, world);
 
       Object.defineProperty(object, key, {

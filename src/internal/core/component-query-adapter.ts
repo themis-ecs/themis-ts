@@ -1,7 +1,7 @@
-import { Entity } from './entity';
 import { ThemisWorld } from './world';
 import { ComponentQuery } from './component-query';
 import { EntityCollection, Events, Query } from '../../public/query';
+import { Entity } from '../../public/entity';
 
 export class ComponentQueryAdapter implements Query {
   protected readonly componentQuery: ComponentQuery;
@@ -30,7 +30,7 @@ export class ComponentQueryAdapter implements Query {
     return this.componentQuery.getActiveEntities().length;
   }
 
-  public getIds(): number[] {
+  public getIds(): Uint32Array {
     return this.componentQuery.getActiveEntities();
   }
 

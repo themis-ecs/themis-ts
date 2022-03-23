@@ -16,8 +16,8 @@ export class ComponentRegistry {
   private static readonly INITIAL_COMPONENT_CAPACITY = 32;
   private static readonly componentTypeMap: { [componentName: string]: ComponentType<ComponentBase> } = {};
 
-  private componentIdentityMap: { [componentName: string]: number };
-  private entityCompositionMap: { [entityId: number]: BitVector };
+  private readonly componentIdentityMap: { [componentName: string]: number };
+  private readonly entityCompositionMap: { [entityId: number]: BitVector };
   private readonly componentMapperMap: {
     [componentId: number]: ComponentMapper<ComponentBase>;
   };
