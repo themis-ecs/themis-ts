@@ -14,7 +14,7 @@ export type ComponentQueryIdentity = {
  * @internal
  */
 export class ComponentQuery {
-  private activeEntities: number[] = [];
+  private activeEntities: Uint32Array = new Uint32Array(0);
 
   private entities = new BitVector();
   private readonly entityAddListeners: ((entityId: number) => void)[] = [];
@@ -86,7 +86,7 @@ export class ComponentQuery {
     this.modified = false;
   }
 
-  public getActiveEntities(): number[] {
+  public getActiveEntities(): Uint32Array {
     return this.activeEntities;
   }
 
@@ -95,6 +95,6 @@ export class ComponentQuery {
     this.entities.reset();
     this.entitiesAdded.reset();
     this.entitiesRemoved.reset();
-    this.activeEntities = [];
+    this.activeEntities = new Uint32Array(0);
   }
 }

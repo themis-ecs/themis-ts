@@ -2,18 +2,38 @@ import { Class, Identifier, SINGLETON } from '../../public/decorator';
 import { ThemisWorld } from '../core/world';
 import { ComponentQueryBuilder } from '../core/component-query-builder';
 import { ComponentQueryAdapter } from '../core/component-query-adapter';
-import { World } from '../../public/world';
 import 'reflect-metadata';
 import { COMPONENT_QUERY_METADATA, ComponentQueryMetadata, INJECT_METADATA, InjectMetadata } from './metadata';
+import { ComponentRegistry } from '../core/component-registry';
+import { Provider, ProviderDefinition } from '../../public/provider';
 
 /**
  * @internal
  */
 export class Container {
-  private instances: Map<Identifier, unknown> = new Map<Identifier, unknown>();
+  private instances = new Map<Identifier, unknown>();
+  private providers = new Map<Identifier, Provider<unknown>>();
 
   public register(identifier: Identifier, instance: unknown): void {
     this.instances.set(identifier, instance);
+  }
+
+  public registerProvider(provider: ProviderDefinition<unknown>) {
+    const identifier = provider.provide;
+    if (provider.useValue) {
+      this.instances.set(identifier, provider.useValue);
+      return;
+    }
+    if (provider.useClass) {
+      const useClass = provider.useClass;
+      this.providers.set(identifier, () => this.resolve(useClass));
+      return;
+    }
+    if (provider.useFactory) {
+      this.providers.set(identifier, provider.useFactory);
+      return;
+    }
+    throw new Error(`Provider for identifier ${identifier} needs to have either useValue, useClass or useFactory`);
   }
 
   public inject(object: unknown): void {
@@ -26,23 +46,38 @@ export class Container {
     this.injectQueries(componentQueryMetadata, object);
   }
 
-  public resolve<T>(identifier: Identifier<T>): T {
+  public resolve<T>(identifier: Identifier<T>, dependencyStack: Set<Class> = new Set<Class>()): T {
     const instance = this.instances.get(identifier);
     if (instance) {
       return instance as T;
     }
+    const provider = this.providers.get(identifier);
+    if (provider) {
+      return provider() as T;
+    }
     if (typeof identifier === 'function') {
       const dependencies: Class[] | undefined = Reflect.getMetadata('design:paramtypes', identifier);
+      dependencies?.forEach((dependency) => {
+        if (dependencyStack.has(dependency)) {
+          if (this.instances.has(dependency)) {
+            dependencyStack.delete(dependency);
+          } else {
+            throw new Error(`${identifier} has dependency ${dependency} which can not be resolved`);
+          }
+        } else {
+          dependencyStack.add(dependency);
+        }
+      });
       const metadata: InjectMetadata | undefined = Reflect.getMetadata(INJECT_METADATA, identifier);
-      const resolvedDependencies = (dependencies?.map((dependency) => this.resolve(dependency)) as never[]) || [];
+      const resolvedDependencies =
+        (dependencies?.map((dependency) => this.resolve(dependency, dependencyStack)) as never[]) || [];
       const newInstance = new identifier(...resolvedDependencies) as T;
       if (metadata?.scope === SINGLETON) {
         this.instances.set(identifier, newInstance);
       }
       return newInstance;
-    } else {
-      throw new Error(`${identifier} can not be resolved`);
     }
+    throw new Error(`${identifier} can not be resolved`);
   }
 
   private injectObjects(metadata: InjectMetadata, object: unknown): void {
@@ -62,7 +97,8 @@ export class Container {
     if (!metadata) {
       return;
     }
-    const world = this.resolve(World) as ThemisWorld;
+    const world = this.resolve(ThemisWorld);
+    const componentRegistry = this.resolve(ComponentRegistry);
 
     Object.keys(metadata).forEach((key: string) => {
       const queryFunctions = metadata[key];
@@ -70,7 +106,7 @@ export class Container {
       const componentQueryBuilder = new ComponentQueryBuilder();
       queryFunctions.forEach((fn) => fn(componentQueryBuilder));
 
-      const componentQuery = world.getComponentRegistry().getComponentQuery(componentQueryBuilder);
+      const componentQuery = componentRegistry.getComponentQuery(componentQueryBuilder);
       const componentQueryAdapter = new ComponentQueryAdapter(componentQuery, world);
 
       Object.defineProperty(object, key, {

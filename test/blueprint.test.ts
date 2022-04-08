@@ -1,4 +1,4 @@
-import { all, ComponentBase, ComponentQuery, Entity, Pipeline, Query, System, WorldBuilder } from '../src';
+import { all, ComponentBase, ComponentQuery, Pipeline, Query, System, WorldBuilder } from '../src';
 
 const performance = require('perf_hooks').performance;
 
@@ -70,8 +70,4 @@ class TestSystem implements System {
       entity.getComponent(TestComponentB);
     });
   }
-
-  onEntityAdd(entity: Entity): void {}
-
-  onEntityRemove(entity: Entity): void {}
 }

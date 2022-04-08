@@ -60,12 +60,12 @@ export class BitVector {
    * Get an array of all positions which are set
    * @return {Array<number>}
    */
-  public getBits(): number[] {
+  public getBits(): Uint32Array {
     let count = 0;
     for (let i = 0; i < this.chunks.length; i++) {
       count += BitVector.bitCount(this.chunks[i]);
     }
-    const result = new Array<number>(count);
+    const result = new Uint32Array(count);
     for (let i = 0, idx = 0; idx < count; i++) {
       let chunk = this.chunks[i];
       const offset = i << 5;

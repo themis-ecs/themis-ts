@@ -1,16 +1,14 @@
 import { BlueprintRegistry } from './blueprint-registry';
 import { EntityRegistry } from './entity-registry';
-import { SystemRegistry } from './system-registry';
 import { ComponentRegistry } from './component-registry';
 import { EventRegistry } from './event-registry';
-import { Entity } from './entity';
 import { ComponentBase, ComponentType } from '../../public/component';
 import { World } from '../../public/world';
 import { BlueprintDefinition } from '../../public/blueprint';
 import { EntityCreateEvent, Event, EventErrorCallback, EventListener, EventType } from '../../public/event';
 import { Container } from '../di/container';
 import { NOOP } from './noop';
-import { deserialize, Serialization, serialize } from './serialization';
+import { Entity } from '../../public/entity';
 
 /**
  * @internal
@@ -18,28 +16,11 @@ import { deserialize, Serialization, serialize } from './serialization';
 export class ThemisWorld implements World {
   constructor(
     private readonly entityRegistry: EntityRegistry,
-    private readonly systemRegistry: SystemRegistry,
     private readonly componentRegistry: ComponentRegistry,
     private readonly blueprintRegistry: BlueprintRegistry,
     private readonly eventRegistry: EventRegistry,
     private readonly container: Container
   ) {}
-
-  public getEntityRegistry(): EntityRegistry {
-    return this.entityRegistry;
-  }
-
-  public getComponentRegistry(): ComponentRegistry {
-    return this.componentRegistry;
-  }
-
-  public getSystemRegistry(): SystemRegistry {
-    return this.systemRegistry;
-  }
-
-  public getEventRegistry(): EventRegistry {
-    return this.eventRegistry;
-  }
 
   public createEntityId(): number {
     return this.entityRegistry.createEntityId();
@@ -55,6 +36,10 @@ export class ThemisWorld implements World {
     return typeof entityIdOrAlias === 'number'
       ? this.entityRegistry.getEntity(entityIdOrAlias as number)
       : this.entityRegistry.getEntityByAlias(entityIdOrAlias as string);
+  }
+
+  public getEntities(...entityIds: number[]): Entity[] {
+    return this.entityRegistry.getEntities(...entityIds);
   }
 
   public createEntity(): Entity;
@@ -106,21 +91,5 @@ export class ThemisWorld implements World {
 
   public inject(object: unknown): void {
     this.container.inject(object);
-  }
-
-  load(data: string): void {
-    this.blueprintRegistry.resetBlueprints();
-    const serialization = deserialize(data);
-    this.entityRegistry.loadFromSerialization(serialization);
-    this.componentRegistry.loadFromSerialization(serialization);
-    this.blueprintRegistry.getBlueprintDefinitions().forEach((definition) => this.registerBlueprint(definition));
-  }
-
-  save(): string {
-    const serialization: Serialization = {
-      componentRegistry: this.componentRegistry.getSerialization(),
-      entityRegistry: this.entityRegistry.getSerialization()
-    };
-    return serialize(serialization);
   }
 }

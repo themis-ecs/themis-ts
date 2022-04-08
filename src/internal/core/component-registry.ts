@@ -7,23 +7,15 @@ import { BlueprintDefinition } from '../../public/blueprint';
 import { BlueprintComponentConfiguration } from './blueprint-registry';
 import { EventRegistry } from './event-registry';
 import { EntityDeleteEvent } from '../../public/event';
-import {
-  ComponentRegistrySerialization,
-  ComponentSerializer,
-  DefaultComponentSerializer,
-  Serialization
-} from './serialization';
-import { COMPONENT_METADATA, ComponentMetadata } from '../di/metadata';
 
 /**
  * @internal
  */
 export class ComponentRegistry {
   private static readonly INITIAL_COMPONENT_CAPACITY = 32;
-  private static readonly componentTypeMap: { [componentName: string]: ComponentType<ComponentBase> } = {};
 
-  private componentIdentityMap: { [componentName: string]: number };
-  private entityCompositionMap: { [entityId: number]: BitVector };
+  private readonly componentIdentityMap: { [componentName: string]: number };
+  private readonly entityCompositionMap: { [entityId: number]: BitVector };
   private readonly componentMapperMap: {
     [componentId: number]: ComponentMapper<ComponentBase>;
   };
@@ -33,22 +25,14 @@ export class ComponentRegistry {
 
   constructor(eventRegistry: EventRegistry) {
     this.componentIdentityMap = {};
-    this.entityCompositionMap = {};
-    this.componentMapperMap = {};
+    this.entityCompositionMap = [];
+    this.componentMapperMap = [];
     this.componentQueries = new Map<ComponentQueryIdentity, ComponentQuery>();
     this.componentIdCounter = 0;
     this.eventRegistry = eventRegistry;
     this.eventRegistry.registerListener(EntityDeleteEvent, (event) => {
       this.processEntityDelete(event.getEntityId());
     });
-  }
-
-  public static registerComponent(component: ComponentType<ComponentBase>, componentName?: string): void {
-    this.componentTypeMap[componentName || component.name] = component;
-  }
-
-  public static getComponentType(componentName: string): ComponentType<ComponentBase> {
-    return this.componentTypeMap[componentName];
   }
 
   public update(): void {
@@ -69,15 +53,7 @@ export class ComponentRegistry {
   }
 
   public getComponentName(componentType: ComponentType<ComponentBase>): string {
-    const componentMetadata: ComponentMetadata = Reflect.getMetadata(COMPONENT_METADATA, componentType);
-    return componentMetadata?.id || componentType.name;
-  }
-
-  public getComponentSerializer(
-    componentType: ComponentType<ComponentBase>
-  ): ComponentSerializer<ComponentBase, unknown> {
-    const componentMetadata: ComponentMetadata = Reflect.getMetadata(COMPONENT_METADATA, componentType);
-    return componentMetadata?.serializer || new DefaultComponentSerializer();
+    return componentType.name;
   }
 
   public getComponentQuery(componentQueryBuilder: ComponentQueryBuilder): ComponentQuery {
@@ -96,13 +72,8 @@ export class ComponentRegistry {
   private getComponentMapper<T extends ComponentBase>(componentType: ComponentType<T>): ComponentMapper<T> {
     const componentId = this.getComponentId(componentType);
     const componentName = this.getComponentName(componentType);
-    const componentSerializer = this.getComponentSerializer(componentType);
     if (!this.componentMapperMap[componentId]) {
-      this.componentMapperMap[componentId] = this.createComponentMapper(
-        componentId,
-        componentName,
-        componentSerializer
-      );
+      this.componentMapperMap[componentId] = ComponentRegistry.createComponentMapper(componentId, componentName);
     }
     return this.componentMapperMap[componentId] as ComponentMapper<T>;
   }
@@ -177,47 +148,6 @@ export class ComponentRegistry {
     });
   }
 
-  public loadFromSerialization(serialization: Serialization): void {
-    this.componentIdentityMap = serialization.componentRegistry.componentIdentityMap;
-    this.entityCompositionMap = Object.keys(serialization.componentRegistry.entityCompositionMap).reduce(
-      (previousValue, currentValue) => {
-        previousValue[Number(currentValue)] = BitVector.from(
-          ...serialization.componentRegistry.entityCompositionMap[Number(currentValue)]
-        );
-        return previousValue;
-      },
-      {} as { [entityId: number]: BitVector }
-    );
-    this.componentIdCounter = serialization.componentRegistry.componentIdCounter;
-
-    serialization.componentRegistry.componentMapper.forEach((mapperSerialization) => {
-      this.componentMapperMap[mapperSerialization.componentId] = ComponentMapper.fromSerialization(
-        mapperSerialization,
-        this.getComponentSerializer(ComponentRegistry.getComponentType(mapperSerialization.componentName))
-      );
-    });
-
-    this.componentQueries.forEach((componentQuery) => componentQuery.reset());
-
-    for (const [entityId, composition] of Object.entries(this.entityCompositionMap)) {
-      this.componentQueries.forEach((componentQuery) => {
-        componentQuery.onCompositionChange(Number(entityId), composition);
-      });
-    }
-  }
-
-  public getSerialization(): ComponentRegistrySerialization {
-    return {
-      componentIdentityMap: this.componentIdentityMap,
-      entityCompositionMap: Object.keys(this.entityCompositionMap).reduce((previousValue, currentValue) => {
-        previousValue[Number(currentValue)] = this.entityCompositionMap[Number(currentValue)].getBits();
-        return previousValue;
-      }, {} as { [entityId: number]: number[] }),
-      componentIdCounter: this.componentIdCounter,
-      componentMapper: Object.values(this.componentMapperMap).map((mapper) => mapper.getSerialization())
-    };
-  }
-
   private getEntityComposition(entityId: number): BitVector {
     if (!this.entityCompositionMap[entityId]) {
       this.entityCompositionMap[entityId] = new BitVector(ComponentRegistry.INITIAL_COMPONENT_CAPACITY);
@@ -225,11 +155,10 @@ export class ComponentRegistry {
     return this.entityCompositionMap[entityId];
   }
 
-  private createComponentMapper<T extends ComponentBase>(
+  private static createComponentMapper<T extends ComponentBase>(
     componentId: number,
-    componentName: string,
-    serializer: ComponentSerializer<T, unknown>
+    componentName: string
   ): ComponentMapper<T> {
-    return new ComponentMapper(componentId, componentName, serializer);
+    return new ComponentMapper(componentId, componentName);
   }
 }

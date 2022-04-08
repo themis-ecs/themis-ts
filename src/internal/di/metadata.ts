@@ -1,6 +1,7 @@
-import { Identifier, Scope } from '../../public/decorator';
-import { ComponentBase, ComponentQueryFunction } from '../../public/component';
-import { ComponentSerializer } from '../core/serialization';
+import { Class, Identifier, Scope } from '../../public/decorator';
+import { ComponentQueryFunction } from '../../public/component';
+import { System } from '../../public/system';
+import { ProviderDefinition } from '../../public/provider';
 
 /**
  * @internal
@@ -9,11 +10,11 @@ export const INJECT_METADATA = 'themis:inject';
 /**
  * @internal
  */
-export const COMPONENT_METADATA = 'themis:component';
+export const COMPONENT_QUERY_METADATA = 'themis:component-query';
 /**
  * @internal
  */
-export const COMPONENT_QUERY_METADATA = 'themis:component-query';
+export const MODULE_METADATA = 'themis:module';
 
 /**
  * @internal
@@ -26,10 +27,12 @@ export type InjectMetadata = {
  * @internal
  */
 export type ComponentQueryMetadata = Record<string | symbol, ComponentQueryFunction[]>;
+
 /**
  * @internal
  */
-export type ComponentMetadata = {
-  id?: string;
-  serializer?: ComponentSerializer<ComponentBase, unknown>;
+export type ModuleMetadata = {
+  name?: string;
+  systems: Class<System<unknown>>[];
+  providers: ProviderDefinition<unknown>[];
 };
