@@ -113,7 +113,7 @@ test('containsNone different vector sizes', () => {
 
 test('getBits', () => {
   const vec = BitVector.from(1, 2, 3, 4, 5, 20, 2048, 10000);
-  expect(vec.getBits()).toStrictEqual([1, 2, 3, 4, 5, 20, 2048, 10000]);
+  expect(vec.getBits()).toEqual(new Uint32Array([1, 2, 3, 4, 5, 20, 2048, 10000]));
 });
 
 test('reset', () => {

@@ -1,26 +1,25 @@
-import { Entity, EntityFactory } from './entity';
 import { EventRegistry } from './event-registry';
 import { EntityDeleteEvent } from '../../public/event';
+import { EntityFactory } from '../../public/entity-factory';
+import { Inject } from '../../public/decorator';
+import { Entity } from '../../public/entity';
 
 /**
  * @internal
  */
 export class EntityRegistry {
   private entityIdCounter = 0;
-  private deletedEntities: number[] = [];
-  private recyclableEntities: number[] = [];
-  private entities: { [entityId: number]: Entity } = {};
-  private entityFactory!: EntityFactory;
-  private aliasToEntityIdMap: { [alias: string]: number } = {};
-  private entityIdToAliasMap: { [entityId: number]: string } = {};
+  private readonly deletedEntities: number[] = [];
+  private readonly recyclableEntities: number[] = [];
+  private readonly entities: Entity[] = [];
+  private readonly aliasToEntityIdMap: { [alias: string]: number } = {};
+  private readonly entityIdToAliasMap: { [entityId: number]: string } = [];
   private readonly eventRegistry: EventRegistry;
+  @Inject()
+  private readonly entityFactory!: EntityFactory;
 
   constructor(eventRegistry: EventRegistry) {
     this.eventRegistry = eventRegistry;
-  }
-
-  public setEntityFactory(entityFactory: EntityFactory): void {
-    this.entityFactory = entityFactory;
   }
 
   public createEntityId(): number {
@@ -40,9 +39,13 @@ export class EntityRegistry {
     if (entity) {
       return entity;
     }
-    entity = this.entityFactory.build(entityId);
+    entity = this.entityFactory.get(entityId);
     this.entities[entityId] = entity;
     return entity;
+  }
+
+  public getEntities(...entityIds: number[]): Entity[] {
+    return entityIds.map((entityId) => this.entities[entityId]);
   }
 
   public getEntityByAlias(alias: string): Entity {

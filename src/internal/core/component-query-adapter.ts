@@ -1,7 +1,7 @@
-import { Entity } from './entity';
 import { ThemisWorld } from './world';
 import { ComponentQuery } from './component-query';
 import { EntityCollection, Events, Query } from '../../public/query';
+import { Entity } from '../../public/entity';
 
 export class ComponentQueryAdapter implements Query {
   protected readonly componentQuery: ComponentQuery;
@@ -21,17 +21,19 @@ export class ComponentQueryAdapter implements Query {
   }
 
   public forEach(callback: (entity: Entity) => void): void {
-    this.componentQuery.getActiveEntities().forEach((entityId) => {
-      callback(this.world.getEntity(entityId));
-    });
+    this.getEntities().forEach((entity) => callback(entity));
   }
 
   public size(): number {
     return this.componentQuery.getActiveEntities().length;
   }
 
-  public getIds(): number[] {
+  public getIds(): Uint32Array {
     return this.componentQuery.getActiveEntities();
+  }
+
+  public getEntities(): Entity[] {
+    return this.world.getEntities(...this.getIds());
   }
 
   public onEntityAdd(callback: (entity: Entity) => void): void {

@@ -1,59 +1,49 @@
-import { ComponentBase, ComponentQueryFunction, ComponentType } from './component';
-import { Query } from './query';
-import { ComponentRegistry } from '../internal/core/component-registry';
+import { ComponentQueryFunction } from './component';
 import 'reflect-metadata';
 import {
-  COMPONENT_METADATA,
   COMPONENT_QUERY_METADATA,
-  ComponentMetadata,
   ComponentQueryMetadata,
   INJECT_METADATA,
-  InjectMetadata
+  InjectMetadata,
+  MODULE_METADATA,
+  ModuleMetadata
 } from '../internal/di/metadata';
+import { ThemisModule } from './module';
+import { System } from './system';
+import { ProviderDefinition } from './provider';
 
 export type Class<T = unknown> = new (...params: never[]) => T;
 
 export type AbstractClass<T = unknown> = abstract new (...params: never[]) => T;
 
-type PropertyDecorator<T = unknown> = <Key extends string | symbol, Prototype extends Record<Key, T>>(
-  protoOrClass: Prototype,
-  key: Key
-) => void;
+// eslint-disable-next-line @typescript-eslint/ban-types
+type PropertyDecorator = <Key extends string | symbol>(target: Object, key: Key) => void;
+type ClassDecorator<T> = (constructor: Class<T>) => void;
 
 export type Identifier<T = unknown> = string | Class<T> | AbstractClass<T>;
 
-export function Inject(identifier: Identifier): PropertyDecorator {
-  return (prototype, key) => {
-    const injectMetadata: InjectMetadata = Reflect.getMetadata(INJECT_METADATA, prototype) || {};
+export function Inject(identifier?: Identifier): PropertyDecorator {
+  return (target, key) => {
+    const injectMetadata: InjectMetadata = Reflect.getMetadata(INJECT_METADATA, target) || {};
     if (!injectMetadata.injectionPoints) {
       injectMetadata.injectionPoints = {};
     }
-    injectMetadata.injectionPoints[key] = identifier;
-    Reflect.defineMetadata(INJECT_METADATA, injectMetadata, prototype);
+    if (identifier) {
+      injectMetadata.injectionPoints[key] = identifier;
+    } else {
+      injectMetadata.injectionPoints[key] = Reflect.getMetadata('design:type', target, key);
+    }
+
+    Reflect.defineMetadata(INJECT_METADATA, injectMetadata, target);
   };
 }
 
-export function ComponentQuery(...queries: ComponentQueryFunction[]): PropertyDecorator<Query> {
+export function ComponentQuery(...queries: ComponentQueryFunction[]): PropertyDecorator {
   return (prototype, key) => {
     const componentQueryMetadata: ComponentQueryMetadata =
       Reflect.getMetadata(COMPONENT_QUERY_METADATA, prototype) || {};
     componentQueryMetadata[key] = queries;
     Reflect.defineMetadata(COMPONENT_QUERY_METADATA, componentQueryMetadata, prototype);
-  };
-}
-
-export type ComponentDefinition = {
-  id?: string;
-};
-
-export function Component(definition?: ComponentDefinition) {
-  return function <T extends ComponentBase>(constructor: ComponentType<T>) {
-    const metadata: ComponentMetadata = {
-      id: definition?.id
-    };
-    Reflect.defineMetadata(COMPONENT_METADATA, metadata, constructor);
-    ComponentRegistry.registerComponent(constructor, definition?.id);
-    return constructor;
   };
 }
 
@@ -66,10 +56,26 @@ export type InjectableOptions = {
   scope?: Scope;
 };
 
-export function Injectable(options?: InjectableOptions) {
+export function Injectable(options?: InjectableOptions): ClassDecorator<unknown> {
   return function <T>(constructor: Class<T>) {
     const metadata: InjectMetadata = Reflect.getMetadata(INJECT_METADATA, constructor) || {};
     metadata.scope = options?.scope ? options.scope : SINGLETON;
     Reflect.defineMetadata(INJECT_METADATA, metadata, constructor);
+  };
+}
+
+export type ModuleDefinitionOptions<T> = {
+  systems?: Class<System<T>>[];
+  providers?: ProviderDefinition<unknown>[];
+};
+
+export function Module<U>(options: ModuleDefinitionOptions<U>): ClassDecorator<ThemisModule<U>> {
+  const injectableFn = Injectable({ scope: SINGLETON });
+  return function <T extends ThemisModule<U>>(constructor: Class<T>) {
+    injectableFn(constructor);
+    const metadata: ModuleMetadata = Reflect.getMetadata(MODULE_METADATA, constructor) || {};
+    metadata.systems = options.systems || [];
+    metadata.providers = options.providers || [];
+    Reflect.defineMetadata(MODULE_METADATA, metadata, constructor);
   };
 }

@@ -8,18 +8,18 @@ export interface Pipeline<T> {
 
 export type SetupCallback<T> = (pipeline: Pipeline<T>) => void;
 
-export type SystemDefinition = System<unknown> | Class<System>;
+export type SystemDefinition<T> = System<T> | Class<System<T>>;
 
 export type PipelineDefinition<T> = {
   id: string;
   setupCallback: SetupCallback<T>;
-  systems: Array<SystemDefinition>;
+  systems: Array<SystemDefinition<T>>;
 };
 
 export class PipelineDefinitionBuilder<T> {
   private readonly _id: string;
   private _setupCallback: SetupCallback<T> = NOOP;
-  private _systems: Array<SystemDefinition> = [];
+  private _systems: Array<SystemDefinition<T>> = [];
 
   constructor(id: string) {
     this._id = id;
@@ -30,7 +30,7 @@ export class PipelineDefinitionBuilder<T> {
     return this;
   }
 
-  public systems(...systems: SystemDefinition[]): this {
+  public systems(...systems: SystemDefinition<T>[]): this {
     this._systems.push(...systems);
     return this;
   }
