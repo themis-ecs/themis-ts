@@ -22,10 +22,6 @@ export class ThemisWorld implements World {
     private readonly container: Container
   ) {}
 
-  public getEntityRegistry(): EntityRegistry {
-    return this.entityRegistry;
-  }
-
   public createEntityId(): number {
     return this.entityRegistry.createEntityId();
   }
@@ -40,6 +36,10 @@ export class ThemisWorld implements World {
     return typeof entityIdOrAlias === 'number'
       ? this.entityRegistry.getEntity(entityIdOrAlias as number)
       : this.entityRegistry.getEntityByAlias(entityIdOrAlias as string);
+  }
+
+  public getEntities(...entityIds: number[]): Entity[] {
+    return this.entityRegistry.getEntities(...entityIds);
   }
 
   public createEntity(): Entity;

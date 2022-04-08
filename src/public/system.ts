@@ -1,6 +1,9 @@
-import { World } from './world';
+export interface OnInit {
+  init(): void;
+}
 
-export interface System<T = number> {
-  init(world: World): void;
+export interface OnUpdate<T = number> {
   update(o: T): void;
 }
+
+export type System<T = number> = Required<OnInit> & Partial<OnUpdate<T>>;

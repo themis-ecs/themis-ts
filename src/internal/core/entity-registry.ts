@@ -9,14 +9,14 @@ import { Entity } from '../../public/entity';
  */
 export class EntityRegistry {
   private entityIdCounter = 0;
-  private deletedEntities: number[] = [];
-  private recyclableEntities: number[] = [];
-  private entities: { [entityId: number]: Entity } = {};
-  private aliasToEntityIdMap: { [alias: string]: number } = {};
-  private entityIdToAliasMap: { [entityId: number]: string } = {};
+  private readonly deletedEntities: number[] = [];
+  private readonly recyclableEntities: number[] = [];
+  private readonly entities: Entity[] = [];
+  private readonly aliasToEntityIdMap: { [alias: string]: number } = {};
+  private readonly entityIdToAliasMap: { [entityId: number]: string } = [];
   private readonly eventRegistry: EventRegistry;
   @Inject()
-  private entityFactory!: EntityFactory;
+  private readonly entityFactory!: EntityFactory;
 
   constructor(eventRegistry: EventRegistry) {
     this.eventRegistry = eventRegistry;
@@ -42,6 +42,10 @@ export class EntityRegistry {
     entity = this.entityFactory.get(entityId);
     this.entities[entityId] = entity;
     return entity;
+  }
+
+  public getEntities(...entityIds: number[]): Entity[] {
+    return entityIds.map((entityId) => this.entities[entityId]);
   }
 
   public getEntityByAlias(alias: string): Entity {

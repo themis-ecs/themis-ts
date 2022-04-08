@@ -21,9 +21,7 @@ export class ComponentQueryAdapter implements Query {
   }
 
   public forEach(callback: (entity: Entity) => void): void {
-    this.componentQuery.getActiveEntities().forEach((entityId) => {
-      callback(this.world.getEntity(entityId));
-    });
+    this.getEntities().forEach((entity) => callback(entity));
   }
 
   public size(): number {
@@ -32,6 +30,10 @@ export class ComponentQueryAdapter implements Query {
 
   public getIds(): Uint32Array {
     return this.componentQuery.getActiveEntities();
+  }
+
+  public getEntities(): Entity[] {
+    return this.world.getEntities(...this.getIds());
   }
 
   public onEntityAdd(callback: (entity: Entity) => void): void {

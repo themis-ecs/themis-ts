@@ -7,14 +7,12 @@ import { BlueprintDefinition } from '../../public/blueprint';
 import { BlueprintComponentConfiguration } from './blueprint-registry';
 import { EventRegistry } from './event-registry';
 import { EntityDeleteEvent } from '../../public/event';
-import { COMPONENT_METADATA, ComponentMetadata } from '../di/metadata';
 
 /**
  * @internal
  */
 export class ComponentRegistry {
   private static readonly INITIAL_COMPONENT_CAPACITY = 32;
-  private static readonly componentTypeMap: { [componentName: string]: ComponentType<ComponentBase> } = {};
 
   private readonly componentIdentityMap: { [componentName: string]: number };
   private readonly entityCompositionMap: { [entityId: number]: BitVector };
@@ -27,22 +25,14 @@ export class ComponentRegistry {
 
   constructor(eventRegistry: EventRegistry) {
     this.componentIdentityMap = {};
-    this.entityCompositionMap = {};
-    this.componentMapperMap = {};
+    this.entityCompositionMap = [];
+    this.componentMapperMap = [];
     this.componentQueries = new Map<ComponentQueryIdentity, ComponentQuery>();
     this.componentIdCounter = 0;
     this.eventRegistry = eventRegistry;
     this.eventRegistry.registerListener(EntityDeleteEvent, (event) => {
       this.processEntityDelete(event.getEntityId());
     });
-  }
-
-  public static registerComponent(component: ComponentType<ComponentBase>, componentName?: string): void {
-    this.componentTypeMap[componentName || component.name] = component;
-  }
-
-  public static getComponentType(componentName: string): ComponentType<ComponentBase> {
-    return this.componentTypeMap[componentName];
   }
 
   public update(): void {
@@ -63,8 +53,7 @@ export class ComponentRegistry {
   }
 
   public getComponentName(componentType: ComponentType<ComponentBase>): string {
-    const componentMetadata: ComponentMetadata = Reflect.getMetadata(COMPONENT_METADATA, componentType);
-    return componentMetadata?.id || componentType.name;
+    return componentType.name;
   }
 
   public getComponentQuery(componentQueryBuilder: ComponentQueryBuilder): ComponentQuery {

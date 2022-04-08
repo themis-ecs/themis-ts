@@ -9,6 +9,7 @@ export interface EntityCollection {
   forEach(callback: (entity: Entity) => void): void;
   size(): number;
   getIds(): Uint32Array;
+  getEntities(): Entity[];
 }
 
 export interface Events {

@@ -1,4 +1,4 @@
-import { all, any, ComponentBase, ComponentQuery, none, Pipeline, Query, System, World, WorldBuilder } from '../src';
+import { all, any, ComponentBase, ComponentQuery, none, Pipeline, Query, System, WorldBuilder } from '../src';
 import { ThemisWorld } from '../src/internal/core/world';
 
 test('integration test', () => {
@@ -64,25 +64,19 @@ class TestEntitySystemA implements System {
   @ComponentQuery(any(TestComponentA, TestComponentD))
   query!: Query;
 
-  init(world: World): void {}
-
-  update(o: number): void {}
+  init(): void {}
 }
 
 class TestEntitySystemB implements System {
   @ComponentQuery(all(TestComponentA, TestComponentD))
   query!: Query;
 
-  init(world: World): void {}
-
-  update(o: number): void {}
+  init(): void {}
 }
 
 class TestEntitySystemC implements System {
   @ComponentQuery(none(TestComponentA))
   query!: Query;
 
-  init(world: World): void {}
-
-  update(o: number): void {}
+  init(): void {}
 }

@@ -23,6 +23,13 @@ export abstract class World {
   abstract getEntity(entityId: number): Entity;
 
   /**
+   * get multiple entities by it's ids.
+   * @see Entity
+   * @param entityIds an array containing the entity ids
+   */
+  abstract getEntities(...entityIds: number[]): Entity[];
+
+  /**
    * Create a new and totally blank entity
    * @see Entity
    */
