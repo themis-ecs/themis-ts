@@ -1,7 +1,5 @@
-import { Class, Identifier, Scope } from '../../public/decorator';
+import { Identifier, Imports, Providers, Scope, Systems } from '../../public/decorator';
 import { ComponentQueryFunction } from '../../public/component';
-import { System } from '../../public/system';
-import { ProviderDefinition } from '../../public/provider';
 
 /**
  * @internal
@@ -32,7 +30,7 @@ export type ComponentQueryMetadata = Record<string | symbol, ComponentQueryFunct
  * @internal
  */
 export type ModuleMetadata = {
-  name?: string;
-  systems: Class<System<unknown>>[];
-  providers: ProviderDefinition<unknown>[];
+  systems: Systems<unknown>;
+  providers: Providers<unknown>;
+  imports: Imports;
 };

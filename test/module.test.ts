@@ -2,13 +2,21 @@ import { Inject, Module, Pipeline, System, World, WorldBuilder } from '../src';
 
 let systemInit = false;
 let moduleInit = false;
+let subModule1Init = false;
+let subModule2Init = false;
+let subModule3Init = false;
 let update = false;
+const initOrderArray: number[] = [];
 
 test('Module Test', () => {
   new WorldBuilder().module(MyModule).build();
   expect(systemInit).toBe(true);
   expect(moduleInit).toBe(true);
+  expect(subModule1Init).toBe(true);
+  expect(subModule2Init).toBe(true);
+  expect(subModule3Init).toBe(true);
   expect(update).toBe(true);
+  expect(initOrderArray).toEqual([3, 1, 2, 0]);
 });
 
 class MySystem implements System {
@@ -27,12 +35,42 @@ class TestClass {
 }
 
 @Module({
+  systems: []
+})
+class SubModule3 {
+  init(): void {
+    subModule3Init = true;
+    initOrderArray.push(3);
+  }
+}
+
+@Module({
   systems: [MySystem],
+  imports: [SubModule3]
+})
+class SubModule1 {
+  init(): void {
+    subModule1Init = true;
+    initOrderArray.push(1);
+  }
+}
+
+@Module({
+  providers: [{ provide: 'test3', useFactory: () => 42 }]
+})
+class SubModule2 {
+  init(): void {
+    subModule2Init = true;
+    initOrderArray.push(2);
+  }
+}
+
+@Module({
   providers: [
     { provide: 'test1', useValue: 5 },
-    { provide: 'test2', useClass: TestClass },
-    { provide: 'test3', useFactory: () => 42 }
-  ]
+    { provide: 'test2', useClass: TestClass }
+  ],
+  imports: [SubModule1, SubModule2]
 })
 class MyModule {
   @Inject('test1')
@@ -55,5 +93,6 @@ class MyModule {
     expect(this.test2.value).toEqual(13);
     expect(this.test3).toEqual(42);
     pipeline.update(42);
+    initOrderArray.push(0);
   }
 }

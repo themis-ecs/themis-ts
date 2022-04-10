@@ -8,11 +8,12 @@ import { World } from './world';
 import { Logging } from './logger';
 import { Pipeline, PipelineDefinition, PipelineDefinitionBuilder, SetupCallback } from './pipeline';
 import { ThemisPipeline } from '../internal/core/pipeline';
-import { Class, Identifier } from './decorator';
+import { Class, Identifier, Imports, Providers, Systems } from './decorator';
 import { System } from './system';
-import { ThemisModule } from './module';
+import { ThemisModule, TopModule } from './module';
 import { MODULE_METADATA, ModuleMetadata } from '../internal/di/metadata';
 import { ProviderDefinition } from './provider';
+import { NOOP } from '../internal/core/noop';
 
 const logger = Logging.getLogger('themis.world.builder');
 
@@ -23,7 +24,7 @@ type PipelineAndSetupCallback<T> = {
 
 export class WorldBuilder {
   private readonly pipelines: Array<PipelineDefinition<unknown>> = [];
-  private readonly modules: Array<Class<ThemisModule<unknown>>> = [];
+  private readonly modules: Array<Class<TopModule<unknown>>> = [];
   private readonly container = new Container();
   private readonly eventRegistry = new EventRegistry();
   private readonly blueprintRegistry = new BlueprintRegistry();
@@ -52,7 +53,7 @@ export class WorldBuilder {
     this.container.inject(this.entityRegistry);
 
     const simplePipelines = this.loadPipelines();
-    const modulePipelines = this.loadModules();
+    const modulePipelines = this.loadTopModules();
 
     const pipelines = simplePipelines.concat(modulePipelines);
 
@@ -84,7 +85,7 @@ export class WorldBuilder {
     return this;
   }
 
-  public module(module: Class<ThemisModule<unknown>>): this {
+  public module(module: Class<TopModule<unknown>>): this {
     this.modules.push(module);
     return this;
   }
@@ -102,19 +103,52 @@ export class WorldBuilder {
     }));
   }
 
-  private loadModules(): PipelineAndSetupCallback<unknown>[] {
+  private loadTopModules(): PipelineAndSetupCallback<unknown>[] {
     return this.modules.map((module) => {
-      const moduleMetadata: ModuleMetadata = Reflect.getMetadata(MODULE_METADATA, module);
-      const name = moduleMetadata.name || module.name;
-      const systems = moduleMetadata.systems.map((system) => this.container.resolve(system));
+      const moduleMetadata = this.getModuleMetadata(module);
+      const name = module.name;
       moduleMetadata.providers.forEach((definition) => this.provider(definition));
+      const systems = moduleMetadata.systems.map((system) => this.container.resolve(system));
+      moduleMetadata.imports
+        .map((subModule) => this.container.resolve(subModule))
+        .forEach((subModuleInstance) => {
+          this.container.inject(subModuleInstance);
+          if (subModuleInstance.init) {
+            subModuleInstance.init();
+          }
+        });
       const moduleInstance = this.container.resolve(module);
       this.container.inject(moduleInstance);
       logger.info(`module ${name} loaded.`);
       return {
         pipeline: new ThemisPipeline(name, systems, this.entityRegistry, this.componentRegistry, this.eventRegistry),
-        setupCallback: (pipeline: Pipeline<unknown>) => moduleInstance.init(pipeline)
+        setupCallback: (pipeline: Pipeline<unknown>) => (moduleInstance.init ? moduleInstance.init(pipeline) : NOOP)
       };
     });
+  }
+
+  private getModuleMetadata(module: Class<ThemisModule<unknown>>): ModuleMetadata {
+    const moduleMetadata: ModuleMetadata | undefined = Reflect.getMetadata(MODULE_METADATA, module);
+    if (!moduleMetadata) {
+      throw new Error(`missing Module decorator on module ${module.name}`);
+    }
+    const systems: Systems<unknown> = [];
+    const providers: Providers<unknown> = [];
+    const imports: Imports = [];
+    moduleMetadata.imports
+      .map((subModule) => this.getModuleMetadata(subModule))
+      .forEach((subModuleMetadata) => {
+        systems.push(...subModuleMetadata.systems);
+        providers.push(...subModuleMetadata.providers);
+        imports.push(...subModuleMetadata.imports);
+      });
+    systems.push(...moduleMetadata.systems);
+    providers.push(...moduleMetadata.providers);
+    imports.push(...moduleMetadata.imports);
+    return {
+      systems,
+      providers,
+      imports
+    };
   }
 }
