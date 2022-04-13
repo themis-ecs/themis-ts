@@ -84,7 +84,7 @@ class MyModule {
 
   constructor(private world: World) {}
 
-  init(pipeline: Pipeline<number>): void {
+  init(pipeline: Pipeline): void {
     moduleInit = true;
     const entity = this.world.createEntity();
     expect(entity).toBeDefined();
