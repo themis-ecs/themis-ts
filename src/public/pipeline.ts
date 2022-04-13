@@ -2,7 +2,7 @@ import { System } from './system';
 import { NOOP } from '../internal/core/noop';
 import { Class } from './decorator';
 
-export interface Pipeline<T> {
+export interface Pipeline<T = number> {
   update(o: T): void;
 }
 

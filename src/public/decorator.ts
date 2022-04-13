@@ -8,7 +8,7 @@ import {
   MODULE_METADATA,
   ModuleMetadata
 } from '../internal/di/metadata';
-import { ThemisModule } from './module';
+import { SubModule, ThemisModule } from './module';
 import { System } from './system';
 import { ProviderDefinition } from './provider';
 
@@ -64,9 +64,14 @@ export function Injectable(options?: InjectableOptions): ClassDecorator<unknown>
   };
 }
 
+export type Systems<T> = Class<System<T>>[];
+export type Providers<T> = ProviderDefinition<T>[];
+export type Imports = Class<SubModule>[];
+
 export type ModuleDefinitionOptions<T> = {
-  systems?: Class<System<T>>[];
-  providers?: ProviderDefinition<unknown>[];
+  systems?: Systems<T>;
+  providers?: Providers<unknown>;
+  imports?: Imports;
 };
 
 export function Module<U>(options: ModuleDefinitionOptions<U>): ClassDecorator<ThemisModule<U>> {
@@ -76,6 +81,7 @@ export function Module<U>(options: ModuleDefinitionOptions<U>): ClassDecorator<T
     const metadata: ModuleMetadata = Reflect.getMetadata(MODULE_METADATA, constructor) || {};
     metadata.systems = options.systems || [];
     metadata.providers = options.providers || [];
+    metadata.imports = options.imports || [];
     Reflect.defineMetadata(MODULE_METADATA, metadata, constructor);
   };
 }
