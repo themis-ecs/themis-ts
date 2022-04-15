@@ -101,8 +101,8 @@ class MySystem implements System {
     init(): void {
         console.log('hello from MySystem');
         const entity = this.world.createEntity();
-        entity.addComponent(new MyComponentA());
-        entity.addComponent(new MyComponentB());
+        entity.addComponent(MyComponentA);
+        entity.addComponent(MyComponentB);
     }
 
     update(dt: number): void {
@@ -316,7 +316,7 @@ class MyModule {
 Themis offers a variety of features to help you write better code.
 
 <ul>
-    <li><a>Entities</a></li>
+    <li><a>Entities and Components</a></li>
     <li><a>Aliases</a></li>
     <li><a>Blueprints</a></li>
     <li><a>Events</a></li>

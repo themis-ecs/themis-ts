@@ -1,4 +1,4 @@
-import { all, ComponentBase, ComponentQuery, Pipeline, Query, System, WorldBuilder } from '../src';
+import { all, Blueprint, ComponentQuery, Pipeline, Query, System, WorldBuilder } from '../src';
 
 const performance = require('perf_hooks').performance;
 
@@ -9,27 +9,23 @@ test('Simple Blueprint Performance Test', () => {
 
   const world = new WorldBuilder().pipeline(mainPipeline).build();
 
-  world.registerBlueprint({
-    name: 'test',
-    components: [
-      { type: TestComponentA, component: new TestComponentA() },
-      { type: TestComponentB, component: new TestComponentB() },
-      { type: TestComponentC, component: new TestComponentC() },
-      { type: TestComponentD, component: new TestComponentD() }
-    ],
-    initialize: (entity) => {
-      entity.getEntityId() + 1;
-    }
-  });
+  world.registerBlueprint(
+    Blueprint('test')
+      .component(TestComponentA, 'somevalue')
+      .component(TestComponentB)
+      .component(TestComponentC)
+      .component(TestComponentD)
+      .initialize((entity) => {
+        entity.getEntityId() + 1;
+      })
+  );
 
   for (let i = 0; i < 10000; i++) {
     world.createEntity('test');
   }
 
   for (let i = 0; i < 10000; i++) {
-    world
-      .createEntity()
-      .addComponent(new TestComponentA(), new TestComponentB(), new TestComponentC(), new TestComponentD());
+    world.createEntity().addComponents(TestComponentA, TestComponentB, TestComponentC, TestComponentD);
   }
 
   // Performance check with blueprint:
@@ -46,16 +42,19 @@ test('Simple Blueprint Performance Test', () => {
   for (let i = 0; i < 100000; i++) {
     world
       .createEntity()
-      .addComponent(new TestComponentA(), new TestComponentB(), new TestComponentC(), new TestComponentD());
+      .addComponent(TestComponentA, 'somevalue')
+      .addComponents(TestComponentB, TestComponentC, TestComponentD);
   }
   t1 = performance.now();
   console.log('Without blueprint: ' + (t1 - t0));
 });
 
-class TestComponentA extends ComponentBase {}
-class TestComponentB extends ComponentBase {}
-class TestComponentC extends ComponentBase {}
-class TestComponentD extends ComponentBase {}
+class TestComponentA {
+  constructor(public value: string) {}
+}
+class TestComponentB {}
+class TestComponentC {}
+class TestComponentD {}
 
 class TestSystem implements System {
   @ComponentQuery(all(TestComponentA, TestComponentB))

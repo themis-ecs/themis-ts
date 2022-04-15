@@ -4,10 +4,9 @@ import { ComponentRegistry } from './component-registry';
 import { EventRegistry } from './event-registry';
 import { ComponentBase, ComponentType } from '../../public/component';
 import { World } from '../../public/world';
-import { BlueprintDefinition } from '../../public/blueprint';
+import { BlueprintBuilder } from '../../public/blueprint';
 import { EntityCreateEvent, Event, EventErrorCallback, EventListener, EventType } from '../../public/event';
 import { Container } from '../di/container';
-import { NOOP } from './noop';
 import { Entity } from '../../public/entity';
 
 /**
@@ -49,13 +48,18 @@ export class ThemisWorld implements World {
     if (blueprint) {
       const configuration = this.blueprintRegistry.getBlueprint(blueprint);
       this.componentRegistry.applyBlueprint(entity.getEntityId(), configuration);
+      configuration.initialize(entity);
     }
     this.eventRegistry.submit(EntityCreateEvent, new EntityCreateEvent(entity.getEntityId()));
     return entity;
   }
 
-  public addComponent<T extends ComponentBase>(entityId: number, component: T): void {
-    this.componentRegistry.addComponent(entityId, component);
+  public addComponent<T extends ComponentType<ComponentBase>>(
+    entityId: number,
+    component: T,
+    ...args: ConstructorParameters<T>
+  ): void {
+    this.componentRegistry.addComponent(entityId, component, ...args);
   }
 
   public removeComponent<T extends ComponentBase>(entityId: number, component: ComponentType<T>): void {
@@ -66,11 +70,10 @@ export class ThemisWorld implements World {
     return this.componentRegistry.getComponent(entityId, component);
   }
 
-  public registerBlueprint(blueprint: BlueprintDefinition): void {
-    this.blueprintRegistry.registerBlueprintDefinition(blueprint);
-    const blueprintConfiguration = this.componentRegistry.getBlueprintConfiguration(blueprint);
-    blueprintConfiguration.initialize = blueprint.initialize ? blueprint.initialize : () => NOOP;
-    this.blueprintRegistry.registerBlueprint(blueprint.name, blueprintConfiguration);
+  public registerBlueprint(blueprint: BlueprintBuilder): void {
+    const blueprintDefinition = blueprint.build();
+    const blueprintConfiguration = this.componentRegistry.getBlueprintConfiguration(blueprintDefinition);
+    this.blueprintRegistry.registerBlueprint(blueprintDefinition.name, blueprintConfiguration);
   }
 
   public registerAlias(entityId: number, name: string): void {

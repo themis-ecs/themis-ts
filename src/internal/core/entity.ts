@@ -16,10 +16,15 @@ export class ThemisEntity implements IEntity {
     return this.world;
   }
 
-  public addComponent(...components: ComponentBase[]): this {
+  public addComponents<T extends ComponentBase>(...components: ComponentType<T>[]): this {
     components.forEach((component) => {
-      this.world.addComponent(this.entityId, component);
+      this.addComponent(component);
     });
+    return this;
+  }
+
+  public addComponent<T extends ComponentType<ComponentBase>>(component: T, ...args: ConstructorParameters<T>): this {
+    this.world.addComponent(this.entityId, component, ...args);
     return this;
   }
 

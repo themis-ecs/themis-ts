@@ -19,8 +19,8 @@ class MySystem implements System {
   init(): void {
     console.log('hello from MySystem');
     const entity = this.world.createEntity();
-    entity.addComponent(new MyComponentA());
-    entity.addComponent(new MyComponentB());
+    entity.addComponent(MyComponentA);
+    entity.addComponent(MyComponentB);
   }
 
   update(dt: number): void {

@@ -1,32 +1,33 @@
 import { ComponentQuery } from './component-query';
 import { ComponentBase, ComponentType } from '../../public/component';
 import { ComponentMapper } from './component-mapper';
-import { BlueprintDefinition, BluePrintInitializer } from '../../public/blueprint';
+import { BluePrintInitializer } from '../../public/blueprint';
 
 /**
  * @internal
  */
 export type BlueprintComponentConfiguration = {
   componentQueries: Array<ComponentQuery>;
-  componentMapperConfigurations: Array<BlueprintComponentMapperConfiguration>;
-  initialize?: BluePrintInitializer;
+  componentMapperConfigurations: Array<
+    BlueprintComponentMapperConfiguration<ComponentBase, ComponentType<ComponentBase>>
+  >;
+  initialize: BluePrintInitializer;
 };
 
 /**
  * @internal
  */
-export type BlueprintComponentMapperConfiguration = {
-  componentType: ComponentType<ComponentBase>;
-  component: ComponentBase | undefined;
-  mapper: ComponentMapper<ComponentBase>;
+export type BlueprintComponentMapperConfiguration<T extends ComponentBase, U extends ComponentType<T>> = {
+  component: U;
+  args: ConstructorParameters<U>;
+  mapper: ComponentMapper<T>;
 };
 
 /**
  * @internal
  */
 export class BlueprintRegistry {
-  private blueprintMap: { [blueprintName: string]: BlueprintComponentConfiguration };
-  private readonly blueprintDefinitions: BlueprintDefinition[] = [];
+  private readonly blueprintMap: { [blueprintName: string]: BlueprintComponentConfiguration };
 
   constructor() {
     this.blueprintMap = {};
@@ -38,17 +39,5 @@ export class BlueprintRegistry {
 
   public getBlueprint(blueprintName: string): BlueprintComponentConfiguration {
     return this.blueprintMap[blueprintName];
-  }
-
-  public registerBlueprintDefinition(definition: BlueprintDefinition): void {
-    this.blueprintDefinitions.push(definition);
-  }
-
-  public getBlueprintDefinitions(): BlueprintDefinition[] {
-    return this.blueprintDefinitions;
-  }
-
-  public resetBlueprints(): void {
-    this.blueprintMap = {};
   }
 }

@@ -17,22 +17,22 @@ test('integration test', () => {
   const world = new WorldBuilder().pipeline(mainPipeline).build() as ThemisWorld;
 
   let entity1 = world.createEntityId();
-  world.addComponent(entity1, new TestComponentA());
-  world.addComponent(entity1, new TestComponentB());
-  world.addComponent(entity1, new TestComponentC());
-  world.addComponent(entity1, new TestComponentD());
+  world.addComponent(entity1, TestComponentA);
+  world.addComponent(entity1, TestComponentB);
+  world.addComponent(entity1, TestComponentC);
+  world.addComponent(entity1, TestComponentD);
 
   let entity2 = world.createEntityId();
-  world.addComponent(entity2, new TestComponentA());
-  world.addComponent(entity2, new TestComponentB());
+  world.addComponent(entity2, TestComponentA);
+  world.addComponent(entity2, TestComponentB);
 
   let entity3 = world.createEntityId();
-  world.addComponent(entity3, new TestComponentB());
-  world.addComponent(entity3, new TestComponentC());
+  world.addComponent(entity3, TestComponentB);
+  world.addComponent(entity3, TestComponentC);
 
   let entity4 = world.createEntityId();
-  world.addComponent(entity4, new TestComponentA());
-  world.addComponent(entity4, new TestComponentD());
+  world.addComponent(entity4, TestComponentA);
+  world.addComponent(entity4, TestComponentD);
 
   update(0);
   expect(entitySystemA.query.entities.getIds()).toEqual(new Uint32Array([entity1, entity2, entity4]));

@@ -30,7 +30,7 @@ class TestSystem implements System {
   world!: World;
 
   init(): void {
-    this.world.createEntity().addComponent(new TestComponentA());
+    this.world.createEntity().addComponent(TestComponentA);
   }
 
   update(): void {

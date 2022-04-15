@@ -7,6 +7,7 @@ import { BlueprintDefinition } from '../../public/blueprint';
 import { BlueprintComponentConfiguration } from './blueprint-registry';
 import { EventRegistry } from './event-registry';
 import { EntityDeleteEvent } from '../../public/event';
+import { NOOP } from './noop';
 
 /**
  * @internal
@@ -78,10 +79,14 @@ export class ComponentRegistry {
     return this.componentMapperMap[componentId] as ComponentMapper<T>;
   }
 
-  public addComponent<T extends ComponentBase>(entityId: number, component: T): void {
-    const componentType = Object.getPrototypeOf(component).constructor;
-    const mapper = this.getComponentMapper(componentType);
-    mapper.addComponent(entityId, component);
+  public addComponent<T extends ComponentType<ComponentBase>>(
+    entityId: number,
+    component: T,
+    ...args: ConstructorParameters<T>
+  ): void {
+    const componentInstance = new component(...args);
+    const mapper = this.getComponentMapper(component);
+    mapper.addComponent(entityId, componentInstance);
     const composition = this.getEntityComposition(entityId);
     composition.set(mapper.getComponentId());
     this.componentQueries.forEach((componentQuery) => componentQuery.onCompositionChange(entityId, composition));
@@ -112,12 +117,13 @@ export class ComponentRegistry {
   public getBlueprintConfiguration(blueprint: BlueprintDefinition): BlueprintComponentConfiguration {
     const blueprintConfiguration: BlueprintComponentConfiguration = {
       componentMapperConfigurations: [],
-      componentQueries: []
+      componentQueries: [],
+      initialize: blueprint.initializer ? blueprint.initializer : NOOP
     };
 
     const composition = new BitVector();
     blueprint.components
-      .map((component) => this.getComponentId(component.type))
+      .map((componentConfig) => this.getComponentId(componentConfig.component))
       .forEach((componentId) => {
         composition.set(componentId);
       });
@@ -127,24 +133,23 @@ export class ComponentRegistry {
       }
     });
 
-    blueprint.components.forEach((it) => {
+    blueprint.components.forEach((componentConfig) => {
       blueprintConfiguration.componentMapperConfigurations.push({
-        mapper: this.getComponentMapper(it.type) as ComponentMapper<ComponentBase>,
-        componentType: it.type,
-        component: it.component
+        mapper: this.getComponentMapper(componentConfig.component) as ComponentMapper<ComponentBase>,
+        component: componentConfig.component,
+        args: componentConfig.args
       });
     });
-
     return blueprintConfiguration;
   }
 
   public applyBlueprint(entityId: number, configuration: BlueprintComponentConfiguration): void {
     configuration.componentQueries.forEach((query) => query.add(entityId));
-    configuration.componentMapperConfigurations.forEach((it) => {
-      const component = new it.componentType();
-      Object.assign(component, it.component);
-      it.mapper.addComponent(entityId, component);
-      this.getEntityComposition(entityId).set(it.mapper.getComponentId());
+    configuration.componentMapperConfigurations.forEach((config) => {
+      const mapper = config.mapper;
+      const component = new config.component(...config.args);
+      mapper.addComponent(entityId, component);
+      this.getEntityComposition(entityId).set(mapper.getComponentId());
     });
   }
 
