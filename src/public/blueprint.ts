@@ -47,6 +47,8 @@ export class BlueprintBuilder {
   }
 }
 
-export function Blueprint(name: string): BlueprintBuilder {
+export type Blueprint = BlueprintBuilder;
+
+export function Blueprint(name: string): Blueprint {
   return new BlueprintBuilder(name);
 }

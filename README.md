@@ -316,10 +316,10 @@ class MyModule {
 Themis offers a variety of features to help you write better code.
 
 <ul>
-    <li><a>Entities and Components</a></li>
-    <li><a>Aliases</a></li>
-    <li><a>Blueprints</a></li>
-    <li><a>Events</a></li>
+    <li><a href="https://github.com/themis-ecs/themis-ts/wiki/Entities-and-Components">Entities and Components</a></li>
+    <li><a href="https://github.com/themis-ecs/themis-ts/wiki/Aliases">Aliases</a></li>
+    <li><a href="https://github.com/themis-ecs/themis-ts/wiki/Blueprints">Blueprints</a></li>
+    <li><a href="https://github.com/themis-ecs/themis-ts/wiki/Events">Events</a></li>
     <li><a>Component Queries</a></li>
     <li><a>Providers</a></li>
     <li><a>Systems</a></li>

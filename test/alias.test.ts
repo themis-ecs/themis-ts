@@ -4,13 +4,13 @@ import { ThemisWorld } from '../src/internal/core/world';
 test('Simple Alias Test', () => {
   const world = new WorldBuilder().build() as ThemisWorld;
 
-  world.registerBlueprint(
-    Blueprint('test')
-      .component(TestComponentA)
-      .component(TestComponentB, 0)
-      .component(TestComponentC)
-      .component(TestComponentD)
-  );
+  const blueprint = Blueprint('test')
+    .component(TestComponentA)
+    .component(TestComponentB, 0)
+    .component(TestComponentC)
+    .component(TestComponentD);
+
+  world.registerBlueprint(blueprint);
 
   world.createEntity('test').setAlias('aliastest').getComponent(TestComponentA).value = 'stringvalue';
 

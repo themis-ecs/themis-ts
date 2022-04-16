@@ -1,5 +1,5 @@
 import { Entity } from './entity';
-import { BlueprintBuilder } from './blueprint';
+import { Blueprint } from './blueprint';
 import { Event, EventErrorCallback, EventListener, EventType } from './event';
 
 /**
@@ -47,7 +47,7 @@ export abstract class World {
    * @see createEntity
    * @param blueprint
    */
-  abstract registerBlueprint(blueprint: BlueprintBuilder): void;
+  abstract registerBlueprint(blueprint: Blueprint): void;
 
   /**
    * Register an EventListener. If the given event occurs, all registered listeners be called after all Systems
