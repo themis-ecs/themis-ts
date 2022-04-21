@@ -1,4 +1,4 @@
-import { all, ComponentQuery, Inject, Module, Pipeline, Query, System, World, WorldBuilder } from '../src';
+import { all, ComponentQuery, Module, OnInit, OnUpdate, Pipeline, Query, System, World, WorldBuilder } from '../src';
 
 test('Example', () => {
   new WorldBuilder().module(MyModule).build();
@@ -12,15 +12,15 @@ class MyComponentB {
   value: string = 'the brown fox is not quick today';
 }
 
-class MySystem implements System {
-  @Inject()
-  private world!: World;
+@System()
+class MySystem implements OnInit, OnUpdate {
+  constructor(private world: World) {}
 
   init(): void {
     console.log('hello from MySystem');
     const entity = this.world.createEntity();
-    entity.addComponent(new MyComponentA());
-    entity.addComponent(new MyComponentB());
+    entity.addComponent(MyComponentA);
+    entity.addComponent(MyComponentB);
   }
 
   update(dt: number): void {
@@ -28,11 +28,10 @@ class MySystem implements System {
   }
 }
 
-class MyComponentQuerySystem implements System {
+@System()
+class MyComponentQuerySystem implements OnUpdate {
   @ComponentQuery(all(MyComponentA, MyComponentB))
   private query!: Query;
-
-  init(): void {}
 
   update(): void {
     this.query.entities.forEach((entity) => {

@@ -1,4 +1,4 @@
-import { all, ComponentQuery, Pipeline, Query, System, WorldBuilder } from '../src';
+import { all, ComponentQuery, OnUpdate, Pipeline, Query, System, WorldBuilder } from '../src';
 import { ThemisEntity } from '../src/internal/core/entity';
 import { ThemisWorld } from '../src/internal/core/world';
 
@@ -14,10 +14,7 @@ test('entity test', () => {
   const world = new WorldBuilder().pipeline(mainPipeline).build() as ThemisWorld;
 
   const entity = new ThemisEntity(world, world.createEntityId());
-  const testComponentA = new TestComponentA();
-  testComponentA.name = 'test';
-  entity.addComponent(testComponentA);
-  entity.addComponent({ name: 'test' });
+  entity.addComponent(TestComponentA, 'test');
   update(1);
   expect(entity.getComponent(TestComponentA).name).toEqual('test');
   entity.removeComponent(TestComponentA);
@@ -26,14 +23,13 @@ test('entity test', () => {
 });
 
 class TestComponentA {
-  name!: string;
+  constructor(public name: string) {}
 }
 
-class TestSystem implements System {
+@System()
+class TestSystem implements OnUpdate {
   @ComponentQuery(all(TestComponentA))
   query!: Query;
-
-  init(): void {}
 
   update(dt: number): void {
     if (dt === 1) {

@@ -6,4 +6,7 @@ export interface OnUpdate<T = number> {
   update(o: T): void;
 }
 
-export type System<T = number> = Required<OnInit> & Partial<OnUpdate<T>>;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface EmtpySystem {}
+
+export type SystemType<T = number> = Required<EmtpySystem> & Partial<OnUpdate<T> & OnInit>;

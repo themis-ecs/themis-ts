@@ -1,4 +1,4 @@
-import { all, ComponentQuery, Inject, Pipeline, Query, System, World, WorldBuilder } from '../src';
+import { all, ComponentQuery, Inject, OnInit, OnUpdate, Pipeline, Query, System, World, WorldBuilder } from '../src';
 import { ThemisWorld } from '../src/internal/core/world';
 
 test('entity collection test', () => {
@@ -22,7 +22,8 @@ class TestComponentA {
   name!: string;
 }
 
-class TestSystem implements System {
+@System()
+class TestSystem implements OnInit, OnUpdate {
   @ComponentQuery(all(TestComponentA))
   query!: Query;
 
@@ -30,7 +31,7 @@ class TestSystem implements System {
   world!: World;
 
   init(): void {
-    this.world.createEntity().addComponent(new TestComponentA());
+    this.world.createEntity().addComponent(TestComponentA);
   }
 
   update(): void {

@@ -1,4 +1,4 @@
-import { OnUpdate, System } from 'public/system';
+import { OnUpdate, SystemType } from 'public/system';
 import { EventRegistry } from './event-registry';
 import { ComponentRegistry } from './component-registry';
 import { EntityRegistry } from './entity-registry';
@@ -9,7 +9,7 @@ import { Pipeline } from '../../public/pipeline';
  */
 export class ThemisPipeline<T> implements Pipeline<T> {
   private readonly id: string;
-  private readonly systems: Array<System<T>>;
+  private readonly systems: Array<SystemType<T>>;
   private readonly updateCallbacks: Array<OnUpdate<T>>;
   private readonly entityRegistry: EntityRegistry;
   private readonly componentRegistry: ComponentRegistry;
@@ -17,7 +17,7 @@ export class ThemisPipeline<T> implements Pipeline<T> {
 
   constructor(
     id: string,
-    systems: Array<System<T>>,
+    systems: Array<SystemType<T>>,
     entityRegistry: EntityRegistry,
     componentRegistry: ComponentRegistry,
     eventRegistry: EventRegistry
@@ -34,7 +34,7 @@ export class ThemisPipeline<T> implements Pipeline<T> {
     return this.id;
   }
 
-  public getSystems(): Array<System<T>> {
+  public getSystems(): Array<SystemType<T>> {
     return this.systems;
   }
 

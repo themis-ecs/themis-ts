@@ -1,4 +1,4 @@
-import { System } from './system';
+import { SystemType } from './system';
 import { NOOP } from '../internal/core/noop';
 import { Class } from './decorator';
 
@@ -8,7 +8,7 @@ export interface Pipeline<T = number> {
 
 export type SetupCallback<T> = (pipeline: Pipeline<T>) => void;
 
-export type SystemDefinition<T> = System<T> | Class<System<T>>;
+export type SystemDefinition<T> = SystemType<T> | Class<SystemType<T>>;
 
 export type PipelineDefinition<T> = {
   id: string;
