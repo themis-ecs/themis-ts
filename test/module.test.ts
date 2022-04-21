@@ -1,5 +1,4 @@
-import { Inject, Module, Pipeline, System, World, WorldBuilder } from '../src';
-import { OnInit, OnUpdate } from '../dist';
+import { Inject, Module, OnInit, OnUpdate, Pipeline, System, World, WorldBuilder } from '../src';
 
 let systemInit = false;
 let moduleInit = false;

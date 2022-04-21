@@ -1,5 +1,4 @@
-import { all, ComponentQuery, Module, Pipeline, Query, System, World, WorldBuilder } from '../src';
-import { OnInit, OnUpdate } from '../dist';
+import { all, ComponentQuery, Module, OnInit, OnUpdate, Pipeline, Query, System, World, WorldBuilder } from '../src';
 
 test('Example', () => {
   new WorldBuilder().module(MyModule).build();
