@@ -1,4 +1,4 @@
-import { all, ComponentQuery, Pipeline, Query, System, WorldBuilder } from '../src';
+import { all, ComponentQuery, OnUpdate, Pipeline, Query, System, WorldBuilder } from '../src';
 import { ThemisEntity } from '../src/internal/core/entity';
 import { ThemisWorld } from '../src/internal/core/world';
 
@@ -26,11 +26,10 @@ class TestComponentA {
   constructor(public name: string) {}
 }
 
-class TestSystem implements System {
+@System()
+class TestSystem implements OnUpdate {
   @ComponentQuery(all(TestComponentA))
   query!: Query;
-
-  init(): void {}
 
   update(dt: number): void {
     if (dt === 1) {

@@ -1,4 +1,4 @@
-import { all, Blueprint, ComponentQuery, Pipeline, Query, System, WorldBuilder } from '../src';
+import { all, Blueprint, ComponentQuery, OnUpdate, Pipeline, Query, System, WorldBuilder } from '../src';
 
 const performance = require('perf_hooks').performance;
 
@@ -56,15 +56,13 @@ class TestComponentB {}
 class TestComponentC {}
 class TestComponentD {}
 
-class TestSystem implements System {
+@System()
+class TestSystem implements OnUpdate {
   @ComponentQuery(all(TestComponentA, TestComponentB))
   query!: Query;
 
-  init(): void {}
-
   update(dt: number): void {
     this.query.entities.forEach((entity) => {
-      // entity.removeComponent(TestComponentA, TestComponentB).addComponent(new TestComponentC(), new TestComponentD());
       entity.getComponent(TestComponentA);
       entity.getComponent(TestComponentB);
     });

@@ -1,4 +1,5 @@
 import { Inject, Module, Pipeline, System, World, WorldBuilder } from '../src';
+import { OnInit, OnUpdate } from '../dist';
 
 let systemInit = false;
 let moduleInit = false;
@@ -19,7 +20,8 @@ test('Module Test', () => {
   expect(initOrderArray).toEqual([3, 1, 2, 0]);
 });
 
-class MySystem implements System {
+@System()
+class MySystem implements OnInit, OnUpdate {
   init(): void {
     systemInit = true;
   }

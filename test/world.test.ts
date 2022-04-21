@@ -60,23 +60,20 @@ class TestComponentB extends ComponentBase {}
 class TestComponentC extends ComponentBase {}
 class TestComponentD extends ComponentBase {}
 
-class TestEntitySystemA implements System {
+@System()
+class TestEntitySystemA {
   @ComponentQuery(any(TestComponentA, TestComponentD))
   query!: Query;
-
-  init(): void {}
 }
 
-class TestEntitySystemB implements System {
+@System()
+class TestEntitySystemB {
   @ComponentQuery(all(TestComponentA, TestComponentD))
   query!: Query;
-
-  init(): void {}
 }
 
-class TestEntitySystemC implements System {
+@System()
+class TestEntitySystemC {
   @ComponentQuery(none(TestComponentA))
   query!: Query;
-
-  init(): void {}
 }

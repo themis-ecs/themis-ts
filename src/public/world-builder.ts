@@ -9,7 +9,7 @@ import { Logging } from './logger';
 import { Pipeline, PipelineDefinition, PipelineDefinitionBuilder, SetupCallback } from './pipeline';
 import { ThemisPipeline } from '../internal/core/pipeline';
 import { Class, Identifier, Imports, Providers, Systems } from './decorator';
-import { System } from './system';
+import { SystemType } from './system';
 import { ThemisModule, TopModule } from './module';
 import { MODULE_METADATA, ModuleMetadata } from '../internal/di/metadata';
 import { ProviderDefinition } from './provider';
@@ -57,10 +57,14 @@ export class WorldBuilder {
 
     const pipelines = simplePipelines.concat(modulePipelines);
 
-    const systems = new Set<System<unknown>>();
+    const systems = new Set<SystemType<unknown>>();
     pipelines.forEach((it) => it.pipeline.getSystems().forEach((system) => systems.add(system)));
     systems.forEach((system) => this.container.inject(system));
-    systems.forEach((system) => system.init());
+    systems.forEach((system) => {
+      if (system.init) {
+        system.init();
+      }
+    });
 
     pipelines.map((it) => {
       it.setupCallback(it.pipeline);

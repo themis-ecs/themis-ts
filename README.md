@@ -39,7 +39,8 @@ A bit confused? Well, let's hop into some code to see everything in action and w
 
 Let's create a simple system:
 ```typescript
-class MySystem implements System {
+@System()
+class MySystem implements OnInit, OnUpdate {
     
     init(): void {
         console.log('hello from MySystem');
@@ -81,8 +82,8 @@ in calling all defined update methods in your systems.
 
 ### Create Entities and add Components
 
-Let us head back to our system MySystem and inject the ```World``` interface using the ```Inject``` decorator. We can then use this interface to create 
-an entity and add components to the entity. 
+Let us head back to our system MySystem and inject the ```World``` interface using the constructor. We can then use this interface to create 
+an entity and add components to the entity.
 
 ```typescript
 class MyComponentA {
@@ -93,10 +94,10 @@ class MyComponentB {
     value: string = 'the brown fox is not quick today';
 }
 
-class MySystem implements System {
-    
-    @Inject()
-    private world!: World;
+@System()
+class MySystem implements OnInit, OnUpdate {
+
+    constructor(private world: World) {}
 
     init(): void {
         console.log('hello from MySystem');
@@ -119,13 +120,12 @@ decorator. Let us create a new system which queries for all entities, which cont
 ```MyComponentB```:
 
 ```typescript
-class MyComponentQuerySystem implements System {
+@System()
+class MyComponentQuerySystem implements OnUpdate {
     
   @ComponentQuery(all(MyComponentA, MyComponentB))
   private query!: Query;
-
-  init(): void {}
-
+  
   update(): void {
     this.query.entities.forEach((entity) => {
         console.log(entity.getComponent(MyComponentA).value); // 13
@@ -320,10 +320,9 @@ Themis offers a variety of features to help you write better code.
     <li><a href="https://github.com/themis-ecs/themis-ts/wiki/Aliases">Aliases</a></li>
     <li><a href="https://github.com/themis-ecs/themis-ts/wiki/Blueprints">Blueprints</a></li>
     <li><a href="https://github.com/themis-ecs/themis-ts/wiki/Events">Events</a></li>
-    <li><a>Component Queries</a></li>
-    <li><a>Providers</a></li>
-    <li><a>Systems</a></li>
-    <li><a>Modules</a></li>
-    <li><a>Pipelines</a></li>
-    <li><a>Logging</a></li>
+    <li><a href="https://github.com/themis-ecs/themis-ts/wiki/Component-Queries">Component Queries</a></li>
+    <li><a href="https://github.com/themis-ecs/themis-ts/wiki/Providers">Providers</a></li>
+    <li><a href="https://github.com/themis-ecs/themis-ts/wiki/Systems">Systems</a></li>
+    <li><a href="https://github.com/themis-ecs/themis-ts/wiki/Modules">Modules</a></li>
+    <li><a href="https://github.com/themis-ecs/themis-ts/wiki/Logging">Logging</a></li>
 </ul>

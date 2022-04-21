@@ -9,7 +9,7 @@ import {
   ModuleMetadata
 } from '../internal/di/metadata';
 import { SubModule, ThemisModule } from './module';
-import { System } from './system';
+import { SystemType } from './system';
 import { ProviderDefinition } from './provider';
 
 export type Class<T = unknown> = new (...params: never[]) => T;
@@ -64,7 +64,7 @@ export function Injectable(options?: InjectableOptions): ClassDecorator<unknown>
   };
 }
 
-export type Systems<T> = Class<System<T>>[];
+export type Systems<T> = Class<SystemType<T>>[];
 export type Providers<T> = ProviderDefinition<T>[];
 export type Imports = Class<SubModule>[];
 
@@ -83,5 +83,12 @@ export function Module<U>(options: ModuleDefinitionOptions<U>): ClassDecorator<T
     metadata.providers = options.providers || [];
     metadata.imports = options.imports || [];
     Reflect.defineMetadata(MODULE_METADATA, metadata, constructor);
+  };
+}
+
+export function System(): ClassDecorator<SystemType<unknown>> {
+  const injectableFn = Injectable({ scope: SINGLETON });
+  return function <T extends SystemType<unknown>>(constructor: Class<T>) {
+    injectableFn(constructor);
   };
 }
