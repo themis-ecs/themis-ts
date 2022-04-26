@@ -1,6 +1,8 @@
 import { Entity } from './entity';
 import { Blueprint } from './blueprint';
 import { Event, EventErrorCallback, EventListener, EventType } from './event';
+import { ComponentQueryFunction } from './component';
+import { Query } from './query';
 
 /**
  * The world is part of the main API of themis-ecs. It is the place, where your systems, your components and
@@ -80,4 +82,11 @@ export abstract class World {
    * @param object
    */
   abstract inject(object: unknown): void;
+
+  /**
+   * Query this world for entities with the components as defined in the given ComponentQueryFunctions.
+   * You can use the predefined functions all(), any() and none().
+   * @param queries
+   */
+  abstract query(...queries: ComponentQueryFunction[]): Query;
 }

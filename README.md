@@ -22,7 +22,7 @@ To get started with Themis there is little to do:
 
 ### Project Setup
 
-Install Themis ECS in your TypeScript project using ```npm install themis-ts``` and add the following to your ```tsconfig.json``` file
+Install Themis ECS in your TypeScript project using ```npm install themis-ts reflect-metadata``` and add the following to your ```tsconfig.json``` file
 ```json
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
