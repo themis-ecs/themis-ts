@@ -43,6 +43,23 @@ test('Listener Throws Error', () => {
   expect(errorHandled).toBe(true);
 });
 
+test('Listener Unsubscription', () => {
+  const eventRegistry = new EventRegistry();
+  let counter = 0;
+  const subscription = eventRegistry.registerListener(EventTestB, (event) => {
+    counter = counter + event.b;
+  });
+
+  eventRegistry.submit(EventTestB, { b: 5 }, true);
+  expect(counter).toEqual(5);
+  eventRegistry.submit(EventTestB, { b: 7 }, true);
+  expect(counter).toEqual(12);
+
+  subscription.unsubscribe();
+  eventRegistry.submit(EventTestB, { b: 3 }, true);
+  expect(counter).toEqual(12);
+});
+
 class EventTestA {
   a!: string;
 }

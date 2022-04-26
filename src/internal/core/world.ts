@@ -5,7 +5,14 @@ import { EventRegistry } from './event-registry';
 import { ComponentBase, ComponentType } from '../../public/component';
 import { World } from '../../public/world';
 import { BlueprintBuilder } from '../../public/blueprint';
-import { EntityCreateEvent, Event, EventErrorCallback, EventListener, EventType } from '../../public/event';
+import {
+  EntityCreateEvent,
+  Event,
+  EventErrorCallback,
+  EventListener,
+  EventType,
+  Subscription
+} from '../../public/event';
 import { Container } from '../di/container';
 import { Entity } from '../../public/entity';
 
@@ -84,8 +91,8 @@ export class ThemisWorld implements World {
     eventType: EventType<T>,
     listener: EventListener<T>,
     errorCallback?: EventErrorCallback<T>
-  ): void {
-    this.eventRegistry.registerListener(eventType, listener, errorCallback);
+  ): Subscription {
+    return this.eventRegistry.registerListener(eventType, listener, errorCallback);
   }
 
   public submit<T extends Event>(eventType: EventType<T>, event: T, instant = false): void {
