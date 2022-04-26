@@ -2,7 +2,7 @@ import { BlueprintRegistry } from './blueprint-registry';
 import { EntityRegistry } from './entity-registry';
 import { ComponentRegistry } from './component-registry';
 import { EventRegistry } from './event-registry';
-import { ComponentBase, ComponentType } from '../../public/component';
+import { ComponentBase, ComponentQueryFunction, ComponentType } from '../../public/component';
 import { World } from '../../public/world';
 import { BlueprintBuilder } from '../../public/blueprint';
 import {
@@ -15,6 +15,9 @@ import {
 } from '../../public/event';
 import { Container } from '../di/container';
 import { Entity } from '../../public/entity';
+import { ComponentQueryBuilder } from './component-query-builder';
+import { ComponentQueryAdapter } from './component-query-adapter';
+import { Query } from 'public/query';
 
 /**
  * @internal
@@ -101,5 +104,12 @@ export class ThemisWorld implements World {
 
   public inject(object: unknown): void {
     this.container.inject(object);
+  }
+
+  public query(...queries: ComponentQueryFunction[]): Query {
+    const componentQueryBuilder = new ComponentQueryBuilder();
+    queries.forEach((fn) => fn(componentQueryBuilder));
+    const componentQuery = this.componentRegistry.getComponentQuery(componentQueryBuilder);
+    return new ComponentQueryAdapter(componentQuery, this);
   }
 }
