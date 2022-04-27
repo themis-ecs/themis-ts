@@ -59,7 +59,6 @@ export class WorldBuilder {
 
     const systems = new Set<SystemType<unknown>>();
     pipelines.forEach((it) => it.pipeline.getSystems().forEach((system) => systems.add(system)));
-    systems.forEach((system) => this.container.inject(system));
     systems.forEach((system) => {
       if (system.init) {
         system.init();
@@ -98,7 +97,14 @@ export class WorldBuilder {
     return this.pipelines.map((definition) => ({
       pipeline: new ThemisPipeline(
         definition.id,
-        definition.systems.map((system) => (typeof system === 'function' ? this.container.resolve(system) : system)),
+        definition.systems.map((system) => {
+          if (typeof system === 'function') {
+            return this.container.resolve(system);
+          } else {
+            this.container.inject(system);
+            return system;
+          }
+        }),
         this.entityRegistry,
         this.componentRegistry,
         this.eventRegistry
@@ -116,13 +122,11 @@ export class WorldBuilder {
       moduleMetadata.imports
         .map((subModule) => this.container.resolve(subModule))
         .forEach((subModuleInstance) => {
-          this.container.inject(subModuleInstance);
           if (subModuleInstance.init) {
             subModuleInstance.init();
           }
         });
       const moduleInstance = this.container.resolve(module);
-      this.container.inject(moduleInstance);
       logger.info(`module ${name} loaded.`);
       return {
         pipeline: new ThemisPipeline(name, systems, this.entityRegistry, this.componentRegistry, this.eventRegistry),

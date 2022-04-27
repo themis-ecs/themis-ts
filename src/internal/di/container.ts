@@ -69,6 +69,7 @@ export class Container {
       const resolvedDependencies =
         (dependencies?.map((dependency) => this.resolve(dependency, dependencyStack)) as never[]) || [];
       const newInstance = new identifier(...resolvedDependencies) as T;
+      this.inject(newInstance);
       if (metadata?.scope === SINGLETON) {
         this.instances.set(identifier, newInstance);
       }

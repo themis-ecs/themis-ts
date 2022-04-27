@@ -110,6 +110,7 @@ export class ThemisWorld implements World {
     const componentQueryBuilder = new ComponentQueryBuilder();
     queries.forEach((fn) => fn(componentQueryBuilder));
     const componentQuery = this.componentRegistry.getComponentQuery(componentQueryBuilder);
+    componentQuery.processModifications();
     return new ComponentQueryAdapter(componentQuery, this);
   }
 }
