@@ -13,11 +13,11 @@ import {
   EventType,
   Subscription
 } from '../../public/event';
-import { Container } from '../di/container';
 import { Entity } from '../../public/entity';
 import { ComponentQueryBuilder } from './component-query-builder';
 import { ComponentQueryAdapter } from './component-query-adapter';
 import { Query } from 'public/query';
+import { Container } from '../ioc/container';
 
 /**
  * @internal
