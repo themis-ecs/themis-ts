@@ -3,6 +3,9 @@ import { Injectable } from '../../public/decorator';
 import { ThemisWorld } from './world';
 import { ThemisEntity } from './entity';
 
+/**
+ * @internal
+ */
 @Injectable()
 export class EntityFactory {
   private readonly world: ThemisWorld;

@@ -7,7 +7,7 @@ import {
   InjectMetadata,
   MODULE_METADATA,
   ModuleMetadata
-} from '../internal/di/metadata';
+} from '../internal/ioc/metadata';
 import { SubModule, ThemisModule } from './module';
 import { SystemType } from './system';
 import { ProviderDefinition } from './provider';
@@ -65,13 +65,15 @@ export function Injectable(options?: InjectableOptions): ClassDecorator<unknown>
 }
 
 export type Systems<T> = Class<SystemType<T>>[];
-export type Providers<T> = ProviderDefinition<T>[];
+export type Providers<T = unknown> = (ProviderDefinition<T> | Class)[];
 export type Imports = Class<SubModule>[];
+export type Exports = (Class<SubModule> | Identifier)[];
 
 export type ModuleDefinitionOptions<T> = {
   systems?: Systems<T>;
-  providers?: Providers<unknown>;
+  providers?: Providers;
   imports?: Imports;
+  exports?: Exports;
 };
 
 export function Module<U>(options: ModuleDefinitionOptions<U>): ClassDecorator<ThemisModule<U>> {
@@ -82,6 +84,7 @@ export function Module<U>(options: ModuleDefinitionOptions<U>): ClassDecorator<T
     metadata.systems = options.systems || [];
     metadata.providers = options.providers || [];
     metadata.imports = options.imports || [];
+    metadata.exports = options.exports || [];
     Reflect.defineMetadata(MODULE_METADATA, metadata, constructor);
   };
 }

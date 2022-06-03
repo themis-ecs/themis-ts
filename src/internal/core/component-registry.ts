@@ -67,7 +67,6 @@ export class ComponentRegistry {
     this.entityCompositionMap.forEach((composition, entityId) =>
       componentQuery?.onCompositionChange(entityId, composition)
     );
-    componentQuery.processModifications();
     this.componentQueries.set(identity, componentQuery);
     return componentQuery;
   }
