@@ -1,16 +1,22 @@
-import { all, ComponentQuery, Inject, OnInit, OnUpdate, Pipeline, Query, System, World, WorldBuilder } from '../src';
+import {
+  all,
+  ComponentQuery,
+  Inject,
+  Module,
+  OnInit,
+  OnUpdate,
+  Pipeline,
+  Query,
+  System,
+  World,
+  WorldBuilder
+} from '../src';
 import { ThemisWorld } from '../src/internal/core/world';
 
+let update: (dt: number) => void;
+
 test('entity collection test', () => {
-  let update = (dt: number) => {};
-
-  const mainPipeline = Pipeline('main')
-    .systems(new TestSystem())
-    .setup((pipeline) => {
-      update = (dt) => pipeline.update(dt);
-    });
-
-  const world = new WorldBuilder().pipeline(mainPipeline).build() as ThemisWorld;
+  const world = new WorldBuilder().module(TestModule).build() as ThemisWorld;
 
   update(1);
 
@@ -38,5 +44,14 @@ class TestSystem implements OnInit, OnUpdate {
     this.query.entities.forEach((entity) => {
       entity.getComponent(TestComponentA).name = 'test';
     });
+  }
+}
+
+@Module({
+  systems: [TestSystem]
+})
+class TestModule {
+  init(pipeline: Pipeline): void {
+    update = (dt) => pipeline.update(dt);
   }
 }

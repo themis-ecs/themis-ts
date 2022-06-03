@@ -5,7 +5,7 @@ import { EventRegistry } from '../internal/core/event-registry';
 import { ThemisWorld } from '../internal/core/world';
 import { World } from './world';
 import { Logging } from './logger';
-import { Pipeline, PipelineDefinition, PipelineDefinitionBuilder, SetupCallback } from './pipeline';
+import { Pipeline, SetupCallback } from './pipeline';
 import { ThemisPipeline } from '../internal/core/pipeline';
 import { Class, Identifier } from './decorator';
 import { SystemType } from './system';
@@ -23,7 +23,6 @@ type PipelineAndSetupCallback<T> = {
 };
 
 export class WorldBuilder {
-  private readonly pipelines: Array<PipelineDefinition<unknown>> = [];
   private readonly modules: Array<Class<TopModule<unknown>>> = [];
   private readonly container = new Container();
   private readonly eventRegistry = new EventRegistry();
@@ -53,12 +52,9 @@ export class WorldBuilder {
 
     this.container.inject(this.entityRegistry);
 
-    const simplePipelines = this.loadPipelines();
     const modulePipelines = this.loadTopModules();
 
-    const pipelines = simplePipelines.concat(modulePipelines);
-
-    pipelines.map((it) => {
+    modulePipelines.forEach((it) => {
       it.setupCallback(it.pipeline);
     });
 
@@ -66,17 +62,8 @@ export class WorldBuilder {
     return world;
   }
 
-  /**
-   * @deprecated I want to remove this... not needed.. need to refactor unit tests....
-   * @param pipelineBuilder
-   */
-  public pipeline(pipelineBuilder: PipelineDefinitionBuilder<unknown>): this {
-    this.pipelines.push(pipelineBuilder.build());
-    return this;
-  }
-
   public register(identifier: Identifier, instance: unknown): this {
-    this.container.registerGlobal({ provide: identifier, useValue: instance });
+    this.provider({ provide: identifier, useValue: instance });
     return this;
   }
 
@@ -88,38 +75,6 @@ export class WorldBuilder {
   public module(module: Class<TopModule<unknown>>): this {
     this.modules.push(module);
     return this;
-  }
-
-  /**
-   * @deprecated
-   */
-  private loadPipelines(): PipelineAndSetupCallback<unknown>[] {
-    return this.pipelines.map((definition) => ({
-      pipeline: new ThemisPipeline(
-        definition.id,
-        definition.systems.map((system) => {
-          if (typeof system === 'function') {
-            this.container.registerGlobal({ provide: system, useClass: system });
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            const instance = this.container.resolve(system)!;
-            if (instance.init) {
-              instance.init();
-            }
-            return instance;
-          } else {
-            this.container.inject(system);
-            if (system.init) {
-              system.init();
-            }
-            return system;
-          }
-        }),
-        this.entityRegistry,
-        this.componentRegistry,
-        this.eventRegistry
-      ),
-      setupCallback: definition.setupCallback
-    }));
   }
 
   private loadTopModules(): PipelineAndSetupCallback<unknown>[] {

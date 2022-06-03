@@ -18,6 +18,8 @@ import { ComponentQueryBuilder } from './component-query-builder';
 import { ComponentQueryAdapter } from './component-query-adapter';
 import { Query } from 'public/query';
 import { Container } from '../ioc/container';
+import { Identifier } from '../../public/decorator';
+import { Module } from '../ioc/module';
 
 /**
  * @internal
@@ -102,8 +104,12 @@ export class ThemisWorld implements World {
     this.eventRegistry.submit(eventType, event, instant);
   }
 
-  public inject(object: unknown): void {
-    this.container.inject(object);
+  public resolve<T>(identifier: Identifier<T>, module?: Module): T | undefined {
+    return this.container.resolve(identifier, module);
+  }
+
+  public inject(object: unknown, module?: Module): void {
+    this.container.inject(object, module);
   }
 
   public query(...queries: ComponentQueryFunction[]): Query {

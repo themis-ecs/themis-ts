@@ -1,16 +1,12 @@
-import { all, Blueprint, ComponentQuery, OnUpdate, Pipeline, Query, System, WorldBuilder } from '../src';
+import { all, Blueprint, ComponentQuery, Module, OnUpdate, Query, System, WorldBuilder } from '../src';
 
 const performance = require('perf_hooks').performance;
 
 const numberOfEntities = 10000;
 
 test('Simple Blueprint Performance Test', () => {
-  const mainPipeline = Pipeline('main')
-    .systems(new TestSystem())
-    .setup(() => {});
-
-  const world1 = new WorldBuilder().pipeline(mainPipeline).build();
-  const world2 = new WorldBuilder().pipeline(mainPipeline).build();
+  const world1 = new WorldBuilder().module(TestModule).build();
+  const world2 = new WorldBuilder().module(TestModule).build();
 
   world1.registerBlueprint(
     Blueprint('test')
@@ -71,3 +67,8 @@ class TestSystem implements OnUpdate {
     });
   }
 }
+
+@Module({
+  systems: [TestSystem]
+})
+class TestModule {}
