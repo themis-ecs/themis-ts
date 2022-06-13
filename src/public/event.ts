@@ -6,6 +6,10 @@ export type EventListener<T extends Event> = (event: T) => void;
 
 export type EventErrorCallback<T extends Event> = (event: T, error: unknown) => void;
 
+export interface Subscription {
+  unsubscribe(): void;
+}
+
 export class EntityEvent {
   private readonly entityId;
   constructor(entityId: number) {

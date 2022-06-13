@@ -22,10 +22,10 @@ To get started with Themis there is little to do:
 
 ### Project Setup
 
-Install Themis ECS in your TypeScript project using ```npm install themis-ts``` and add the following to your ```tsconfig.json``` file
+Install Themis ECS in your TypeScript project using ```npm install themis-ts reflect-metadata``` and add the following to your ```tsconfig.json``` file
 ```json
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
+"experimentalDecorators": true,
+"emitDecoratorMetadata": true,
 ```
 
 ### Basics
@@ -224,21 +224,26 @@ You can register custom dependencies to Themis by using the ```Provider``` inter
 * Value Provider
 * Factory Provider
 
-If you try to resolve a class with zero dependencies, no providers are needed and Themis will just use the type you have
-defined:
-
 ```typescript
-@Inject()
-private myClass: MyClass;
+@Injectable()
+export class SomeClass {
+    
+    // property injection
+    @Inject()
+    private myClass: MyClass;
+
+    // constructor injection
+    constructor(private myService: MyService) {}
+    
+}
 ```
 
-To perform this injection, Themis will try to resolve MyClass. 
+Be sure to have the ```Injectable``` decorator present on your classes and make sure you have a provider registered 
+in your module for Themis to be able to detect the dependencies.
 
-If the constructor of MyClass has dependencies, Themis will try to resolve them and inject them into the constructor
-call. Be sure to have the ```Injectable``` decorator present on MyClass for Themis to be able to detect the dependencies.
 
 ```typescript
-// No Injectable decorator needed, as the constructor has no dependencies
+@Injectable()
 class MyService {
     constructor() {
         // ...
@@ -248,16 +253,35 @@ class MyService {
 @Injectable()
 class MyClass {
     constructor(service: MyService) {
-        // service will be resolved by Themis
+        // ...
     }
 }
+
+@Module({
+    systems: [],
+    providers: [MyService, MyClass],
+    imports: [],
+    exports: [MyClass] // this will make the defined provider available to modules that import this module
+})
+class MyModule {}
 ```
 
-To change the strategy Themis uses when resolving dependencies, you can use one of the providers listed above in your modules.
 
-❗ **Beware**: Providers are not limited to their modules, if you register a provider in an arbitrary module, these will
-also be used in every other module. Be sure to not register two providers for the same identifier, as this will override
-previously defined providers for that identifier. ❗
+```typescript
+providers: [MyClass]
+``` 
+is a shorthand notation for a class provider (see below) which is the same as
+```typescript
+providers: [{ provide: MyClass, useClass: MyClass }]
+```
+
+Providers are limited to their module scope. If you want them to become available in modules that import your module,
+you will need to export them using the ```exports``` array of your module. Exporting your providers is totally optional,
+in fact, it is best practice to only export what is really needed to have good encapsulation and modularization of
+your dependencies.
+
+To change the strategy Themis uses when resolving dependencies, you can use the following provider types in your
+modules:
 
 
 #### Class Provider
@@ -268,7 +292,8 @@ const classProvider = { provide: MyClass, useClass: MyClassImpl };
 @Module({
     systems: [],
     providers: [classProvider],
-    imports: []
+    imports: [],
+    exports: [MyClass] // this will make the defined provider available to modules that import this module
 })
 class MyModule {
     
@@ -285,7 +310,9 @@ const valueProvider = { provide: 'MyValue', useValue: 42 };
 @Module({
     systems: [],
     providers: [valueProvider],
-    imports: []
+    imports: [],
+    exports: ['MyValue'] // this will make the defined provider available to modules that import this module
+
 })
 class MyModule {
     
@@ -299,10 +326,11 @@ class MyModule {
 
 const factoryProvider = { provide: MyClass, useFactory: () => new MyClassImpl() }
 
-    @Module({
+@Module({
     systems: [],
     providers: [factoryProvider],
-    imports: []
+    imports: [], 
+    exports: [MyClass] // this will make the defined provider available to modules that import this module
 })
 class MyModule {
     

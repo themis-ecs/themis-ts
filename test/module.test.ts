@@ -57,7 +57,8 @@ class SubModule1 {
 }
 
 @Module({
-  providers: [{ provide: 'test3', useFactory: () => 42 }]
+  providers: [{ provide: 'test3', useFactory: () => 42 }],
+  exports: ['test3']
 })
 class SubModule2 {
   init(): void {

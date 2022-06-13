@@ -1,20 +1,14 @@
-import { all, any, ComponentBase, ComponentQuery, none, Pipeline, Query, System, WorldBuilder } from '../src';
+import { all, any, ComponentBase, ComponentQuery, Module, none, Pipeline, Query, System, WorldBuilder } from '../src';
 import { ThemisWorld } from '../src/internal/core/world';
 
+let update: (dt: number) => void;
+
 test('integration test', () => {
-  const entitySystemA = new TestEntitySystemA();
-  const entitySystemB = new TestEntitySystemB();
-  const entitySystemC = new TestEntitySystemC();
+  const world = new WorldBuilder().module(TestModule).build() as ThemisWorld;
 
-  let update = (dt: number) => {};
-
-  const mainPipeline = Pipeline('main')
-    .systems(entitySystemA, entitySystemB, entitySystemC)
-    .setup((pipeline) => {
-      update = (dt) => pipeline.update(dt);
-    });
-
-  const world = new WorldBuilder().pipeline(mainPipeline).build() as ThemisWorld;
+  const entitySystemA = world.resolve(TestEntitySystemA, TestModule)!;
+  const entitySystemB = world.resolve(TestEntitySystemB, TestModule)!;
+  const entitySystemC = world.resolve(TestEntitySystemC, TestModule)!;
 
   let entity1 = world.createEntityId();
   world.addComponent(entity1, TestComponentA);
@@ -76,4 +70,13 @@ class TestEntitySystemB {
 class TestEntitySystemC {
   @ComponentQuery(none(TestComponentA))
   query!: Query;
+}
+
+@Module({
+  systems: [TestEntitySystemA, TestEntitySystemB, TestEntitySystemC]
+})
+class TestModule {
+  init(pipeline: Pipeline): void {
+    update = (dt) => pipeline.update(dt);
+  }
 }

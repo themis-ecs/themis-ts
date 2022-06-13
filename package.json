@@ -26,6 +26,9 @@
     "url": "https://github.com/themis-ecs/themis-ts/issues"
   },
   "homepage": "https://github.com/themis-ecs/themis-ts#readme",
+  "peerDependencies": {
+    "reflect-metadata": "^0.1.13"
+  },
   "devDependencies": {
     "@semantic-release/github": "^8.0.4",
     "@semantic-release/npm": "^9.0.1",
@@ -36,7 +39,6 @@
     "eslint-plugin-prettier": "^4.0.0",
     "jest": "^27.5.1",
     "prettier": "^2.6.2",
-    "reflect-metadata": "^0.1.13",
     "semantic-release": "^19.0.2",
     "ts-jest": "^27.1.4",
     "tslib": "^2.3.1",

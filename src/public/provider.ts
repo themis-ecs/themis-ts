@@ -1,11 +1,11 @@
 import { Class, Identifier } from './decorator';
 
-export type Provider<T> = () => T;
-export type FactoryProvider<T> = Provider<T>;
-export type ValueProvider<T> = T;
-export type ClassProvider<T> = Class<T>;
+export type Provider<T = unknown> = () => T;
+export type FactoryProvider<T = unknown> = Provider<T>;
+export type ValueProvider<T = unknown> = T;
+export type ClassProvider<T = unknown> = Class<T>;
 
-export type ProviderDefinition<T> = {
+export type ProviderDefinition<T = unknown> = {
   provide: Identifier<T>;
   useClass?: ClassProvider<T>;
   useValue?: ValueProvider<T>;

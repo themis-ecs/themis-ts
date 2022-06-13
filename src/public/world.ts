@@ -1,6 +1,10 @@
 import { Entity } from './entity';
 import { Blueprint } from './blueprint';
 import { Event, EventErrorCallback, EventListener, EventType } from './event';
+import { ComponentQueryFunction } from './component';
+import { Query } from './query';
+import { Identifier } from './decorator';
+import { Module } from '../internal/ioc/module';
 
 /**
  * The world is part of the main API of themis-ecs. It is the place, where your systems, your components and
@@ -75,9 +79,27 @@ export abstract class World {
 
   /**
    * You can use this method to inject the dependencies which were configured during world building into any
-   * arbitrary object. See the documentation about dependency injection in the world builder for more details.
+   * arbitrary object.
+   * If you specify a module, then its content will be used, otherwise the global context is used.
+   * See the documentation about dependency injection in the world builder for more details.
    * @see WorldBuilder
    * @param object
+   * @param module
    */
-  abstract inject(object: unknown): void;
+  abstract inject(object: unknown, module?: Module): void;
+
+  /**
+   * resolve the given dependency. If you specify a module, then its context will be used, otherwise the global
+   * context is used.
+   * @param identifier
+   * @param module
+   */
+  abstract resolve<T>(identifier: Identifier<T>, module?: Module): T | undefined;
+
+  /**
+   * Query this world for entities with the components as defined in the given ComponentQueryFunctions.
+   * You can use the predefined functions all(), any() and none().
+   * @param queries
+   */
+  abstract query(...queries: ComponentQueryFunction[]): Query;
 }

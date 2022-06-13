@@ -1,17 +1,11 @@
-import { all, ComponentQuery, OnUpdate, Pipeline, Query, System, WorldBuilder } from '../src';
+import { all, ComponentQuery, Module, OnUpdate, Pipeline, Query, System, WorldBuilder } from '../src';
 import { ThemisEntity } from '../src/internal/core/entity';
 import { ThemisWorld } from '../src/internal/core/world';
 
+let update: (dt: number) => void;
+
 test('entity test', () => {
-  let update = (dt: number) => {};
-
-  const mainPipeline = Pipeline('main')
-    .systems(new TestSystem())
-    .setup((pipeline) => {
-      update = (dt) => pipeline.update(dt);
-    });
-
-  const world = new WorldBuilder().pipeline(mainPipeline).build() as ThemisWorld;
+  const world = new WorldBuilder().module(TestModule).build() as ThemisWorld;
 
   const entity = new ThemisEntity(world, world.createEntityId());
   entity.addComponent(TestComponentA, 'test');
@@ -39,5 +33,14 @@ class TestSystem implements OnUpdate {
     } else {
       fail();
     }
+  }
+}
+
+@Module({
+  systems: [TestSystem]
+})
+class TestModule {
+  init(pipeline: Pipeline): void {
+    update = (dt) => pipeline.update(dt);
   }
 }

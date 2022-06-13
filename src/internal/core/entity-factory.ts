@@ -1,8 +1,11 @@
 import { Entity } from 'public/entity';
-import { Injectable } from './decorator';
-import { ThemisWorld } from '../internal/core/world';
-import { ThemisEntity } from '../internal/core/entity';
+import { Injectable } from '../../public/decorator';
+import { ThemisWorld } from './world';
+import { ThemisEntity } from './entity';
 
+/**
+ * @internal
+ */
 @Injectable()
 export class EntityFactory {
   private readonly world: ThemisWorld;

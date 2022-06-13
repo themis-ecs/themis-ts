@@ -16,10 +16,8 @@ export class ComponentRegistry {
   private static readonly INITIAL_COMPONENT_CAPACITY = 32;
 
   private readonly componentIdentityMap: { [componentName: string]: number };
-  private readonly entityCompositionMap: { [entityId: number]: BitVector };
-  private readonly componentMapperMap: {
-    [componentId: number]: ComponentMapper<ComponentBase>;
-  };
+  private readonly entityCompositionMap: BitVector[];
+  private readonly componentMapperMap: ComponentMapper<ComponentBase>[];
   private readonly componentQueries: Map<ComponentQueryIdentity, ComponentQuery>;
   private componentIdCounter: number;
   private readonly eventRegistry: EventRegistry;
@@ -65,6 +63,9 @@ export class ComponentRegistry {
     }
     componentQuery = componentQueryBuilder.build(ComponentRegistry.INITIAL_COMPONENT_CAPACITY, (component) =>
       this.getComponentId(component)
+    );
+    this.entityCompositionMap.forEach((composition, entityId) =>
+      componentQuery?.onCompositionChange(entityId, composition)
     );
     this.componentQueries.set(identity, componentQuery);
     return componentQuery;

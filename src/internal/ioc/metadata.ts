@@ -1,4 +1,4 @@
-import { Identifier, Imports, Providers, Scope, Systems } from '../../public/decorator';
+import { Exports, Identifier, Imports, Providers, Scope, Systems } from '../../public/decorator';
 import { ComponentQueryFunction } from '../../public/component';
 
 /**
@@ -33,4 +33,5 @@ export type ModuleMetadata = {
   systems: Systems<unknown>;
   providers: Providers<unknown>;
   imports: Imports;
+  exports: Exports;
 };

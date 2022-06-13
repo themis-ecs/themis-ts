@@ -3,6 +3,9 @@ import { ComponentQuery } from './component-query';
 import { EntityCollection, Events, Query } from '../../public/query';
 import { Entity } from '../../public/entity';
 
+/**
+ * @internal
+ */
 export class ComponentQueryAdapter implements Query {
   protected readonly componentQuery: ComponentQuery;
   protected readonly world: ThemisWorld;

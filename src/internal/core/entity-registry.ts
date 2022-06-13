@@ -1,6 +1,6 @@
 import { EventRegistry } from './event-registry';
 import { EntityDeleteEvent } from '../../public/event';
-import { EntityFactory } from '../../public/entity-factory';
+import { EntityFactory } from './entity-factory';
 import { Inject } from '../../public/decorator';
 import { Entity } from '../../public/entity';
 
