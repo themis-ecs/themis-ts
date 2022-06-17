@@ -19,6 +19,7 @@ export const MODULE_METADATA = 'themis:module';
  */
 export type InjectMetadata = {
   injectionPoints: Record<string | symbol, Identifier>;
+  constructorInjectionPoints: Record<number, Identifier>;
   scope: Scope;
   providedIn: ProvidedIn;
 };

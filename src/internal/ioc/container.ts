@@ -113,8 +113,17 @@ export class Container implements Resolver {
         }
       }
 
+      const constructorInjectionPoints = metadata?.constructorInjectionPoints || {};
+
       const resolvedDependencies =
-        (dependencies?.map((dependency) => this.resolve(dependency, module)) as never[]) || [];
+        (dependencies?.map((dependency, index) => {
+          const configuredDependency = constructorInjectionPoints[index];
+          if (configuredDependency !== undefined) {
+            return this.resolve(configuredDependency, module);
+          } else {
+            return this.resolve(dependency, module);
+          }
+        }) as never[]) || [];
       const instance = new constructor(...resolvedDependencies);
 
       if (metadata?.scope === SINGLETON && metadata?.providedIn === 'module') {
