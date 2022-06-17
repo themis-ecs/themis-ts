@@ -10,6 +10,7 @@ test('constructor injection test', () => {
   const instance = container.resolve(TestClass, MyModule)!;
 
   expect(instance).toBeDefined();
+  expect(instance.someNumber).toEqual(42);
   expect(testValue).toEqual('works :)');
   expect(Object.getPrototypeOf(instance.dependency).constructor).toEqual(MyConcreteClass);
 });
@@ -32,12 +33,15 @@ class TestClass {
   @Inject(MyConcreteClass)
   public dependency!: MyAbstractClass;
 
-  constructor(@Inject(MyConcreteClass) dependency: MyAbstractClass) {
+  public someNumber: number;
+
+  constructor(@Inject(MyConcreteClass) dependency: MyAbstractClass, @Inject('someIdentifier') someNumber: number) {
     dependency.testFunction();
+    this.someNumber = someNumber;
   }
 }
 
 @Module({
-  providers: [TestClass, MyConcreteClass]
+  providers: [TestClass, MyConcreteClass, { provide: 'someIdentifier', useValue: 42 }]
 })
 class MyModule {}
