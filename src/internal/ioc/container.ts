@@ -14,6 +14,7 @@ import { PublicInjector } from './public-injector';
  */
 export class Container implements Resolver {
   private globalContext = this.newContext();
+  private rootContext = this.newContext();
   private contexts = new Map<Module, ModuleContext>();
   private injectors: Injector[] = [new ModuleInjector(this), new ComponentQueryInjector(this)];
 
@@ -104,12 +105,25 @@ export class Container implements Resolver {
       }
       const dependencies: Class[] | undefined = Reflect.getMetadata('design:paramtypes', constructor);
       const metadata: InjectMetadata | undefined = Reflect.getMetadata(INJECT_METADATA, constructor);
+
+      if (metadata?.providedIn === 'root') {
+        const cachedRootInstance = this.rootContext.getInstance(constructor);
+        if (cachedRootInstance !== undefined) {
+          return cachedRootInstance;
+        }
+      }
+
       const resolvedDependencies =
         (dependencies?.map((dependency) => this.resolve(dependency, module)) as never[]) || [];
       const instance = new constructor(...resolvedDependencies);
-      if (metadata?.scope === SINGLETON) {
+
+      if (metadata?.scope === SINGLETON && metadata?.providedIn === 'module') {
         context.registerInstance(constructor, instance);
       }
+      if (metadata?.scope === SINGLETON && metadata?.providedIn === 'root') {
+        this.rootContext.registerInstance(constructor, instance);
+      }
+
       return instance;
     }
     return undefined;

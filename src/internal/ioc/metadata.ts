@@ -1,4 +1,4 @@
-import { Exports, Identifier, Imports, Providers, Scope, Systems } from '../../public/decorator';
+import { Exports, Identifier, Imports, ProvidedIn, Providers, Scope, Systems } from '../../public/decorator';
 import { ComponentQueryFunction } from '../../public/component';
 
 /**
@@ -20,6 +20,7 @@ export const MODULE_METADATA = 'themis:module';
 export type InjectMetadata = {
   injectionPoints: Record<string | symbol, Identifier>;
   scope: Scope;
+  providedIn: ProvidedIn;
 };
 /**
  * @internal

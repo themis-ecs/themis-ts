@@ -51,15 +51,18 @@ export const SINGLETON = 'SINGLETON';
 export const REQUEST = 'REQUEST';
 
 export type Scope = 'SINGLETON' | 'REQUEST';
+export type ProvidedIn = 'root' | 'module';
 
 export type InjectableOptions = {
   scope?: Scope;
+  providedIn?: ProvidedIn;
 };
 
 export function Injectable(options?: InjectableOptions): ClassDecorator<unknown> {
   return function <T>(constructor: Class<T>) {
     const metadata: InjectMetadata = Reflect.getMetadata(INJECT_METADATA, constructor) || {};
     metadata.scope = options?.scope ? options.scope : SINGLETON;
+    metadata.providedIn = options?.providedIn ? options.providedIn : 'module';
     Reflect.defineMetadata(INJECT_METADATA, metadata, constructor);
   };
 }
