@@ -8,6 +8,8 @@ import { ModuleInjector } from './module-injector';
 import { ComponentQueryInjector } from './component-query-injector';
 import { Resolver } from './resolver';
 import { PublicInjector } from './public-injector';
+import { isForwardRef, Token } from './token';
+import { createProxy } from './proxy';
 
 /**
  * @internal
@@ -85,8 +87,8 @@ export class Container implements Resolver {
     return instance;
   }
 
-  private useProvider<T>(context: ModuleContext, identifier: Identifier<T>, module?: Module): T | undefined {
-    const provider = context.getProvider(identifier);
+  private useProvider<T>(context: ModuleContext, token: Identifier<T>, module?: Module): T | undefined {
+    const provider = context.getProvider(token);
     return (Container.useValueProvider(provider) ||
       Container.useFactoryProvider(provider) ||
       this.useClassProvider(context, provider, module)) as T;
@@ -117,8 +119,13 @@ export class Container implements Resolver {
 
       const resolvedDependencies =
         (dependencies?.map((dependency, index) => {
-          const configuredDependency = constructorInjectionPoints[index];
+          const configuredToken: Token = constructorInjectionPoints[index];
+          const forwardRef = isForwardRef(configuredToken);
+          const configuredDependency: Identifier = forwardRef ? configuredToken.forwardRef() : configuredToken;
           if (configuredDependency !== undefined) {
+            if (forwardRef) {
+              return createProxy(() => this.resolve(configuredDependency, module));
+            }
             return this.resolve(configuredDependency, module);
           } else {
             return this.resolve(dependency, module);
@@ -138,7 +145,8 @@ export class Container implements Resolver {
     return undefined;
   }
 
-  private useImports<T>(context: ModuleContext, identifier: Identifier<T>, module: Module): T | undefined {
+  private useImports<T>(context: ModuleContext, token: Token<T>, module: Module): T | undefined {
+    const identifier = isForwardRef(token) ? token.forwardRef() : token;
     for (const importedModule of context.getImports()) {
       const importContext = this.contexts.get(importedModule);
       if (!importContext) {
