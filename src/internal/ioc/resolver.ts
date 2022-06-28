@@ -1,5 +1,5 @@
-import { Identifier } from '../../public/decorator';
 import { Module } from './module';
+import { Identifier } from '../../public/decorator';
 
 /**
  * @internal

@@ -40,6 +40,48 @@ test('Container Encapsulation', () => {
   expect(container.resolve(ServiceD, ModuleC)).toBeDefined();
 });
 
+test('providedIn with singleton scope', () => {
+  const container = new Container();
+  container.registerModule(ModuleA);
+
+  const instanceA = container.resolve(GlobalService, ModuleA)!;
+  const instanceB = container.resolve(GlobalService, ModuleB)!;
+  const instanceC = container.resolve(GlobalService, ModuleC)!;
+
+  expect(instanceA).toBe(instanceB);
+  expect(instanceA).toBe(instanceC);
+  expect(instanceB).toBe(instanceC);
+
+  instanceA.id = 'A';
+  instanceB.id = 'B';
+  instanceC.id = 'C';
+
+  expect(instanceA.id).toEqual('C');
+  expect(instanceB.id).toEqual('C');
+  expect(instanceC.id).toEqual('C');
+});
+
+test('providedIn with module scope', () => {
+  const container = new Container();
+  container.registerModule(ModuleA);
+
+  const instanceA = container.resolve(NonGlobalService, ModuleA)!;
+  const instanceB = container.resolve(NonGlobalService, ModuleB)!;
+  const instanceC = container.resolve(NonGlobalService, ModuleC)!;
+
+  expect(instanceA).not.toBe(instanceB);
+  expect(instanceA).not.toBe(instanceC);
+  expect(instanceB).not.toBe(instanceC);
+
+  instanceA.id = 'A';
+  instanceB.id = 'B';
+  instanceC.id = 'C';
+
+  expect(instanceA.id).toEqual('A');
+  expect(instanceB.id).toEqual('B');
+  expect(instanceC.id).toEqual('C');
+});
+
 @Injectable()
 class ServiceD {
   public id = 'ServiceD';
@@ -62,22 +104,32 @@ class ServiceA {
   constructor(public service: ServiceB) {}
 }
 
+@Injectable({ providedIn: 'root' })
+class GlobalService {
+  public id = 'GlobalService';
+}
+
+@Injectable({ providedIn: 'module' })
+class NonGlobalService {
+  public id = 'NonGlobalService';
+}
+
 @Module({
-  providers: [ServiceC, ServiceD],
+  providers: [ServiceC, ServiceD, GlobalService, NonGlobalService],
   imports: [],
   exports: [ServiceC]
 })
 class ModuleC {}
 
 @Module({
-  providers: [ServiceB],
+  providers: [ServiceB, GlobalService, NonGlobalService],
   imports: [ModuleC],
   exports: [ServiceB]
 })
 class ModuleB {}
 
 @Module({
-  providers: [ServiceA],
+  providers: [ServiceA, GlobalService, NonGlobalService],
   imports: [ModuleB],
   exports: []
 })

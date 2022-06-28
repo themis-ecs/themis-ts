@@ -1,6 +1,9 @@
 import { Injector } from './injector';
 import { INJECT_METADATA, InjectMetadata } from './metadata';
 import { Module } from './module';
+import { isForwardRef } from './token';
+import { Identifier } from '../../public/decorator';
+import { createProxy } from './proxy';
 
 /**
  * @internal
@@ -12,8 +15,15 @@ export class ModuleInjector extends Injector {
       return;
     }
     Object.keys(metadata.injectionPoints).forEach((key: string) => {
-      const identifier = metadata.injectionPoints[key];
-      this.defineProperty(instance, key, this.resolve(identifier, module));
+      const token = metadata.injectionPoints[key];
+      const forwardRef = isForwardRef(token);
+      const identifier: Identifier = forwardRef ? token.forwardRef() : token;
+      if (forwardRef) {
+        const proxy = createProxy(() => this.resolve(identifier, module) as object);
+        this.defineProperty(instance, key, proxy);
+      } else {
+        this.defineProperty(instance, key, this.resolve(identifier, module));
+      }
     });
   }
 }
