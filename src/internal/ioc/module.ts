@@ -67,8 +67,8 @@ export class ModuleContext {
     return this.exports;
   }
 
-  public getProvider(identifier: Identifier): ProviderDefinition | undefined {
-    return this.providers.get(identifier);
+  public getProvider(token: Identifier): ProviderDefinition | undefined {
+    return this.providers.get(token);
   }
 
   public getInstance<T>(identifier: Identifier<T>): T | undefined {

@@ -3,6 +3,8 @@ export * from './public/component';
 export * from './public/decorator';
 export * from './public/entity';
 export * from './public/event';
+export * from './public/forward-ref';
+export * from './public/injector';
 export * from './public/logger';
 export * from './public/module';
 export * from './public/pipeline';

@@ -350,6 +350,7 @@ Themis offers a variety of features to help you write better code.
     <li><a href="https://github.com/themis-ecs/themis-ts/wiki/Events">Events</a></li>
     <li><a href="https://github.com/themis-ecs/themis-ts/wiki/Component-Queries">Component Queries</a></li>
     <li><a href="https://github.com/themis-ecs/themis-ts/wiki/Providers">Providers</a></li>
+    <li><a href="https://github.com/themis-ecs/themis-ts/wiki/Injection">Injection</a></li>
     <li><a href="https://github.com/themis-ecs/themis-ts/wiki/Systems">Systems</a></li>
     <li><a href="https://github.com/themis-ecs/themis-ts/wiki/Modules">Modules</a></li>
     <li><a href="https://github.com/themis-ecs/themis-ts/wiki/Logging">Logging</a></li>

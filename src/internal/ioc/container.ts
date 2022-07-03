@@ -8,12 +8,15 @@ import { ModuleInjector } from './module-injector';
 import { ComponentQueryInjector } from './component-query-injector';
 import { Resolver } from './resolver';
 import { PublicInjector } from './public-injector';
+import { isForwardRef, Token } from './token';
+import { createProxy } from './proxy';
 
 /**
  * @internal
  */
 export class Container implements Resolver {
   private globalContext = this.newContext();
+  private rootContext = this.newContext();
   private contexts = new Map<Module, ModuleContext>();
   private injectors: Injector[] = [new ModuleInjector(this), new ComponentQueryInjector(this)];
 
@@ -84,8 +87,8 @@ export class Container implements Resolver {
     return instance;
   }
 
-  private useProvider<T>(context: ModuleContext, identifier: Identifier<T>, module?: Module): T | undefined {
-    const provider = context.getProvider(identifier);
+  private useProvider<T>(context: ModuleContext, token: Identifier<T>, module?: Module): T | undefined {
+    const provider = context.getProvider(token);
     return (Container.useValueProvider(provider) ||
       Container.useFactoryProvider(provider) ||
       this.useClassProvider(context, provider, module)) as T;
@@ -104,18 +107,46 @@ export class Container implements Resolver {
       }
       const dependencies: Class[] | undefined = Reflect.getMetadata('design:paramtypes', constructor);
       const metadata: InjectMetadata | undefined = Reflect.getMetadata(INJECT_METADATA, constructor);
+
+      if (metadata?.providedIn === 'root') {
+        const cachedRootInstance = this.rootContext.getInstance(constructor);
+        if (cachedRootInstance !== undefined) {
+          return cachedRootInstance;
+        }
+      }
+
+      const constructorInjectionPoints = metadata?.constructorInjectionPoints || {};
+
       const resolvedDependencies =
-        (dependencies?.map((dependency) => this.resolve(dependency, module)) as never[]) || [];
+        (dependencies?.map((dependency, index) => {
+          const configuredToken: Token = constructorInjectionPoints[index];
+          const forwardRef = isForwardRef(configuredToken);
+          const configuredDependency: Identifier = forwardRef ? configuredToken.forwardRef() : configuredToken;
+          if (configuredDependency !== undefined) {
+            if (forwardRef) {
+              return createProxy(() => this.resolve(configuredDependency, module));
+            }
+            return this.resolve(configuredDependency, module);
+          } else {
+            return this.resolve(dependency, module);
+          }
+        }) as never[]) || [];
       const instance = new constructor(...resolvedDependencies);
-      if (metadata?.scope === SINGLETON) {
+
+      if (metadata?.scope === SINGLETON && metadata?.providedIn === 'module') {
         context.registerInstance(constructor, instance);
       }
+      if (metadata?.scope === SINGLETON && metadata?.providedIn === 'root') {
+        this.rootContext.registerInstance(constructor, instance);
+      }
+
       return instance;
     }
     return undefined;
   }
 
-  private useImports<T>(context: ModuleContext, identifier: Identifier<T>, module: Module): T | undefined {
+  private useImports<T>(context: ModuleContext, token: Token<T>, module: Module): T | undefined {
+    const identifier = isForwardRef(token) ? token.forwardRef() : token;
     for (const importedModule of context.getImports()) {
       const importContext = this.contexts.get(importedModule);
       if (!importContext) {
