@@ -9,11 +9,12 @@ import { Pipeline, SetupCallback } from './pipeline';
 import { ThemisPipeline } from '../internal/core/pipeline';
 import { Class, Identifier } from './decorator';
 import { SystemType } from './system';
-import { SubModule, ThemisModule, TopModule } from './module';
+import { SubModule, TopModule } from './module';
 import { ProviderDefinition } from './provider';
 import { NOOP } from '../internal/core/noop';
 import { Container } from '../internal/ioc/container';
 import { EntityFactory } from '../internal/core/entity-factory';
+import { Module } from '../internal/ioc/module';
 
 const logger = Logging.getLogger('themis.world.builder');
 
@@ -29,6 +30,8 @@ export class WorldBuilder {
   private readonly blueprintRegistry = new BlueprintRegistry();
   private readonly entityRegistry = new EntityRegistry(this.eventRegistry);
   private readonly componentRegistry = new ComponentRegistry(this.eventRegistry);
+
+  private readonly initializedSystemsMap = new Map<Module, Set<SystemType>>();
 
   public build(): World {
     logger.info('Welcome to Themis-ECS');
@@ -92,7 +95,7 @@ export class WorldBuilder {
     });
   }
 
-  private loadSystems(module: Class<ThemisModule<unknown>>): SystemType<unknown>[] {
+  private loadSystems(module: Module): SystemType<unknown>[] {
     const metadata = this.container.getMetadata(module);
     if (!metadata) {
       return [];
@@ -103,13 +106,27 @@ export class WorldBuilder {
       .map((system) => this.container.resolve(system, module))
       .forEach((instance) => {
         if (instance) {
-          if (instance.init) {
-            instance.init();
-          }
+          this.initSystem(module, instance);
           systems.push(instance);
         }
       });
     return systems;
+  }
+
+  private initSystem(module: Module, system: SystemType<unknown>): void {
+    if (!system.init) {
+      return;
+    }
+    let initializedSystems = this.initializedSystemsMap.get(module);
+    if (initializedSystems === undefined) {
+      initializedSystems = new Set<SystemType>();
+      this.initializedSystemsMap.set(module, initializedSystems);
+    }
+    if (initializedSystems.has(system)) {
+      return;
+    }
+    system.init();
+    initializedSystems.add(system);
   }
 
   private loadSubModules(module: Class<TopModule<unknown>>): void {
@@ -123,7 +140,7 @@ export class WorldBuilder {
     });
   }
 
-  private getSubModules(module: Class<ThemisModule<unknown>>): ReadonlySet<Class<SubModule>> {
+  private getSubModules(module: Module): ReadonlySet<Class<SubModule>> {
     const metadata = this.container.getMetadata(module);
     const subModules = new Set<Class<SubModule>>();
     if (!metadata) {
