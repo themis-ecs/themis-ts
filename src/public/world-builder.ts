@@ -31,8 +31,6 @@ export class WorldBuilder {
   private readonly entityRegistry = new EntityRegistry(this.eventRegistry);
   private readonly componentRegistry = new ComponentRegistry(this.eventRegistry);
 
-  private readonly initializedSystemsMap = new Map<Module, Set<SystemType>>();
-
   public build(): World {
     logger.info('Welcome to Themis-ECS');
     logger.info('building your world...');
@@ -95,38 +93,27 @@ export class WorldBuilder {
     });
   }
 
-  private loadSystems(module: Module): SystemType<unknown>[] {
+  private loadSystems(module: Module, loadedModules = new Set<Module>()): SystemType<unknown>[] {
     const metadata = this.container.getMetadata(module);
-    if (!metadata) {
+    if (!metadata || loadedModules.has(module)) {
       return [];
     }
+    loadedModules.add(module);
     const systems: SystemType<unknown>[] = [];
-    metadata.imports.map((subModule) => this.loadSystems(subModule)).forEach((it) => systems.push(...it));
+    metadata.imports
+      .map((subModule) => this.loadSystems(subModule, loadedModules))
+      .forEach((it) => systems.push(...it));
     metadata.systems
       .map((system) => this.container.resolve(system, module))
       .forEach((instance) => {
         if (instance) {
-          this.initSystem(module, instance);
+          if (instance.init) {
+            instance.init();
+          }
           systems.push(instance);
         }
       });
     return systems;
-  }
-
-  private initSystem(module: Module, system: SystemType<unknown>): void {
-    if (!system.init) {
-      return;
-    }
-    let initializedSystems = this.initializedSystemsMap.get(module);
-    if (initializedSystems === undefined) {
-      initializedSystems = new Set<SystemType>();
-      this.initializedSystemsMap.set(module, initializedSystems);
-    }
-    if (initializedSystems.has(system)) {
-      return;
-    }
-    system.init();
-    initializedSystems.add(system);
   }
 
   private loadSubModules(module: Class<TopModule<unknown>>): void {
@@ -140,14 +127,15 @@ export class WorldBuilder {
     });
   }
 
-  private getSubModules(module: Module): ReadonlySet<Class<SubModule>> {
+  private getSubModules(module: Module, loadedModules = new Set<Module>()): ReadonlySet<Class<SubModule>> {
     const metadata = this.container.getMetadata(module);
     const subModules = new Set<Class<SubModule>>();
-    if (!metadata) {
+    if (!metadata || loadedModules.has(module)) {
       return subModules;
     }
+    loadedModules.add(module);
     metadata.imports
-      .map((subModule) => this.getSubModules(subModule))
+      .map((subModule) => this.getSubModules(subModule, loadedModules))
       .forEach((imports) => imports.forEach((subModule) => subModules.add(subModule)));
     metadata.imports.forEach((subModule) => subModules.add(subModule));
     return subModules;
