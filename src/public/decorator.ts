@@ -8,7 +8,7 @@ import {
   MODULE_METADATA,
   ModuleMetadata
 } from '../internal/ioc/metadata';
-import { SubModule, ThemisModule } from './module';
+import { EmptyModule, SubModule, ThemisModule } from './module';
 import { SystemType } from './system';
 import { ProviderDefinition } from './provider';
 import { Token } from '../internal/ioc/token';
@@ -83,8 +83,8 @@ export function Injectable(options?: InjectableOptions): ClassDecorator<unknown>
 
 export type Systems<T> = Class<SystemType<T>>[];
 export type Providers<T = unknown> = (ProviderDefinition<T> | Class)[];
-export type Imports = Class<SubModule>[];
-export type Exports = (Class<SubModule> | Identifier)[];
+export type Imports = Class<Required<EmptyModule> & Partial<SubModule>>[];
+export type Exports = (Class<Required<EmptyModule> & Partial<SubModule>> | Identifier)[];
 
 export type ModuleDefinitionOptions<T> = {
   systems?: Systems<T>;

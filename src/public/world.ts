@@ -1,6 +1,6 @@
 import { Entity } from './entity';
 import { Blueprint } from './blueprint';
-import { Event, EventErrorCallback, EventListener, EventType } from './event';
+import { Event, EventErrorCallback, EventListener, EventType, Subscription } from './event';
 import { ComponentQueryFunction } from './component';
 import { Query } from './query';
 import { Identifier } from './decorator';
@@ -65,7 +65,7 @@ export abstract class World {
     eventType: EventType<T>,
     listener: EventListener<T>,
     errorCallback?: EventErrorCallback<T>
-  ): void;
+  ): Subscription;
 
   /**
    * Submit the given event. All EventListeners will be informed about this call after all systems have updated.
