@@ -8,4 +8,7 @@ export abstract class SubModule {
   public abstract init?(): void;
 }
 
-export type ThemisModule<U> = TopModule<U> | SubModule;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface EmptyModule {}
+
+export type ThemisModule<U> = Required<EmptyModule> & Partial<TopModule<U> | SubModule>;
