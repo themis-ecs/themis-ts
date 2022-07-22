@@ -1,7 +1,7 @@
 import { Module, Pipeline } from 'themis-ts';
 import { BabylonjsModule } from './babylonjs/babylonjs.module';
-import { Engine } from '@babylonjs/core';
 import { DemoModule } from './demo/demo.module';
+import { BabylonjsService } from './babylonjs/service/babylonjs.service';
 
 @Module({
   systems: [],
@@ -10,11 +10,11 @@ import { DemoModule } from './demo/demo.module';
   exports: []
 })
 export class AppModule {
-  constructor(private readonly engine: Engine) {}
+  constructor(private readonly babylonjsService: BabylonjsService) {}
 
   init(pipeline: Pipeline): void {
-    this.engine.runRenderLoop(() => {
-      pipeline.update(this.engine.getDeltaTime());
+    this.babylonjsService.getEngine().runRenderLoop(() => {
+      pipeline.update(this.babylonjsService.getEngine().getDeltaTime());
     });
   }
 }

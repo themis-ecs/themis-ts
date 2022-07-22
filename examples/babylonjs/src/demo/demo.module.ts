@@ -1,6 +1,6 @@
 import { Module } from 'themis-ts';
+import { DemoSystem } from './system/demo.system';
 import { BabylonjsModule } from '../babylonjs/babylonjs.module';
-import { DemoSystem } from './demo.system';
 
 @Module({
   systems: [DemoSystem],

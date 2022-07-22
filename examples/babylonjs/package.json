@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "reflect-metadata": "0.1.13",
-    "themis-ts": "3.1.0"
+    "rxjs": "^7.5.6",
+    "themis-ts": "^3.0.0"
   }
 }
