@@ -9,11 +9,12 @@ import { Pipeline, SetupCallback } from './pipeline';
 import { ThemisPipeline } from '../internal/core/pipeline';
 import { Class, Identifier } from './decorator';
 import { SystemType } from './system';
-import { SubModule, ThemisModule, TopModule } from './module';
+import { SubModule, TopModule } from './module';
 import { ProviderDefinition } from './provider';
 import { NOOP } from '../internal/core/noop';
 import { Container } from '../internal/ioc/container';
 import { EntityFactory } from '../internal/core/entity-factory';
+import { Module } from '../internal/ioc/module';
 
 const logger = Logging.getLogger('themis.world.builder');
 
@@ -92,13 +93,16 @@ export class WorldBuilder {
     });
   }
 
-  private loadSystems(module: Class<ThemisModule<unknown>>): SystemType<unknown>[] {
+  private loadSystems(module: Module, loadedModules = new Set<Module>()): SystemType<unknown>[] {
     const metadata = this.container.getMetadata(module);
-    if (!metadata) {
+    if (!metadata || loadedModules.has(module)) {
       return [];
     }
+    loadedModules.add(module);
     const systems: SystemType<unknown>[] = [];
-    metadata.imports.map((subModule) => this.loadSystems(subModule)).forEach((it) => systems.push(...it));
+    metadata.imports
+      .map((subModule) => this.loadSystems(subModule, loadedModules))
+      .forEach((it) => systems.push(...it));
     metadata.systems
       .map((system) => this.container.resolve(system, module))
       .forEach((instance) => {
@@ -123,14 +127,15 @@ export class WorldBuilder {
     });
   }
 
-  private getSubModules(module: Class<ThemisModule<unknown>>): ReadonlySet<Class<SubModule>> {
+  private getSubModules(module: Module, loadedModules = new Set<Module>()): ReadonlySet<Class<SubModule>> {
     const metadata = this.container.getMetadata(module);
     const subModules = new Set<Class<SubModule>>();
-    if (!metadata) {
+    if (!metadata || loadedModules.has(module)) {
       return subModules;
     }
+    loadedModules.add(module);
     metadata.imports
-      .map((subModule) => this.getSubModules(subModule))
+      .map((subModule) => this.getSubModules(subModule, loadedModules))
       .forEach((imports) => imports.forEach((subModule) => subModules.add(subModule)));
     metadata.imports.forEach((subModule) => subModules.add(subModule));
     return subModules;
