@@ -1,4 +1,4 @@
-import { all, any, none, WorldBuilder } from '../src';
+import { all, any, Blueprint, Module, none, Pipeline, WorldBuilder } from '../src';
 
 test('Component Query Test', () => {
   const world = new WorldBuilder().build();
@@ -35,8 +35,27 @@ test('Component Query Test', () => {
   expect(world.query(none(ComponentC)).entities.getIds()).toEqual(new Uint32Array([entity1.getEntityId()]));
 });
 
+let update: (dt: number) => void;
+
+test('Component Query with Blueprint Test', () => {
+  const world = new WorldBuilder().module(TestModule).build();
+  world.registerBlueprint(Blueprint('test').component(ComponentA).component(ComponentB));
+  const query = world.query(all(ComponentA, ComponentB));
+  const entity = world.createEntity('test');
+  update(0);
+  const queryEntity = query.entities.getEntities()[0];
+  expect(queryEntity).toBe(entity);
+});
+
 class ComponentA {}
 
 class ComponentB {}
 
 class ComponentC {}
+
+@Module({})
+class TestModule {
+  init(pipeline: Pipeline): void {
+    update = (dt) => pipeline.update(dt);
+  }
+}

@@ -1,4 +1,3 @@
-import { BlueprintRegistry } from './blueprint-registry';
 import { EntityRegistry } from './entity-registry';
 import { ComponentRegistry } from './component-registry';
 import { EventRegistry } from './event-registry';
@@ -28,7 +27,6 @@ export class ThemisWorld implements World {
   constructor(
     private readonly entityRegistry: EntityRegistry,
     private readonly componentRegistry: ComponentRegistry,
-    private readonly blueprintRegistry: BlueprintRegistry,
     private readonly eventRegistry: EventRegistry,
     private readonly container: Container
   ) {}
@@ -58,9 +56,7 @@ export class ThemisWorld implements World {
   public createEntity(blueprint?: string): Entity {
     const entity = this.getEntity(this.createEntityId());
     if (blueprint) {
-      const configuration = this.blueprintRegistry.getBlueprint(blueprint);
-      this.componentRegistry.applyBlueprint(entity.getEntityId(), configuration);
-      configuration.initialize(entity);
+      this.componentRegistry.applyBlueprint(entity, blueprint);
     }
     this.eventRegistry.submit(EntityCreateEvent, new EntityCreateEvent(entity.getEntityId()));
     return entity;
@@ -84,8 +80,7 @@ export class ThemisWorld implements World {
 
   public registerBlueprint(blueprint: BlueprintBuilder): void {
     const blueprintDefinition = blueprint.build();
-    const blueprintConfiguration = this.componentRegistry.getBlueprintConfiguration(blueprintDefinition);
-    this.blueprintRegistry.registerBlueprint(blueprintDefinition.name, blueprintConfiguration);
+    this.componentRegistry.registerBlueprint(blueprintDefinition);
   }
 
   public registerAlias(entityId: number, name: string): void {
