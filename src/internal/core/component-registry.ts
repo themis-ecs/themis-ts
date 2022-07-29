@@ -3,11 +3,32 @@ import { BitVector } from './bit-vector';
 import { ComponentMapper } from './component-mapper';
 import { ComponentQuery, ComponentQueryIdentity } from './component-query';
 import { ComponentQueryBuilder } from './component-query-builder';
-import { BlueprintDefinition } from '../../public/blueprint';
-import { BlueprintComponentConfiguration } from './blueprint-registry';
+import { BlueprintDefinition, BluePrintInitializer } from '../../public/blueprint';
 import { EventRegistry } from './event-registry';
 import { EntityDeleteEvent } from '../../public/event';
 import { NOOP } from './noop';
+import { Entity } from '../../public/entity';
+
+/**
+ * @internal
+ */
+type BlueprintComponentConfiguration = {
+  composition: BitVector;
+  componentQueries: Array<ComponentQuery>;
+  componentMapperConfigurations: Array<
+    BlueprintComponentMapperConfiguration<ComponentBase, ComponentType<ComponentBase>>
+  >;
+  initialize: BluePrintInitializer;
+};
+
+/**
+ * @internal
+ */
+type BlueprintComponentMapperConfiguration<T extends ComponentBase, U extends ComponentType<T>> = {
+  component: U;
+  args: ConstructorParameters<U>;
+  mapper: ComponentMapper<T>;
+};
 
 /**
  * @internal
@@ -15,6 +36,7 @@ import { NOOP } from './noop';
 export class ComponentRegistry {
   private static readonly INITIAL_COMPONENT_CAPACITY = 32;
 
+  private readonly blueprintMap: { [blueprintName: string]: BlueprintComponentConfiguration };
   private readonly componentIdentityMap: { [componentName: string]: number };
   private readonly entityCompositionMap: BitVector[];
   private readonly componentMapperMap: ComponentMapper<ComponentBase>[];
@@ -23,6 +45,7 @@ export class ComponentRegistry {
   private readonly eventRegistry: EventRegistry;
 
   constructor(eventRegistry: EventRegistry) {
+    this.blueprintMap = {};
     this.componentIdentityMap = {};
     this.entityCompositionMap = [];
     this.componentMapperMap = [];
@@ -68,6 +91,11 @@ export class ComponentRegistry {
       componentQuery?.onCompositionChange(entityId, composition)
     );
     this.componentQueries.set(identity, componentQuery);
+    Object.values(this.blueprintMap).forEach((blueprint) => {
+      if (componentQuery?.isInterested(blueprint.composition)) {
+        blueprint.componentQueries.push(componentQuery);
+      }
+    });
     return componentQuery;
   }
 
@@ -115,21 +143,21 @@ export class ComponentRegistry {
     composition.reset();
   }
 
-  public getBlueprintConfiguration(blueprint: BlueprintDefinition): BlueprintComponentConfiguration {
+  public registerBlueprint(blueprint: BlueprintDefinition): void {
     const blueprintConfiguration: BlueprintComponentConfiguration = {
+      composition: new BitVector(),
       componentMapperConfigurations: [],
       componentQueries: [],
       initialize: blueprint.initializer ? blueprint.initializer : NOOP
     };
 
-    const composition = new BitVector();
     blueprint.components
       .map((componentConfig) => this.getComponentId(componentConfig.component))
       .forEach((componentId) => {
-        composition.set(componentId);
+        blueprintConfiguration.composition.set(componentId);
       });
     this.componentQueries.forEach((componentQuery) => {
-      if (componentQuery.isInterested(composition)) {
+      if (componentQuery.isInterested(blueprintConfiguration.composition)) {
         blueprintConfiguration.componentQueries.push(componentQuery);
       }
     });
@@ -141,10 +169,16 @@ export class ComponentRegistry {
         args: componentConfig.args
       });
     });
-    return blueprintConfiguration;
+
+    this.blueprintMap[blueprint.name] = blueprintConfiguration;
   }
 
-  public applyBlueprint(entityId: number, configuration: BlueprintComponentConfiguration): void {
+  public applyBlueprint(entity: Entity, blueprintName: string): void {
+    const configuration = this.blueprintMap[blueprintName];
+    if (!configuration) {
+      return;
+    }
+    const entityId = entity.getEntityId();
     configuration.componentQueries.forEach((query) => query.add(entityId));
     configuration.componentMapperConfigurations.forEach((config) => {
       const mapper = config.mapper;
@@ -152,6 +186,7 @@ export class ComponentRegistry {
       mapper.addComponent(entityId, component);
       this.getEntityComposition(entityId).set(mapper.getComponentId());
     });
+    configuration.initialize(entity);
   }
 
   private getEntityComposition(entityId: number): BitVector {

@@ -1,6 +1,5 @@
 import { EntityRegistry } from '../internal/core/entity-registry';
 import { ComponentRegistry } from '../internal/core/component-registry';
-import { BlueprintRegistry } from '../internal/core/blueprint-registry';
 import { EventRegistry } from '../internal/core/event-registry';
 import { ThemisWorld } from '../internal/core/world';
 import { World } from './world';
@@ -27,7 +26,6 @@ export class WorldBuilder {
   private readonly modules: Array<Class<TopModule<unknown>>> = [];
   private readonly container = new Container();
   private readonly eventRegistry = new EventRegistry();
-  private readonly blueprintRegistry = new BlueprintRegistry();
   private readonly entityRegistry = new EntityRegistry(this.eventRegistry);
   private readonly componentRegistry = new ComponentRegistry(this.eventRegistry);
 
@@ -35,18 +33,11 @@ export class WorldBuilder {
     logger.info('Welcome to Themis-ECS');
     logger.info('building your world...');
 
-    const world = new ThemisWorld(
-      this.entityRegistry,
-      this.componentRegistry,
-      this.blueprintRegistry,
-      this.eventRegistry,
-      this.container
-    );
+    const world = new ThemisWorld(this.entityRegistry, this.componentRegistry, this.eventRegistry, this.container);
 
     this.register(World, world);
     this.register(ThemisWorld, world);
     this.register(EntityRegistry, this.eventRegistry);
-    this.register(BlueprintRegistry, this.blueprintRegistry);
     this.register(EntityRegistry, this.entityRegistry);
     this.register(ComponentRegistry, this.componentRegistry);
     this.provider({ provide: EntityFactory, useClass: EntityFactory });
