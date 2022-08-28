@@ -1,4 +1,4 @@
-import { Module, ModuleContext } from './module';
+import { ModuleContext } from './module';
 import { Class, Identifier, SINGLETON } from '../../public/decorator';
 import { ProviderDefinition } from '../../public/provider';
 import { Injector as IPublicInjector } from '../../public/injector';
@@ -10,6 +10,7 @@ import { Resolver } from './resolver';
 import { PublicInjector } from './public-injector';
 import { isForwardRef, Token } from './token';
 import { createProxy } from './proxy';
+import { ModuleClass } from '../../public/module';
 
 /**
  * @internal
@@ -17,7 +18,7 @@ import { createProxy } from './proxy';
 export class Container implements Resolver {
   private globalContext = this.newContext();
   private rootContext = this.newContext();
-  private contexts = new Map<Module, ModuleContext>();
+  private contexts = new Map<ModuleClass, ModuleContext>();
   private injectors: Injector[] = [new ModuleInjector(this), new ComponentQueryInjector(this)];
 
   constructor() {
@@ -28,7 +29,7 @@ export class Container implements Resolver {
     this.globalContext.registerProvider(provider);
   }
 
-  public registerModule(module: Module): void {
+  public registerModule(module: ModuleClass): void {
     if (this.contexts.has(module)) {
       return;
     }
@@ -41,14 +42,14 @@ export class Container implements Resolver {
     const importedModules = metadata.imports;
     const exportedModules = metadata.exports.filter((ex) => typeof ex !== 'string');
 
-    Array.of(...importedModules, ...exportedModules).forEach((it) => this.registerModule(it as Module));
+    Array.of(...importedModules, ...exportedModules).forEach((it) => this.registerModule(it as ModuleClass));
   }
 
-  public getMetadata(module: Module): ModuleMetadata | undefined {
+  public getMetadata(module: ModuleClass): ModuleMetadata | undefined {
     return Reflect.getMetadata(MODULE_METADATA, module);
   }
 
-  private newContext(module?: Module, metadata?: ModuleMetadata): ModuleContext {
+  private newContext(module?: ModuleClass, metadata?: ModuleMetadata): ModuleContext {
     const context = new ModuleContext(module, metadata);
     this.registerInjector(context, module);
     if (module) {
@@ -57,14 +58,14 @@ export class Container implements Resolver {
     return context;
   }
 
-  private registerInjector(context: ModuleContext, module?: Module): void {
+  private registerInjector(context: ModuleContext, module?: ModuleClass): void {
     context.registerProvider({
       provide: IPublicInjector,
       useValue: new PublicInjector(this, module)
     });
   }
 
-  public resolve<T>(identifier: Identifier<T>, module?: Module): T | undefined {
+  public resolve<T>(identifier: Identifier<T>, module?: ModuleClass): T | undefined {
     if (!module) {
       return this.useProvider(this.globalContext, identifier);
     }
@@ -87,7 +88,7 @@ export class Container implements Resolver {
     return instance;
   }
 
-  private useProvider<T>(context: ModuleContext, token: Identifier<T>, module?: Module): T | undefined {
+  private useProvider<T>(context: ModuleContext, token: Identifier<T>, module?: ModuleClass): T | undefined {
     const provider = context.getProvider(token);
     return (Container.useValueProvider(provider) ||
       Container.useFactoryProvider(provider) ||
@@ -97,7 +98,7 @@ export class Container implements Resolver {
   private useClassProvider(
     context: ModuleContext,
     provider: ProviderDefinition | undefined,
-    module?: Module
+    module?: ModuleClass
   ): unknown | undefined {
     if (provider?.useClass) {
       const constructor = provider.useClass;
@@ -145,7 +146,7 @@ export class Container implements Resolver {
     return undefined;
   }
 
-  private useImports<T>(context: ModuleContext, token: Token<T>, module: Module): T | undefined {
+  private useImports<T>(context: ModuleContext, token: Token<T>, module: ModuleClass): T | undefined {
     const identifier = isForwardRef(token) ? token.forwardRef() : token;
     for (const importedModule of context.getImports()) {
       const importContext = this.contexts.get(importedModule);
@@ -175,12 +176,12 @@ export class Container implements Resolver {
     return undefined;
   }
 
-  private getExportedModules(context: ModuleContext): Module[] {
-    return Array.from(context.getExports()).filter((it) => this.isModule(it)) as Module[];
+  private getExportedModules(context: ModuleContext): ModuleClass[] {
+    return Array.from(context.getExports()).filter((it) => this.isModule(it)) as ModuleClass[];
   }
 
   private isModule(identifier: Identifier): boolean {
-    return this.contexts.has(identifier as Module);
+    return this.contexts.has(identifier as ModuleClass);
   }
 
   private static useValueProvider(provider: ProviderDefinition | undefined): unknown | undefined {
@@ -195,7 +196,7 @@ export class Container implements Resolver {
     return context.getExports().has(identifier) && context.getProvider(identifier) !== undefined;
   }
 
-  public inject(object: unknown, module?: Module): void {
+  public inject(object: unknown, module?: ModuleClass): void {
     this.injectors.forEach((injector) => injector.inject(object, module));
   }
 }

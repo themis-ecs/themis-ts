@@ -1,4 +1,4 @@
-import { all, ComponentQuery, Module, OnInit, OnUpdate, Pipeline, Query, System, World, WorldBuilder } from '../src';
+import { all, ComponentQuery, Module, OnInit, OnUpdate, Query, System, World, WorldBuilder } from '../src';
 
 test('Example', () => {
   new WorldBuilder().module(MyModule).build();
@@ -57,9 +57,4 @@ class MySubModule {
   providers: [],
   imports: [MySubModule]
 })
-class MyModule {
-  init(pipeline: Pipeline): void {
-    console.log('hello from MyModule');
-    pipeline.update(42);
-  }
-}
+class MyModule {}

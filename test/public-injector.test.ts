@@ -1,5 +1,4 @@
-import { Injectable, Module } from '../src';
-import { Injector } from '../src/public/injector';
+import { Injectable, Module, Injector } from '../src';
 import { Container } from '../src/internal/ioc/container';
 
 test('Public Injector Test', () => {

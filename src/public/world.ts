@@ -4,7 +4,7 @@ import { Event, EventErrorCallback, EventListener, EventType, Subscription } fro
 import { ComponentQueryFunction } from './component';
 import { Query } from './query';
 import { Identifier } from './decorator';
-import { Module } from '../internal/ioc/module';
+import { ModuleClass } from './module';
 
 /**
  * The world is part of the main API of themis-ecs. It is the place, where your systems, your components and
@@ -86,7 +86,7 @@ export abstract class World {
    * @param object
    * @param module
    */
-  abstract inject(object: unknown, module?: Module): void;
+  abstract inject(object: unknown, module?: ModuleClass): void;
 
   /**
    * resolve the given dependency. If you specify a module, then its context will be used, otherwise the global
@@ -94,7 +94,7 @@ export abstract class World {
    * @param identifier
    * @param module
    */
-  abstract resolve<T>(identifier: Identifier<T>, module?: Module): T | undefined;
+  abstract resolve<T>(identifier: Identifier<T>, module?: ModuleClass): T | undefined;
 
   /**
    * Query this world for entities with the components as defined in the given ComponentQueryFunctions.
@@ -102,4 +102,14 @@ export abstract class World {
    * @param queries
    */
   abstract query(...queries: ComponentQueryFunction[]): Query;
+
+  /**
+   * This method is used to update all systems within the given module scope. If no scope is given,
+   * then all systems that were registered during world generation will be updated. When calling this
+   * method Themis will also perform pending operations, i.e. entity deletions, component adds and deletions
+   * as well as performing all pending events.
+   * @param delta the update object
+   * @param scope the module scope
+   */
+  abstract update<T>(delta: T, scope?: ModuleClass): void;
 }

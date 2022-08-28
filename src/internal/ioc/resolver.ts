@@ -1,9 +1,9 @@
-import { Module } from './module';
 import { Identifier } from '../../public/decorator';
+import { ModuleClass } from '../../public/module';
 
 /**
  * @internal
  */
 export interface Resolver {
-  resolve<T>(identifier: Identifier<T>, module?: Module): T | undefined;
+  resolve<T>(identifier: Identifier<T>, module?: ModuleClass): T | undefined;
 }

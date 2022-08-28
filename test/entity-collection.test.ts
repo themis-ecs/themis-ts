@@ -1,24 +1,10 @@
-import {
-  all,
-  ComponentQuery,
-  Inject,
-  Module,
-  OnInit,
-  OnUpdate,
-  Pipeline,
-  Query,
-  System,
-  World,
-  WorldBuilder
-} from '../src';
+import { all, ComponentQuery, Inject, Module, OnInit, OnUpdate, Query, System, World, WorldBuilder } from '../src';
 import { ThemisWorld } from '../src/internal/core/world';
-
-let update: (dt: number) => void;
 
 test('entity collection test', () => {
   const world = new WorldBuilder().module(TestModule).build() as ThemisWorld;
 
-  update(1);
+  world.update(1);
 
   const entity = world.getEntity(0);
   expect(entity.getComponent(TestComponentA).name).toEqual('test');
@@ -50,8 +36,4 @@ class TestSystem implements OnInit, OnUpdate {
 @Module({
   systems: [TestSystem]
 })
-class TestModule {
-  init(pipeline: Pipeline): void {
-    update = (dt) => pipeline.update(dt);
-  }
-}
+class TestModule {}
