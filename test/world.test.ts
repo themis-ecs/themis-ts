@@ -1,7 +1,5 @@
-import { all, any, ComponentBase, ComponentQuery, Module, none, Pipeline, Query, System, WorldBuilder } from '../src';
+import { all, any, ComponentBase, ComponentQuery, Module, none, Query, System, WorldBuilder } from '../src';
 import { ThemisWorld } from '../src/internal/core/world';
-
-let update: (dt: number) => void;
 
 test('integration test', () => {
   const world = new WorldBuilder().module(TestModule).build() as ThemisWorld;
@@ -28,7 +26,7 @@ test('integration test', () => {
   world.addComponent(entity4, TestComponentA);
   world.addComponent(entity4, TestComponentD);
 
-  update(0);
+  world.update(0);
   expect(entitySystemA.query.entities.getIds()).toEqual(new Uint32Array([entity1, entity2, entity4]));
   expect(entitySystemB.query.entities.getIds()).toEqual(new Uint32Array([entity1, entity4]));
   expect(entitySystemC.query.entities.getIds()).toEqual(new Uint32Array([entity3]));
@@ -36,13 +34,13 @@ test('integration test', () => {
   world.removeComponent(entity1, TestComponentA);
   world.removeComponent(entity2, TestComponentA);
 
-  update(0);
+  world.update(0);
   expect(entitySystemA.query.entities.getIds()).toEqual(new Uint32Array([entity1, entity4]));
   expect(entitySystemB.query.entities.getIds()).toEqual(new Uint32Array([entity4]));
   expect(entitySystemC.query.entities.getIds()).toEqual(new Uint32Array([entity1, entity2, entity3]));
 
   world.deleteEntityById(entity1);
-  update(0);
+  world.update(0);
   expect(entitySystemA.query.entities.getIds()).toEqual(new Uint32Array([entity4]));
   expect(entitySystemB.query.entities.getIds()).toEqual(new Uint32Array([entity4]));
   expect(entitySystemC.query.entities.getIds()).toEqual(new Uint32Array([entity2, entity3]));
@@ -75,8 +73,4 @@ class TestEntitySystemC {
 @Module({
   systems: [TestEntitySystemA, TestEntitySystemB, TestEntitySystemC]
 })
-class TestModule {
-  init(pipeline: Pipeline): void {
-    update = (dt) => pipeline.update(dt);
-  }
-}
+class TestModule {}

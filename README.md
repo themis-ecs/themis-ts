@@ -30,11 +30,11 @@ Install Themis ECS in your TypeScript project using ```npm install themis-ts ref
 
 ### Basics
 
-In Themis ECS you define your world in modules. There are two types of modules, top level modules and submodules. 
+In Themis ECS you define your world in modules.
 A module is used to organize your code, it contains your systems, providers and submodules. Systems are an ECS specific
 feature, whereas providers are used for dependency injection. Did you know? Themis helps you write better code by
-providing you with a lightweight dependency injection framework. In a top level module, Themis automatically creates
-a pipeline which contains all the systems you have registered in the top level module and all of its submodules.
+providing you with a lightweight dependency injection framework.
+
 A bit confused? Well, let's hop into some code to see everything in action and work on the details later:
 
 Let's create a simple system:
@@ -61,24 +61,22 @@ Now let's create our first module:
 })
 class MyModule {
     
-    init(pipeline: Pipeline): void {
+    init(): void {
         console.log('hello from MyModule');
-        setInterval(() => pipeline.update(42), 1000);
     }
 }
 ```
 
-The last thing we need to do now, is to create our Themis World using the ```WorldBuilder``` class. We will register
-our newly created module ```MyModule```
+The last thing we need to do now, is to create our Themis `World` using the ```WorldBuilder``` class. We will register
+our newly created module ```MyModule``` and then we will call the `update` method of our newly created ```World``` 
+periodically.
 
 ```typescript
-new WorldBuilder().module(MyModule).build();
+const world = new WorldBuilder().module(MyModule).build();
+setInterval(() => world.update(42), 1000);
 ```
 
-As you can see in the example above, the class ```MyModule``` uses ```Pipeline``` in its update method. As stated before,
-a pipeline is automatically setup by Themis for you and contains all the systems you have defined in the top level module
-and all its nested submodules. You can use the pipeline object for periodic updates to your systems, which will result
-in calling all defined update methods in your systems.
+
 
 ### Create Entities and add Components
 
@@ -115,7 +113,7 @@ class MySystem implements OnInit, OnUpdate {
 ### Query for Entities
 
 Most of the time, when using an ECS, we are interested in entities, which match a specific query described by the
-components present or absent on these entities. In Themis you can define a query using the ```ComponentQuery```
+components present or absent on these entities. In Themis, you can define a query using the ```ComponentQuery```
 decorator. Let us create a new system which queries for all entities, which contain ```MyComponentA``` and 
 ```MyComponentB```:
 
@@ -166,17 +164,14 @@ class MySubModule {
 })
 class MyModule {
     
-  init(pipeline: Pipeline): void {
+  init(): void {
     console.log('hello from MyModule');
-    setInterval(() => pipeline.update(42), 1000);
   }
 }
 ```
 
-Notice how the submodule does not have the pipeline parameter? As stated before, this is only available in top level
-modules. But do not worry, your systems, which were defined in the submodule, are still present in the pipeline of
-the top level module. Themis merges them. How they are merged and in which order are they performed you ask? Well that
-is easy to answer:
+Wondering how Themis will handle the order of your systems?
+Well that is easy to answer:
 
 Say we have a top level module named A, and submodules named a, b and c. Module A defines systems A1 and A2,
 the submodule a defines systems a1, a2 and submodules b and c define systems b1, b2, b3 and c1.
@@ -204,7 +199,7 @@ class c {}
   imports: [a, b, c]
 })
 class A {
-  init(pipeline: Pipeline): void {
+  init(): void {
     // ...
   }
 }

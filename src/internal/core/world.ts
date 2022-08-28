@@ -18,7 +18,8 @@ import { ComponentQueryAdapter } from './component-query-adapter';
 import { Query } from 'public/query';
 import { Container } from '../ioc/container';
 import { Identifier } from '../../public/decorator';
-import { Module } from '../ioc/module';
+import { SystemRegistry } from './system-registry';
+import { ModuleClass } from '../../public/module';
 
 /**
  * @internal
@@ -28,6 +29,7 @@ export class ThemisWorld implements World {
     private readonly entityRegistry: EntityRegistry,
     private readonly componentRegistry: ComponentRegistry,
     private readonly eventRegistry: EventRegistry,
+    private readonly systemRegistry: SystemRegistry,
     private readonly container: Container
   ) {}
 
@@ -99,11 +101,11 @@ export class ThemisWorld implements World {
     this.eventRegistry.submit(eventType, event, instant);
   }
 
-  public resolve<T>(identifier: Identifier<T>, module?: Module): T | undefined {
+  public resolve<T>(identifier: Identifier<T>, module?: ModuleClass): T | undefined {
     return this.container.resolve(identifier, module);
   }
 
-  public inject(object: unknown, module?: Module): void {
+  public inject(object: unknown, module?: ModuleClass): void {
     this.container.inject(object, module);
   }
 
@@ -113,5 +115,16 @@ export class ThemisWorld implements World {
     const componentQuery = this.componentRegistry.getComponentQuery(componentQueryBuilder);
     componentQuery.processModifications();
     return new ComponentQueryAdapter(componentQuery, this);
+  }
+
+  public update<T>(delta: T, scope?: ModuleClass): void {
+    this.entityRegistry.update();
+    this.componentRegistry.update();
+    this.systemRegistry.getSystems<T>(scope).forEach((system) => {
+      if (system.update) {
+        system.update(delta);
+      }
+    });
+    this.eventRegistry.update();
   }
 }

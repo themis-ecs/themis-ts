@@ -1,6 +1,6 @@
-import { Module } from './module';
 import { Resolver } from './resolver';
 import { Identifier } from '../../public/decorator';
+import { ModuleClass } from '../../public/module';
 
 /**
  * @internal
@@ -8,7 +8,7 @@ import { Identifier } from '../../public/decorator';
 export abstract class Injector {
   constructor(private resolver: Resolver) {}
 
-  protected resolve<T>(identifier: Identifier<T>, module?: Module): T | undefined {
+  protected resolve<T>(identifier: Identifier<T>, module?: ModuleClass): T | undefined {
     return this.resolver.resolve(identifier, module);
   }
 
@@ -19,5 +19,5 @@ export abstract class Injector {
     });
   }
 
-  public abstract inject(instance: unknown, module?: Module): void;
+  public abstract inject(instance: unknown, module?: ModuleClass): void;
 }

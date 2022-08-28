@@ -8,7 +8,7 @@ import {
   MODULE_METADATA,
   ModuleMetadata
 } from '../internal/ioc/metadata';
-import { EmptyModule, SubModule, ThemisModule } from './module';
+import { ModuleClass, ThemisModule } from './module';
 import { SystemType } from './system';
 import { ProviderDefinition } from './provider';
 import { Token } from '../internal/ioc/token';
@@ -83,8 +83,8 @@ export function Injectable(options?: InjectableOptions): ClassDecorator<unknown>
 
 export type Systems<T> = Class<SystemType<T>>[];
 export type Providers<T = unknown> = (ProviderDefinition<T> | Class)[];
-export type Imports = Class<Required<EmptyModule> & Partial<SubModule>>[];
-export type Exports = (Class<Required<EmptyModule> & Partial<SubModule>> | Identifier)[];
+export type Imports = ModuleClass[];
+export type Exports = (ModuleClass | Identifier)[];
 
 export type ModuleDefinitionOptions<T> = {
   systems?: Systems<T>;
@@ -93,9 +93,9 @@ export type ModuleDefinitionOptions<T> = {
   exports?: Exports;
 };
 
-export function Module<U>(options: ModuleDefinitionOptions<U>): ClassDecorator<ThemisModule<U>> {
+export function Module<U>(options: ModuleDefinitionOptions<U>): ClassDecorator<ThemisModule> {
   const injectableFn = Injectable({ scope: SINGLETON });
-  return function <T extends ThemisModule<U>>(constructor: Class<T>) {
+  return function <T extends ThemisModule>(constructor: Class<T>) {
     injectableFn(constructor);
     const metadata: ModuleMetadata = Reflect.getMetadata(MODULE_METADATA, constructor) || {};
     metadata.systems = options.systems || [];

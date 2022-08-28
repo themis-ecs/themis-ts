@@ -1,4 +1,4 @@
-import { Inject, Module, OnInit, OnUpdate, Pipeline, System, World, WorldBuilder } from '../src';
+import { Inject, Module, OnInit, OnUpdate, System, World, WorldBuilder } from '../src';
 
 let systemInit = false;
 let moduleInit = false;
@@ -9,7 +9,7 @@ let update = false;
 const initOrderArray: number[] = [];
 
 test('Module Test', () => {
-  new WorldBuilder().module(MyModule).build();
+  new WorldBuilder().module(MyModule).build().update(42);
   expect(systemInit).toBe(true);
   expect(moduleInit).toBe(true);
   expect(subModule1Init).toBe(true);
@@ -86,7 +86,7 @@ class MyModule {
 
   constructor(private world: World) {}
 
-  init(pipeline: Pipeline): void {
+  init(): void {
     moduleInit = true;
     const entity = this.world.createEntity();
     expect(entity).toBeDefined();
@@ -94,7 +94,6 @@ class MyModule {
     expect(this.test1).toEqual(5);
     expect(this.test2.value).toEqual(13);
     expect(this.test3).toEqual(42);
-    pipeline.update(42);
     initOrderArray.push(0);
   }
 }

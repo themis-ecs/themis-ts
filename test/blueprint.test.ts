@@ -27,11 +27,15 @@ test('Simple Blueprint Performance Test', () => {
     world2.createEntity().addComponents(TestComponentA, TestComponentB, TestComponentC, TestComponentD);
   }
 
+  world1.update(1);
+  world2.update(1);
+
   // Performance check with blueprint:
   let t0 = performance.now();
   for (let i = 0; i < numberOfEntities; i++) {
     world1.createEntity('test');
   }
+  world1.update(1);
   let t1 = performance.now();
   console.log('With blueprint: ' + (t1 - t0));
 
@@ -44,6 +48,7 @@ test('Simple Blueprint Performance Test', () => {
       .addComponent(TestComponentA, 'somevalue')
       .addComponents(TestComponentB, TestComponentC, TestComponentD);
   }
+  world2.update(1);
   t1 = performance.now();
   console.log('Without blueprint: ' + (t1 - t0));
 });

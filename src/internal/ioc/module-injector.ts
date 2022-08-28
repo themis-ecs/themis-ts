@@ -1,15 +1,15 @@
 import { Injector } from './injector';
 import { INJECT_METADATA, InjectMetadata } from './metadata';
-import { Module } from './module';
 import { isForwardRef } from './token';
 import { Identifier } from '../../public/decorator';
 import { createProxy } from './proxy';
+import { ModuleClass } from '../../public/module';
 
 /**
  * @internal
  */
 export class ModuleInjector extends Injector {
-  inject(instance: unknown, module?: Module): void {
+  inject(instance: unknown, module?: ModuleClass): void {
     const metadata: InjectMetadata = Reflect.getMetadata(INJECT_METADATA, Object.getPrototypeOf(instance));
     if (!metadata || !metadata.injectionPoints) {
       return;

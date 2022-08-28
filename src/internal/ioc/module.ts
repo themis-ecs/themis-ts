@@ -1,25 +1,20 @@
 import { Class, Identifier } from '../../public/decorator';
 import { ProviderDefinition } from '../../public/provider';
-import { ThemisModule } from '../../public/module';
+import { ModuleClass } from '../../public/module';
 import { ModuleMetadata } from './metadata';
 import { SystemType } from '../../public/system';
 
 /**
  * @internal
  */
-export type Module = Class<ThemisModule<unknown>>;
-
-/**
- * @internal
- */
 export class ModuleContext {
-  private imports = new Set<Module>();
+  private imports = new Set<ModuleClass>();
   private exports = new Set<Identifier>();
   private providers = new Map<Identifier, ProviderDefinition>();
   private instances = new Map<Identifier, unknown>();
   private systems = new Set<Class<SystemType<unknown>>>();
 
-  constructor(module?: Module, metadata?: ModuleMetadata) {
+  constructor(module?: ModuleClass, metadata?: ModuleMetadata) {
     if (!metadata || !module) {
       return;
     }
@@ -39,7 +34,7 @@ export class ModuleContext {
     });
   }
 
-  public registerImport(module: Module): void {
+  public registerImport(module: ModuleClass): void {
     this.imports.add(module);
   }
 
@@ -59,7 +54,7 @@ export class ModuleContext {
     this.systems.add(system);
   }
 
-  public getImports(): ReadonlySet<Module> {
+  public getImports(): ReadonlySet<ModuleClass> {
     return this.imports;
   }
 
